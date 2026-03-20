@@ -1410,21 +1410,25 @@ function generateTBAPDF() {
     y += 2;
   }
 
-  // ── Two-column mini-card ──
+  // ── Two-column mini-card (dynamic height) ──
   function twoCol(leftLabel, leftVal, rightLabel, rightVal) {
     if (!leftVal && !rightVal) return;
-    chk(26);
     const hw = (IW - 4) / 2;
-    [[M, leftLabel, leftVal, G.lt], [M + hw + 4, rightLabel, rightVal, G.dk]].forEach(([x, lbl, val, bar]) => {
-      doc.setFillColor(...G.card); doc.rect(x, y, hw, 22, 'F');
-      doc.setFillColor(...bar); doc.rect(x, y, 4, 22, 'F');
+    // Pre-compute line counts at correct font size to get accurate height
+    doc.setFontSize(10); doc.setFont(undefined, 'normal');
+    const lLines = doc.splitTextToSize(leftVal  || '—', hw - 14);
+    const rLines = doc.splitTextToSize(rightVal || '—', hw - 14);
+    const bh = Math.max(24, Math.max(lLines.length, rLines.length) * 5.5 + 16);
+    chk(bh + 4);
+    [[M, leftLabel, lLines, G.lt], [M + hw + 4, rightLabel, rLines, G.dk]].forEach(([x, lbl, lines, bar]) => {
+      doc.setFillColor(...G.card); doc.rect(x, y, hw, bh, 'F');
+      doc.setFillColor(...bar); doc.rect(x, y, 4, bh, 'F');
       doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.md);
       doc.text(lbl.toUpperCase(), x + 9, y + 8);
       doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.tx);
-      const vl = doc.splitTextToSize(val || '—', hw - 14);
-      vl.forEach((l, i) => doc.text(l, x + 9, y + 15 + i * 5.5));
+      lines.forEach((l, i) => doc.text(l, x + 9, y + 15 + i * 5.5));
     });
-    y += 26;
+    y += bh + 3;
   }
 
   // ═══════════════════════════════
