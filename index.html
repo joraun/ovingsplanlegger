@@ -128,6 +128,24 @@
     /* ── Auto tag ── */
     .atag { font-size:.67rem; background:#e8f5ee; color:var(--tba); border:1px solid var(--tba-lt); border-radius:3px; padding:1px 5px; margin-left:7px; font-weight:600; }
 
+    /* ── T4 Findings summary ── */
+    .findings { background:#f0f9f4; border:1px solid var(--tba-lt); border-radius:var(--r); padding:14px 16px; }
+    .findings h4 { font-size:.75rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px; }
+    .findings-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px; }
+    .fi { background:var(--white); border-radius:5px; padding:8px 11px; border-left:3px solid var(--tba-lt); }
+    .fi .fi-lbl { font-size:.68rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.3px; }
+    .fi .fi-val { font-size:.82rem; color:var(--text); margin-top:3px; line-height:1.4; }
+    .fi .fi-val.mt { color:var(--muted); font-style:italic; }
+
+    /* ── Suggestion box ── */
+    .suggest-box { background:#e8f5ee; border:1.5px solid var(--tba-lt); border-radius:var(--r); padding:10px 14px; display:flex; gap:9px; align-items:flex-start; margin-bottom:8px; }
+    .suggest-box strong { color:var(--tba); font-size:.75rem; font-weight:700; display:block; margin-bottom:2px; }
+    .suggest-box span.si { font-size:1.1rem; flex-shrink:0; }
+    .suggest-box .st { font-size:.84rem; color:var(--tba); font-weight:600; }
+
+    /* ── Type description ── */
+    .type-desc { margin-top:5px !important; }
+
     /* ── Transition screen ── */
     .trans-wrap { background:var(--white); border-radius:var(--r); box-shadow:var(--sh); padding:30px 22px; text-align:center; margin-bottom:22px; }
     .trans-wrap .t-icon { font-size:2.8rem; margin-bottom:10px; }
@@ -307,8 +325,8 @@
 
         <div class="f">
           <label class="t">Hvem trenger treningen?</label>
-          <p class="hint">Beskriv målgruppen — roller, bakgrunn, hvilke lag eller enheter</p>
-          <textarea id="t3_hvem" rows="3" placeholder="F.eks. nye mannskaper i søk og redning, alle teamledere, samvirkepartnere..."></textarea>
+          <p class="hint">Beskriv målgruppen — roller, funksjoner, lag eller enheter</p>
+          <textarea id="t3_hvem" rows="3" placeholder="F.eks. alle teamledere, nye mannskaper i søk og redning, kommunens kriseledelse..."></textarea>
         </div>
 
         <div class="fg">
@@ -329,32 +347,81 @@
         </div>
 
         <div class="f">
-          <label class="t">Målgruppe og nivå</label>
-          <p class="hint">Hva er riktig nivå for denne øvelsen?</p>
-          <div class="cg">
-            <label class="cl"><input type="checkbox" id="t3_individ" /> Individ — enkeltmannsferdigheter</label>
-            <label class="cl"><input type="checkbox" id="t3_gruppe" /> Gruppe — samhandling i laget</label>
-            <label class="cl"><input type="checkbox" id="t3_org" /> Organisasjon — samvirke og helhetlig respons</label>
-          </div>
+          <label class="t">Spesielle hensyn</label>
+          <p class="hint">Turnover, nye roller, samvirke med ny aktør, eller andre individuelle faktorer som påvirker treningen</p>
+          <textarea id="t3_hensyn" rows="2" placeholder="F.eks. høy turnover siste år, ny øvingsleder, felles øvelse med ny samvirkeaktør..."></textarea>
         </div>
 
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-tba" onclick="nextPage()">Neste: Konklusjoner →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TBA 4 — KONKLUSJONER
+═══════════════════════════════════════════ -->
+<div class="page" id="page-tba-3">
+  <div class="card">
+    <div class="card-hdr tba"><div class="cn">T4</div><h2>Konklusjoner og anbefalinger</h2></div>
+    <div class="card-body">
+      <div class="fg1">
+
+        <!-- Auto-generated findings from T1–T3 -->
+        <div class="findings">
+          <h4>📋 Nøkkelfunn fra analysen (T1–T3)</h4>
+          <div class="findings-grid" id="t4-findings-grid"></div>
+        </div>
+
+        <hr class="d" />
+
+        <!-- Treningsnivå -->
         <div class="f">
-          <label class="t">Anbefalt øvelsestype</label>
-          <p class="hint">Hva tilsier analysen? Enkeltferdigheter bør øves og sitte før man øver som gruppe — gruppen bør fungere godt før man kjører fullskala.</p>
+          <label class="t">Treningsnivå</label>
+          <p class="hint">Hva peker analysen mot? Velg det nivået øvelsen primært skal adressere.</p>
           <div class="cg">
-            <label class="cl"><input type="checkbox" id="t3_drill" /> Ferdighetstrening / drill</label>
-            <label class="cl"><input type="checkbox" id="t3_funk" /> Funksjonsøvelse</label>
-            <label class="cl"><input type="checkbox" id="t3_full" /> Fullskalaøvelse / samvirkeøvelse</label>
-            <label class="cl"><input type="checkbox" id="t3_bord" /> Skrivebordsøvelse</label>
+            <label class="cl"><input type="checkbox" id="t4_individ" /> Individ — enkeltmannsferdigheter og prosedyrer</label>
+            <label class="cl"><input type="checkbox" id="t4_gruppe" /> Gruppe — koordinering og samhandling i laget</label>
+            <label class="cl"><input type="checkbox" id="t4_org" /> Organisasjon — samvirke og helhetlig krisehåndtering</label>
           </div>
         </div>
 
         <hr class="d" />
 
+        <!-- Øvelsestype med auto-forslag -->
         <div class="f">
-          <label class="t">Oppsummering av treningsbehov</label>
-          <p class="hint">Saml de viktigste funnene fra T1–T3. Dette blir grunnlaget for øvelsens bakgrunn og læringsmål.</p>
-          <textarea id="t3_oppsummering" rows="4" placeholder="Oppsummer de viktigste treningsbehovene identifisert i analysen..."></textarea>
+          <label class="t">Anbefalt øvelsestype</label>
+          <p class="hint">Velg den øvelsestypen som best adresserer identifiserte gap og kompetansenivå.</p>
+          <div class="suggest-box" id="t4-suggest" style="display:none">
+            <span class="si">💡</span>
+            <div>
+              <strong>Forslag basert på analysen:</strong>
+              <span class="st" id="t4-suggest-text"></span>
+            </div>
+          </div>
+          <select id="t4_type" onchange="updateTypeDesc()">
+            <option value="">— Velg øvelsestype —</option>
+            <option>Diskusjonsøvelse</option>
+            <option>Spilløvelse / ledelsesspill</option>
+            <option>Ferdighetstrening / drill</option>
+            <option>Funksjonsøvelse</option>
+            <option>Fullskalaøvelse</option>
+            <option>Seminar / Workshop</option>
+            <option>Annet</option>
+          </select>
+          <p class="hint type-desc" id="t4-type-desc"></p>
+        </div>
+
+        <hr class="d" />
+
+        <!-- Prioriterte behov -->
+        <div class="f">
+          <label class="t">Prioriterte treningsbehov og anbefalinger</label>
+          <p class="hint">Oppsummer de viktigste funnene fra T1–T3. Dette er grunnlaget for læringsmålene og bakgrunnen i øvingsplanen.</p>
+          <textarea id="t4_behov" rows="5" placeholder="Basert på analysen bør øvelsen prioritere å trene på..."></textarea>
         </div>
 
       </div>
@@ -405,11 +472,12 @@
           <label>Øvelsestype <span id="type-hint" style="font-size:.71rem;color:var(--tba-mid);font-weight:400;margin-left:6px;"></span></label>
           <select id="s1_type">
             <option value="">— Velg type —</option>
-            <option>Skrivebordsøvelse</option>
+            <option>Diskusjonsøvelse</option>
+            <option>Spilløvelse / ledelsesspill</option>
             <option>Ferdighetstrening / drill</option>
             <option>Funksjonsøvelse</option>
             <option>Fullskalaøvelse</option>
-            <option>Samvirkeøvelse</option>
+            <option>Seminar / Workshop</option>
             <option>Annet</option>
           </select>
         </div>
@@ -646,9 +714,9 @@
 // ═══════════════════════════════════════════
 //  STATE & NAV
 // ═══════════════════════════════════════════
-const PAGES   = ['tba-0','tba-1','tba-2','transition','plan-0','plan-1','plan-2','plan-3','plan-4','plan-5'];
-const TBA_L   = ['Organisasjon','Oppgaver','Personanalyse'];
-const PLN_L   = ['Grunninfo','Bakgrunn','Læringsmål','Scenario','Deltakere','Evaluering'];
+const PAGES = ['tba-0','tba-1','tba-2','tba-3','transition','plan-0','plan-1','plan-2','plan-3','plan-4','plan-5'];
+const TBA_L = ['Organisasjon','Oppgaver','Personanalyse','Konklusjoner'];
+const PLN_L = ['Grunninfo','Bakgrunn','Læringsmål','Scenario','Deltakere','Evaluering'];
 let idx = 0;
 
 function goTo(i) {
@@ -656,6 +724,7 @@ function goTo(i) {
   document.getElementById('page-' + PAGES[idx]).classList.remove('active');
   idx = i;
   document.getElementById('page-' + PAGES[idx]).classList.add('active');
+  if (PAGES[idx] === 'tba-3')    { buildT4Summary(); autoSuggest(); }
   if (PAGES[idx] === 'transition') buildSummary();
   renderNav();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -700,7 +769,7 @@ function renderNav() {
     if (isPLN && +p.split('-')[1] === i) b.classList.add('active');
     else if (isPLN && +p.split('-')[1] > i) b.classList.add('done');
     b.innerHTML = `<span class="sn">${i+1}</span>${lbl}`;
-    b.onclick = () => { if (isPLN) goTo(i + 4); };
+    b.onclick = () => { if (isPLN) goTo(i + 5); };
     inner.appendChild(b);
   });
 
@@ -708,19 +777,73 @@ function renderNav() {
 }
 
 // ═══════════════════════════════════════════
-//  TRANSITION — summary + auto-fill
+//  T4 — FINDINGS SUMMARY + AUTO-SUGGEST
+// ═══════════════════════════════════════════
+function buildT4Summary() {
+  const items = [
+    ['Organisasjon',       v('t1_org')],
+    ['Øvingskultur',       v('t1_kultur')],
+    ['Begrensninger',      v('t1_begrensninger')],
+    ['Kritiske oppgaver',  dynRows('t2-opp-list').map(r => r[0]).filter(Boolean).join(', ')],
+    ['Kompetansegap',      v('t2_gap')],
+    ['Hvem trenger trening', v('t3_hvem')],
+    ['Kompetansenivå',     v('t3_nivaa')],
+  ];
+  document.getElementById('t4-findings-grid').innerHTML = items.map(([lbl, val]) =>
+    `<div class="fi"><div class="fi-lbl">${lbl}</div><div class="fi-val ${val ? '' : 'mt'}">${val || '— ikke utfylt —'}</div></div>`
+  ).join('');
+}
+
+const EXERCISE_DESCS = {
+  'Diskusjonsøvelse':          'Scenariet diskuteres rundt bordet uten aktivering av ressurser. Egnet for å teste planer, roller og beslutningsprosesser.',
+  'Spilløvelse / ledelsesspill':'Aktiverer ledelsesfunksjoner og kommunikasjonslinjer i realistisk kontekst, men uten feltaktivitet. Egnet for å øve kriseledelse og samordning.',
+  'Ferdighetstrening / drill': 'Repetert øving på enkeltoppgaver til de sitter. Egnet for å innarbeide prosedyrer og grunnleggende ferdigheter.',
+  'Funksjonsøvelse':           'Tester spesifikke funksjoner og prosedyrer med aktivering av utvalgte enheter. Egnet når grunnleggende ferdigheter er på plass.',
+  'Fullskalaøvelse':           'Full aktivering med alle funksjoner, felt og samvirkeaktører. Krever at alle delkomponenter fungerer godt.',
+  'Seminar / Workshop':        'Presentasjoner og diskusjon for å bygge felles forståelse og kunnskap. Godt forarbeid før en øvelse.',
+  'Annet': ''
+};
+
+function suggestExerciseType() {
+  const nivaa = v('t3_nivaa');
+  if (!nivaa) return null;
+  if (nivaa.includes('Nybegynner'))  return 'Ferdighetstrening / drill';
+  if (nivaa.includes('Blandet'))     return 'Diskusjonsøvelse';
+  if (nivaa.includes('Viderekommet'))return 'Spilløvelse / ledelsesspill';
+  if (nivaa.includes('Erfaren'))     return 'Funksjonsøvelse';
+  return null;
+}
+
+function autoSuggest() {
+  const sug = suggestExerciseType();
+  const box = document.getElementById('t4-suggest');
+  const txt = document.getElementById('t4-suggest-text');
+  if (sug) {
+    txt.textContent = sug;
+    box.style.display = 'flex';
+    if (!v('t4_type')) { set('t4_type', sug); updateTypeDesc(); }
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function updateTypeDesc() {
+  const desc = EXERCISE_DESCS[v('t4_type')] || '';
+  document.getElementById('t4-type-desc').textContent = desc;
+}
+
+// ═══════════════════════════════════════════
+//  TRANSITION — summary
 // ═══════════════════════════════════════════
 function buildSummary() {
   const items = [
-    ['Organisasjon',      v('t1_org')],
-    ['Øvingskultur',      v('t1_kultur')],
-    ['Ressurser',         v('t1_ressurser')],
-    ['Begrensninger',     v('t1_begrensninger')],
-    ['Kompetansegap',     v('t2_gap')],
-    ['Målgruppe',         tba_mg()],
-    ['Kompetansenivå',    v('t3_nivaa')],
-    ['Anbefalt type',     tba_type()],
-    ['Treningsbehov',     v('t3_oppsummering')],
+    ['Organisasjon',       v('t1_org')],
+    ['Øvingskultur',       v('t1_kultur')],
+    ['Kompetansegap',      v('t2_gap')],
+    ['Kompetansenivå',     v('t3_nivaa')],
+    ['Treningsnivå',       tba_mg()],
+    ['Anbefalt øvelsestype', tba_type()],
+    ['Prioriterte behov',  v('t4_behov')],
   ];
   document.getElementById('sumGrid').innerHTML = items.map(([h, val]) =>
     `<div class="sum-card"><h4>${h}</h4><p class="${val ? '' : 'mt'}">${val || '— ikke utfylt —'}</p></div>`
@@ -728,19 +851,20 @@ function buildSummary() {
 }
 
 function startPlanning() {
-  // Auto-fill planning from TBA
   const gap  = v('t2_gap');
   const krav = v('t1_krav');
-  const bkgr = v('t3_oppsummering');
+  const bkgr = v('t4_behov');
   const org  = v('t1_org');
+  const type = v('t4_type');
 
   if (gap)  { set('s2_gap', gap);  show('gap-atag'); }
   if (krav) { set('s2_hjemmel', krav); show('krav-atag'); }
   if (bkgr && !v('s2_bakgrunn')) set('s2_bakgrunn', bkgr);
   if (org  && !v('s1_org'))  set('s1_org', org);
+  if (type && !v('s1_type')) set('s1_type', type);
 
   ['individ','gruppe','org'].forEach(k => {
-    if (document.getElementById('t3_' + k)?.checked)
+    if (document.getElementById('t4_' + k)?.checked)
       document.getElementById('s3_' + k).checked = true;
   });
   if (tba_mg()) show('mg-atag');
@@ -748,21 +872,16 @@ function startPlanning() {
   const typ = tba_type();
   if (typ) document.getElementById('type-hint').textContent = `(TBA anbefaler: ${typ})`;
 
-  goTo(4);
+  goTo(5);
 }
 
 function tba_mg() {
   return ['individ','gruppe','org']
-    .filter(k => document.getElementById('t3_'+k)?.checked)
+    .filter(k => document.getElementById('t4_'+k)?.checked)
     .map(k => ({ individ:'Individ', gruppe:'Gruppe', org:'Organisasjon' })[k])
     .join(', ');
 }
-function tba_type() {
-  return [['t3_drill','Ferdighetstrening'],['t3_funk','Funksjonsøvelse'],
-          ['t3_full','Fullskalaøvelse'],['t3_bord','Skrivebordsøvelse']]
-    .filter(([id]) => document.getElementById(id)?.checked)
-    .map(([,l]) => l).join(', ');
-}
+function tba_type() { return v('t4_type'); }
 
 // ═══════════════════════════════════════════
 //  HELPERS
@@ -874,49 +993,48 @@ function pdfInit() {
   };
 
   let y = 20;
-  const state = { doc, W, H, M, IW, C, get y() { return y; }, set y(val) { y = val; } };
 
-  function chk(need) { if (y + need > H - 16) newPg(); }
+  function chk(need) { if (y + need > H - 18) newPg(); }
   function newPg() {
-    doc.addPage(); y = 20;
+    doc.addPage(); y = 22;
     doc.setDrawColor(...C.blueL); doc.setLineWidth(0.35);
-    doc.line(M, 11, W - M, 11);
-    doc.setFontSize(7); doc.setTextColor(...C.muted);
-    doc.text('Øvingsplanlegger', M, 9.5);
-    doc.text('Side ' + doc.getNumberOfPages(), W - M, 9.5, { align: 'right' });
+    doc.line(M, 12, W - M, 12);
+    doc.setFontSize(8); doc.setTextColor(...C.muted);
+    doc.text('Øvingsplanlegger', M, 10);
+    doc.text('Side ' + doc.getNumberOfPages(), W - M, 10, { align: 'right' });
   }
 
   function secHdr(color, label, title) {
-    chk(13);
-    doc.setFillColor(...color); doc.rect(M, y, IW, 10, 'F');
-    doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
-    doc.text(label + '  ' + title, M + 4, y + 7);
-    y += 13;
+    chk(14);
+    doc.setFillColor(...color); doc.rect(M, y, IW, 11, 'F');
+    doc.setFontSize(10.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
+    doc.text(label + '  ' + title, M + 4, y + 7.5);
+    y += 14;
   }
   function subHdr(text, color) {
-    chk(8); doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...color);
-    doc.text(text, M, y); y += 5;
+    chk(9); doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.setTextColor(...color);
+    doc.text(text, M, y); y += 6;
   }
   function fLbl(text, color) {
-    chk(6); doc.setFontSize(7.5); doc.setFont(undefined, 'bold');
-    doc.setTextColor(...(color || C.blueL)); doc.text(text, M, y); y += 4;
+    chk(7); doc.setFontSize(9); doc.setFont(undefined, 'bold');
+    doc.setTextColor(...(color || C.blueL)); doc.text(text, M, y); y += 5;
   }
   function fBody(text, indent) {
     if (!text) return;
     const x = M + (indent || 0), w = IW - (indent || 0);
-    doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
-    doc.splitTextToSize(text, w).forEach(l => { chk(5); doc.text(l, x, y); y += 4.7; });
-    y += 1;
+    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
+    doc.splitTextToSize(text, w).forEach(l => { chk(6); doc.text(l, x, y); y += 5.5; });
+    y += 1.5;
   }
   function fp(label, text, color) {
     if (!text) return;
     fLbl(label, color); fBody(text);
   }
   function tblHdr(cols, color) {
-    chk(9); doc.setFillColor(...color); doc.rect(M, y - 1, IW, 7, 'F');
-    doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
-    let x = M + 2; cols.forEach(c => { doc.text(c.l, x, y + 4); x += c.w; });
-    y += 8;
+    chk(10); doc.setFillColor(...color); doc.rect(M, y - 1, IW, 8, 'F');
+    doc.setFontSize(9.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
+    let x = M + 2; cols.forEach(c => { doc.text(c.l, x, y + 5); x += c.w; });
+    y += 9;
   }
   function tblRow(cols, data, ri) {
     let ml = 1;
@@ -925,13 +1043,13 @@ function pdfInit() {
       const ls = doc.splitTextToSize(String(d), cols[ci].w - 3);
       if (ls.length > ml) ml = ls.length;
     });
-    const rh = ml * 4.7 + 3;
+    const rh = ml * 5.5 + 4;
     chk(rh);
     if (ri % 2 === 0) { doc.setFillColor(...C.bg); doc.rect(M, y - 1, IW, rh, 'F'); }
-    doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
+    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
     let x = M + 2;
     data.forEach((d, ci) => {
-      doc.splitTextToSize(String(d || '—'), cols[ci].w - 3).forEach((l, li) => doc.text(l, x, y + 3.5 + li * 4.7));
+      doc.splitTextToSize(String(d || '—'), cols[ci].w - 3).forEach((l, li) => doc.text(l, x, y + 4 + li * 5.5));
       x += cols[ci].w;
     });
     doc.setDrawColor(...C.border); doc.setLineWidth(0.18);
@@ -941,29 +1059,29 @@ function pdfInit() {
   function bullets(rows) {
     rows.forEach(r => {
       const t = Array.isArray(r) ? r[0] : r; if (!t) return;
-      chk(6);
-      doc.setFontSize(8.5); doc.setFont(undefined, 'normal');
+      chk(7);
+      doc.setFontSize(10); doc.setFont(undefined, 'normal');
       doc.setTextColor(...C.tbaL); doc.text('•', M + 1, y);
       doc.setTextColor(...C.text);
       const ls = doc.splitTextToSize(t, IW - 7);
-      ls.forEach((l, li) => { if (li > 0) chk(5); doc.text(l, M + 6, y + li * 4.7); });
-      y += ls.length * 4.7 + 1;
+      ls.forEach((l, li) => { if (li > 0) chk(6); doc.text(l, M + 6, y + li * 5.5); });
+      y += ls.length * 5.5 + 1.5;
     });
-    y += 1;
+    y += 1.5;
   }
   function addFooters(label) {
     const total = doc.getNumberOfPages();
     for (let p = 1; p <= total; p++) {
       doc.setPage(p);
       doc.setDrawColor(...C.border); doc.setLineWidth(0.35);
-      doc.line(M, H - 12, W - M, H - 12);
-      doc.setFontSize(7.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.muted);
+      doc.line(M, H - 13, W - M, H - 13);
+      doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.muted);
       doc.text(label + ' — ' + new Date().toLocaleDateString('nb-NO'), M, H - 7);
       doc.text('Side ' + p + ' av ' + total, W - M, H - 7, { align: 'right' });
     }
   }
 
-  return { doc, W, H, M, IW, C, state,
+  return { doc, W, H, M, IW, C,
     chk, newPg, secHdr, subHdr, fLbl, fBody, fp, tblHdr, tblRow, bullets, addFooters,
     getY: () => y, setY: val => { y = val; }
   };
@@ -973,19 +1091,19 @@ function pdfInit() {
 //  TBA-ONLY PDF
 // ═══════════════════════════════════════════
 function generateTBAPDF() {
-  const { doc, W, H, M, IW, C, chk, secHdr, subHdr, fLbl, fBody, fp, tblHdr, tblRow, bullets, addFooters, getY, setY } = pdfInit();
+  const { doc, W, H, M, IW, C, chk, secHdr, subHdr, fLbl, fBody, fp, bullets, addFooters, getY, setY } = pdfInit();
 
   // Cover
   doc.setFillColor(...C.tba);
-  doc.rect(0, 0, W, 52, 'F');
-  doc.setFontSize(20); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
-  doc.text('TRENINGSBEHOVSANALYSE', M, 24);
-  doc.setFontSize(12); doc.setFont(undefined, 'normal');
-  doc.text(v('t1_org') || 'Organisasjon ikke angitt', M, 34);
-  doc.setFontSize(9); doc.setTextColor(180, 230, 200);
-  doc.text('Gjennomført: ' + new Date().toLocaleDateString('nb-NO'), M, 42);
+  doc.rect(0, 0, W, 54, 'F');
+  doc.setFontSize(22); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
+  doc.text('TRENINGSBEHOVSANALYSE', M, 25);
+  doc.setFontSize(13); doc.setFont(undefined, 'normal');
+  doc.text(v('t1_org') || 'Organisasjon ikke angitt', M, 36);
+  doc.setFontSize(10); doc.setTextColor(180, 230, 200);
+  doc.text('Gjennomført: ' + new Date().toLocaleDateString('nb-NO'), M, 46);
 
-  setY(62);
+  setY(64);
 
   // T1
   secHdr(C.tba, 'T1', 'Organisasjonsanalyse');
@@ -997,7 +1115,7 @@ function generateTBAPDF() {
   fp('Begrensninger', v('t1_begrensninger'), C.tbaL);
   fp('Krav og hjemmel', v('t1_krav'), C.tbaL);
 
-  setY(getY() + 3);
+  setY(getY() + 4);
 
   // T2
   secHdr(C.tba, 'T2', 'Oppgaveanalyse');
@@ -1007,16 +1125,22 @@ function generateTBAPDF() {
   fp('Kunnskap og informasjon som må vite hvor finnes', v('t2_nta'), C.tbaL);
   fp('Identifiserte kompetansegap', v('t2_gap'), C.tbaL);
 
-  setY(getY() + 3);
+  setY(getY() + 4);
 
   // T3
   secHdr(C.tba, 'T3', 'Personanalyse');
   fp('Hvem trenger treningen', v('t3_hvem'), C.tbaL);
   fp('Nåværende kompetansenivå', v('t3_nivaa'), C.tbaL);
   fp('Forutsetninger', v('t3_forut'), C.tbaL);
-  fp('Målgruppe / Nivå', tba_mg(), C.tbaL);
+  fp('Spesielle hensyn', v('t3_hensyn'), C.tbaL);
+
+  setY(getY() + 4);
+
+  // T4
+  secHdr(C.tba, 'T4', 'Konklusjoner og anbefalinger');
+  fp('Treningsnivå', tba_mg(), C.tbaL);
   fp('Anbefalt øvelsestype', tba_type(), C.tbaL);
-  fp('Oppsummering — prioritert treningsbehov', v('t3_oppsummering'), C.tbaL);
+  fp('Prioriterte treningsbehov', v('t4_behov'), C.tbaL);
 
   addFooters('Treningsbehovsanalyse');
 
@@ -1033,20 +1157,20 @@ function generatePDF() {
 
   // ── Cover ──
   doc.setFillColor(...C.blue);
-  doc.rect(0, 0, W, 56, 'F');
+  doc.rect(0, 0, W, 58, 'F');
   doc.setFillColor(50, 80, 118);
-  doc.roundedRect(M, 9, 36, 36, 4, 4, 'F');
-  doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
-  doc.text('DSB', M + 18, 29, { align: 'center' });
-  doc.setFontSize(21); doc.setFont(undefined, 'bold');
-  doc.text('ØVINGSPLAN', M + 44, 23);
-  doc.setFontSize(13); doc.setFont(undefined, 'normal');
-  doc.text(v('s1_navn') || 'Uten tittel', M + 44, 33);
-  doc.setFontSize(8.5); doc.setTextColor(200, 215, 240);
-  doc.text('Planleggingsverktøy for beredskapsøvelser', M + 44, 42);
+  doc.roundedRect(M, 10, 36, 36, 4, 4, 'F');
+  doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
+  doc.text('DSB', M + 18, 30, { align: 'center' });
+  doc.setFontSize(22); doc.setFont(undefined, 'bold');
+  doc.text('ØVINGSPLAN', M + 44, 24);
+  doc.setFontSize(14); doc.setFont(undefined, 'normal');
+  doc.text(v('s1_navn') || 'Uten tittel', M + 44, 35);
+  doc.setFontSize(9); doc.setTextColor(200, 215, 240);
+  doc.text('Planleggingsverktøy for beredskapsøvelser', M + 44, 44);
 
   // Meta strip
-  doc.setFillColor(236, 240, 248); doc.rect(0, 56, W, 28, 'F');
+  doc.setFillColor(236, 240, 248); doc.rect(0, 58, W, 30, 'F');
   const meta = [
     ['Dato:', v('s1_dato') || '—'], ['Tid:', v('s1_tid') || '—'],
     ['Type:', v('s1_type') || '—'], ['Sted:', v('s1_sted') || '—'],
@@ -1055,14 +1179,14 @@ function generatePDF() {
   ];
   const cw = IW / 4;
   meta.forEach(([lbl, val], i) => {
-    const cx = M + (i % 4) * cw, cy = 63 + Math.floor(i / 4) * 11;
-    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.blue);
+    const cx = M + (i % 4) * cw, cy = 65 + Math.floor(i / 4) * 12;
+    doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.blue);
     doc.text(lbl, cx, cy);
-    doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
-    doc.text(val, cx, cy + 5);
+    doc.setFontSize(9); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
+    doc.text(val, cx, cy + 6);
   });
 
-  setY(92);
+  setY(96);
 
   // ── TBA Summary ──
   secHdr(C.tba, 'TBA', 'Treningsbehovsanalyse — Sammendrag');
@@ -1080,11 +1204,14 @@ function generatePDF() {
   fp('Kompetansegap', v('t2_gap'), C.tbaL);
   setY(getY() + 2);
   subHdr('Personanalyse', C.tbaL);
-  fp('Målgruppe', tba_mg(), C.tbaL);
+  fp('Hvem trenger treningen', v('t3_hvem'), C.tbaL);
   fp('Kompetansenivå', v('t3_nivaa'), C.tbaL);
+  setY(getY() + 2);
+  subHdr('Konklusjoner', C.tbaL);
+  fp('Treningsnivå', tba_mg(), C.tbaL);
   fp('Anbefalt øvelsestype', tba_type(), C.tbaL);
-  fp('Prioritert treningsbehov', v('t3_oppsummering'), C.tbaL);
-  setY(getY() + 3);
+  fp('Prioriterte treningsbehov', v('t4_behov'), C.tbaL);
+  setY(getY() + 4);
 
   // ── Plan seksjoner ──
   chk(18); secHdr(C.blue, '1', 'Grunnleggende informasjon');
@@ -1109,14 +1236,14 @@ function generatePDF() {
       const cbs = smartOf(item);
       const letters = ['S','M','A','R','T'];
       const smartStr = letters.map((l, idx) => (cbs[idx] ? '✓' : '✗') + l).join('  ');
-      chk(10);
-      if (i % 2 === 0) { doc.setFillColor(...C.bg); doc.rect(M, getY() - 1, IW, 9, 'F'); }
-      doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
-      const ls = doc.splitTextToSize(`${i + 1}. ${txt}`, IW - 50);
-      ls.forEach((l, li) => { chk(5); doc.text(l, M + 2, getY() + 4 + li * 4.7); });
-      doc.setFontSize(7); doc.setTextColor(...C.muted);
-      doc.text(smartStr, M + IW - 48, getY() + 4);
-      setY(getY() + Math.max(8, ls.length * 4.7 + 3));
+      chk(11);
+      if (i % 2 === 0) { doc.setFillColor(...C.bg); doc.rect(M, getY() - 1, IW, 10, 'F'); }
+      doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
+      const ls = doc.splitTextToSize(`${i + 1}. ${txt}`, IW - 52);
+      ls.forEach((l, li) => { chk(6); doc.text(l, M + 2, getY() + 5 + li * 5.5); });
+      doc.setFontSize(8); doc.setTextColor(...C.muted);
+      doc.text(smartStr, M + IW - 50, getY() + 5);
+      setY(getY() + Math.max(9, ls.length * 5.5 + 4));
       doc.setDrawColor(...C.border); doc.setLineWidth(0.18);
       doc.line(M, getY(), M + IW, getY()); setY(getY() + 2);
     });
@@ -1135,20 +1262,20 @@ function generatePDF() {
   if (injR.length) {
     fLbl('Injeksjoner / Momenter');
     const iC = [{l:'Tidspunkt',w:35},{l:'Beskrivelse',w:108},{l:'Ansvarlig',w:31}];
-    tblHdr(iC, C.blueMid); injR.forEach((r, i) => tblRow(iC, r, i)); setY(getY() + 3);
+    tblHdr(iC, C.blueMid); injR.forEach((r, i) => tblRow(iC, r, i)); setY(getY() + 4);
   }
   fp('Markørbeskrivelse og sminke', v('s4_markor'));
   const utsR = dynRows('uts-list');
   if (utsR.length) {
     fLbl('Nødvendig utstyr');
     const uC = [{l:'Utstyr',w:120},{l:'Antall',w:54}];
-    tblHdr(uC, C.blueMid); utsR.forEach((r, i) => tblRow(uC, r, i)); setY(getY() + 3);
+    tblHdr(uC, C.blueMid); utsR.forEach((r, i) => tblRow(uC, r, i)); setY(getY() + 4);
   }
   const rolR = dynRows('rol-list');
   if (rolR.length) {
     fLbl('Roller og ansvar');
     const rC = [{l:'Rolle',w:50},{l:'Navn',w:50},{l:'Beskrivelse',w:74}];
-    tblHdr(rC, C.blueMid); rolR.forEach((r, i) => tblRow(rC, r, i)); setY(getY() + 3);
+    tblHdr(rC, C.blueMid); rolR.forEach((r, i) => tblRow(rC, r, i)); setY(getY() + 4);
   }
 
   chk(18); secHdr(C.blue, '5', 'Deltakere');
@@ -1156,13 +1283,13 @@ function generatePDF() {
   if (dR.length) {
     fLbl('Deltakerliste');
     const dC = [{l:'Navn',w:70},{l:'Rolle',w:74},{l:'Nivå',w:30}];
-    tblHdr(dC, C.blueMid); dR.forEach((r, i) => tblRow(dC, r, i)); setY(getY() + 3);
+    tblHdr(dC, C.blueMid); dR.forEach((r, i) => tblRow(dC, r, i)); setY(getY() + 4);
   }
   const kR = dynRows('kont-list');
   if (kR.length) {
     fLbl('Nøkkelpersoner');
     const kC = [{l:'Navn',w:60},{l:'Funksjon',w:74},{l:'Telefon',w:40}];
-    tblHdr(kC, C.blueMid); kR.forEach((r, i) => tblRow(kC, r, i)); setY(getY() + 3);
+    tblHdr(kC, C.blueMid); kR.forEach((r, i) => tblRow(kC, r, i)); setY(getY() + 4);
   }
   fp('Eksterne aktører', v('s5_ext'));
 
