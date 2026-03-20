@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Øvingsplanlegger</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #1a3a5c;
+      --blue-mid:  #2a5298;
+      --blue-lt:   #4a7fd4;
+      --tba:       #1b5e38;
+      --tba-mid:   #2e7d52;
+      --tba-lt:    #52a878;
+      --accent:    #c8382a;
+      --bg:        #f4f6f9;
+      --white:     #ffffff;
+      --border:    #d0d7e3;
+      --text:      #1e2a38;
+      --muted:     #6b7a8d;
+      --ok:        #2e7d32;
+      --r:         8px;
+      --sh:        0 2px 8px rgba(0,0,0,.10);
+      --sh-lg:     0 4px 20px rgba(0,0,0,.14);
+    }
+
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── Header ── */
+    header { background: linear-gradient(135deg,var(--blue),var(--blue-mid)); color:#fff; box-shadow:var(--sh-lg); position:sticky; top:0; z-index:100; }
+    .hdr-inner { max-width:920px; margin:0 auto; padding:13px 20px 10px; display:flex; align-items:center; gap:13px; }
+    .hdr-logo { width:44px; height:44px; background:rgba(255,255,255,.15); border-radius:var(--r); display:flex; align-items:center; justify-content:center; font-size:21px; flex-shrink:0; }
+    .hdr-text h1 { font-size:1.2rem; font-weight:700; }
+    .hdr-text p  { font-size:0.74rem; opacity:.72; margin-top:2px; }
+    .prog-wrap { background:rgba(0,0,0,.2); height:4px; }
+    .prog-fill { height:4px; background:linear-gradient(90deg,#7ec8e3,#fff); transition:width .4s; width:10%; }
+
+    /* ── Phase bar ── */
+    .phase-bar { background:var(--white); border-bottom:1px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,.05); }
+    .phase-bar-inner { max-width:920px; margin:0 auto; padding:0 16px; display:flex; align-items:center; }
+    .ph-tab { display:flex; align-items:center; gap:8px; padding:10px 16px; border:none; background:none; cursor:pointer; font-size:0.82rem; color:var(--muted); border-bottom:3px solid transparent; transition:all .2s; }
+    .ph-tab .ph-num { width:21px; height:21px; border-radius:50%; background:var(--border); color:var(--muted); font-size:0.70rem; font-weight:700; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
+    .ph-tab span:last-child { font-weight:600; }
+    .ph-tab.tba-on  { color:var(--tba-mid); border-bottom-color:var(--tba-mid); }
+    .ph-tab.tba-on  .ph-num { background:var(--tba-mid); color:#fff; }
+    .ph-tab.tba-ok  { color:var(--ok); }
+    .ph-tab.tba-ok  .ph-num { background:var(--ok); color:#fff; }
+    .ph-tab.pln-on  { color:var(--blue-mid); border-bottom-color:var(--blue-mid); }
+    .ph-tab.pln-on  .ph-num { background:var(--blue-mid); color:#fff; }
+    .ph-arr { font-size:.9rem; color:var(--border); padding:0 2px; }
+
+    /* ── Step nav ── */
+    .step-nav { background:var(--bg); border-bottom:1px solid var(--border); overflow-x:auto; }
+    .step-nav-inner { max-width:920px; margin:0 auto; display:flex; align-items:center; padding:0 8px; min-height:50px; }
+    .s-btn { display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 11px 5px; border:none; background:none; cursor:pointer; font-size:0.69rem; color:var(--muted); border-bottom:3px solid transparent; transition:all .2s; white-space:nowrap; min-width:68px; }
+    .s-btn .sn { width:21px; height:21px; border-radius:50%; background:var(--border); color:var(--muted); font-size:0.69rem; font-weight:700; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .s-btn.tba.active  { color:var(--tba-mid); border-bottom-color:var(--tba-mid); }
+    .s-btn.tba.active .sn { background:var(--tba-mid); color:#fff; }
+    .s-btn.tba.done .sn  { background:var(--ok); color:#fff; }
+    .s-btn.pln.active  { color:var(--blue-mid); border-bottom-color:var(--blue-mid); }
+    .s-btn.pln.active .sn { background:var(--blue-mid); color:#fff; }
+    .s-btn.pln.done .sn  { background:var(--ok); color:#fff; }
+    .nav-sep { width:1px; height:34px; background:var(--border); margin:0 5px; flex-shrink:0; }
+
+    /* ── Main + pages ── */
+    .main { max-width:920px; margin:0 auto; padding:22px 16px 80px; }
+    .page { display:none; }
+    .page.active { display:block; }
+
+    /* ── Cards ── */
+    .card { background:var(--white); border-radius:var(--r); box-shadow:var(--sh); margin-bottom:22px; overflow:hidden; }
+    .card-hdr { padding:12px 18px; display:flex; align-items:center; gap:11px; color:#fff; }
+    .card-hdr.tba { background:linear-gradient(135deg,var(--tba),var(--tba-mid)); }
+    .card-hdr.pln { background:linear-gradient(135deg,var(--blue),var(--blue-mid)); }
+    .card-hdr .cn { width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.85rem; flex-shrink:0; }
+    .card-hdr h2 { font-size:.97rem; font-weight:600; }
+    .card-body { padding:20px; }
+
+    /* ── Fields ── */
+    .fg  { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .fg1 { display:grid; grid-template-columns:1fr; gap:14px; }
+    @media(max-width:580px){ .fg { grid-template-columns:1fr; } }
+    .span2 { grid-column:1/-1; }
+    .f { display:flex; flex-direction:column; gap:4px; }
+    .f label { font-size:.79rem; font-weight:600; color:var(--blue); }
+    .f label.t { color:var(--tba); }
+    .f .hint { font-size:.71rem; color:var(--muted); line-height:1.4; margin-top:-2px; }
+
+    input[type=text],input[type=date],input[type=time],input[type=number],select,textarea {
+      width:100%; padding:8px 11px; border:1.5px solid var(--border); border-radius:var(--r);
+      font-size:.87rem; font-family:inherit; color:var(--text); background:#fff;
+      transition:border-color .2s,box-shadow .2s; outline:none;
+    }
+    input:focus,select:focus,textarea:focus { border-color:var(--blue-lt); box-shadow:0 0 0 3px rgba(74,127,212,.14); }
+    textarea { resize:vertical; min-height:74px; }
+
+    /* ── Checkboxes ── */
+    .cg { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:4px; }
+    .cl { display:flex; align-items:center; gap:6px; font-size:.84rem; cursor:pointer; }
+    .cl input[type=checkbox] { width:15px; height:15px; cursor:pointer; accent-color:var(--blue-mid); }
+
+    /* ── Dynamic lists ── */
+    .dl { display:flex; flex-direction:column; gap:7px; }
+    .di { display:flex; gap:7px; align-items:flex-start; background:var(--bg); border:1px solid var(--border); border-radius:var(--r); padding:8px 8px 8px 12px; }
+    .di-f { flex:1; display:flex; flex-wrap:wrap; gap:6px; }
+    .di-f input,.di-f select,.di-f textarea { flex:1; min-width:88px; }
+    .di .rb { background:none; border:none; color:var(--accent); font-size:1rem; cursor:pointer; padding:3px 5px; border-radius:4px; flex-shrink:0; transition:background .15s; }
+    .di .rb:hover { background:#fdecea; }
+    .add { display:inline-flex; align-items:center; gap:5px; padding:7px 12px; background:var(--bg); border:1.5px dashed var(--blue-lt); border-radius:var(--r); color:var(--blue-mid); font-size:.81rem; font-weight:600; cursor:pointer; transition:all .15s; margin-top:4px; }
+    .add.t { border-color:var(--tba-lt); color:var(--tba-mid); }
+    .add:hover { background:#e8f0fb; border-style:solid; }
+    .add.t:hover { background:#e8f5ee; }
+
+    /* ── SMART check row ── */
+    .sg .di-f { flex-direction:column; gap:5px; }
+    .scr { display:flex; align-items:center; gap:9px; flex-wrap:wrap; padding:4px 0 1px; }
+    .scr .sc-lbl { font-size:.71rem; font-weight:700; color:var(--muted); }
+    .scr label { display:flex; align-items:center; gap:3px; font-size:.71rem; color:var(--muted); cursor:pointer; }
+    .scr label.on { color:var(--ok); font-weight:600; }
+    .scr input[type=checkbox] { width:13px; height:13px; accent-color:var(--ok); }
+
+    /* ── Divider ── */
+    hr.d { border:none; border-top:1px solid var(--border); margin:14px 0; }
+
+    /* ── Auto tag ── */
+    .atag { font-size:.67rem; background:#e8f5ee; color:var(--tba); border:1px solid var(--tba-lt); border-radius:3px; padding:1px 5px; margin-left:7px; font-weight:600; }
+
+    /* ── Transition screen ── */
+    .trans-wrap { background:var(--white); border-radius:var(--r); box-shadow:var(--sh); padding:30px 22px; text-align:center; margin-bottom:22px; }
+    .trans-wrap .t-icon { font-size:2.8rem; margin-bottom:10px; }
+    .trans-wrap h2 { font-size:1.35rem; color:var(--blue); margin-bottom:7px; }
+    .trans-wrap > p { color:var(--muted); font-size:.88rem; max-width:500px; margin:0 auto 22px; line-height:1.6; }
+    .sum-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:26px; text-align:left; }
+    .sum-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--r); padding:13px 15px; }
+    .sum-card h4 { font-size:.75rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
+    .sum-card p { font-size:.82rem; color:var(--text); line-height:1.5; }
+    .sum-card p.mt { color:var(--muted); font-style:italic; }
+    .trans-btns { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+
+    /* ── Nav buttons ── */
+    .nav { display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px; flex-wrap:wrap; }
+    .btn { padding:10px 20px; border-radius:var(--r); font-size:.87rem; font-weight:600; cursor:pointer; border:none; transition:all .15s; }
+    .btn-sec { background:var(--white); border:1.5px solid var(--border); color:var(--text); }
+    .btn-sec:hover { background:var(--bg); }
+    .btn-tba { background:linear-gradient(135deg,var(--tba-mid),var(--tba)); color:#fff; box-shadow:0 2px 6px rgba(46,125,82,.28); }
+    .btn-tba:hover { opacity:.9; }
+    .btn-pln { background:linear-gradient(135deg,var(--blue-mid),var(--blue)); color:#fff; box-shadow:0 2px 6px rgba(42,82,152,.28); }
+    .btn-pln:hover { opacity:.9; }
+    .btn-pdf-tba { background:linear-gradient(135deg,var(--tba-mid),var(--tba)); color:#fff; box-shadow:0 2px 6px rgba(46,125,82,.28); padding:12px 22px; }
+    .btn-pdf-tba:hover { opacity:.9; }
+    .btn-pdf { background:linear-gradient(135deg,var(--accent),#9b2318); color:#fff; box-shadow:0 2px 6px rgba(200,56,42,.28); padding:12px 26px; font-size:.93rem; }
+    .btn-pdf:hover { opacity:.9; }
+    .btn-lg { padding:13px 32px; font-size:1rem; }
+
+    /* ── Notice strip ── */
+    .notice { background:#e8f5e9; border:1px solid #a5d6a7; border-radius:var(--r); padding:11px 16px; font-size:.84rem; color:var(--ok); font-weight:600; margin-top:4px; }
+
+    /* ── Toast ── */
+    #toast { position:fixed; bottom:22px; right:22px; background:var(--ok); color:#fff; padding:11px 18px; border-radius:var(--r); box-shadow:var(--sh-lg); font-size:.87rem; font-weight:600; opacity:0; pointer-events:none; transition:opacity .3s; z-index:999; }
+    #toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-inner">
+    <div class="hdr-logo">🛡️</div>
+    <div class="hdr-text">
+      <h1>Øvingsplanlegger</h1>
+      <p>Planleggingsverktøy for beredskapsøvelser</p>
+    </div>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+</header>
+
+<div class="phase-bar">
+  <div class="phase-bar-inner">
+    <button class="ph-tab" id="phTab0" onclick="goTo(0)">
+      <span class="ph-num">1</span><span>Treningsbehovsanalyse</span>
+    </button>
+    <div class="ph-arr">▶</div>
+    <button class="ph-tab" id="phTab1">
+      <span class="ph-num">2</span><span>Øvingsplanlegging</span>
+    </button>
+  </div>
+</div>
+
+<div class="step-nav"><div class="step-nav-inner" id="stepInner"></div></div>
+
+<div class="main">
+
+<!-- ═══════════════════════════════════════
+     TBA 1 — ORGANISASJONSANALYSE
+═══════════════════════════════════════════ -->
+<div class="page active" id="page-tba-0">
+  <div class="card">
+    <div class="card-hdr tba"><div class="cn">T1</div><h2>Organisasjonsanalyse</h2></div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="f span2">
+          <label class="t">Organisasjon / Lag</label>
+          <input type="text" id="t1_org" placeholder="Navn på organisasjon eller lag" />
+        </div>
+        <div class="f span2">
+          <label class="t">Bakgrunn og formål med analysen</label>
+          <p class="hint">Hvorfor gjennomføres denne treningsbehovsanalysen nå? Hva er situasjonen som har utløst den?</p>
+          <textarea id="t1_bakgrunn" rows="3" placeholder="F.eks. ny hendelse avdekket svakheter, pålegg fra overordnet, planlagt kompetanseheving..."></textarea>
+        </div>
+        <div class="f">
+          <label class="t">Øvings- og treningskultur</label>
+          <select id="t1_kultur">
+            <option value="">— Velg nivå —</option>
+            <option>Lav — lite systematikk, ad-hoc</option>
+            <option>Middels — noe struktur, varierende</option>
+            <option>Høy — systematisk og forankret</option>
+          </select>
+        </div>
+        <div class="f">
+          <label class="t">Utdyp kulturen</label>
+          <textarea id="t1_kultur_note" rows="3" placeholder="Beskriv øvingskulturen nærmere..."></textarea>
+        </div>
+        <div class="f">
+          <label class="t">Tilgjengelige ressurser</label>
+          <p class="hint">Tid, økonomi og personell</p>
+          <textarea id="t1_ressurser" rows="3" placeholder="F.eks. 4 timer per kvartal, budsjett 5 000 kr, to instruktører..."></textarea>
+        </div>
+        <div class="f">
+          <label class="t">Materiell og fasiliteter</label>
+          <p class="hint">Utstyr og lokaler tilgjengelig</p>
+          <textarea id="t1_materiell" rows="3" placeholder="F.eks. førstehjelpsmateriell, radioer, øvingslokale..."></textarea>
+        </div>
+        <div class="f span2">
+          <label class="t">Begrensninger og utfordringer</label>
+          <p class="hint">Hva kan hindre god planlegging og gjennomføring? Turnover, frivillighetsproblematikk, kompetanse hos instruktører?</p>
+          <textarea id="t1_begrensninger" rows="3" placeholder="Beskriv kjente begrensninger..."></textarea>
+        </div>
+        <div class="f span2">
+          <label class="t">Relevante krav og hjemmel</label>
+          <p class="hint">Lover, forskrifter, interne planer eller pålegg som begrunner treningsbehovet</p>
+          <textarea id="t1_krav" rows="3" placeholder="F.eks. kommunal beredskapsplikt, DSB-krav, interne minstekrav..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav"><span></span><button class="btn btn-tba" onclick="nextPage()">Neste: Oppgaveanalyse →</button></div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TBA 2 — OPPGAVEANALYSE
+═══════════════════════════════════════════ -->
+<div class="page" id="page-tba-1">
+  <div class="card">
+    <div class="card-hdr tba"><div class="cn">T2</div><h2>Oppgaveanalyse</h2></div>
+    <div class="card-body">
+      <div class="fg1">
+
+        <div>
+          <label class="f" style="display:block;margin-bottom:8px;"><span class="t" style="font-size:.82rem;font-weight:700;">Kritiske oppgaver som skal mestres</span></label>
+          <p class="hint" style="margin-bottom:10px;">Hvilke konkrete situasjoner og oppgaver MÅ mannskapene håndtere?</p>
+          <div class="dl" id="t2-opp-list"></div>
+          <button class="add t" onclick="addT2Opp()">+ Legg til oppgave</button>
+        </div>
+
+        <hr class="d" />
+
+        <div class="fg">
+          <div class="f">
+            <label class="t">Kunnskap og ferdigheter som må sitte</label>
+            <p class="hint">Det alle deltakere må beherske — ingen kan slå opp.</p>
+            <textarea id="t2_ntk" rows="4" placeholder="F.eks. ABCDE-pasientvurdering, søkstaktikk, HLR..."></textarea>
+          </div>
+          <div class="f">
+            <label class="t">Kunnskap og informasjon som må vite hvor finnes</label>
+            <p class="hint">Det holder å vite hvor man finner det — planer, sjekklister, kontaktlister.</p>
+            <textarea id="t2_nta" rows="4" placeholder="F.eks. kommunens beredskapsplan, ressursoversikter, varslingsplan..."></textarea>
+          </div>
+        </div>
+
+        <hr class="d" />
+
+        <div class="f">
+          <label class="t">Identifiserte kompetansegap</label>
+          <p class="hint">Hva er gapet mellom det mannskapene kan i dag og det de bør kunne? Dette er kjernen i analysen og grunnlaget for læringsmålene.</p>
+          <textarea id="t2_gap" rows="4" placeholder="Beskriv konkrete gap som øvelsen skal adressere..."></textarea>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-tba" onclick="nextPage()">Neste: Personanalyse →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TBA 3 — PERSONANALYSE
+═══════════════════════════════════════════ -->
+<div class="page" id="page-tba-2">
+  <div class="card">
+    <div class="card-hdr tba"><div class="cn">T3</div><h2>Personanalyse</h2></div>
+    <div class="card-body">
+      <div class="fg1">
+
+        <div class="f">
+          <label class="t">Hvem trenger treningen?</label>
+          <p class="hint">Beskriv målgruppen — roller, bakgrunn, hvilke lag eller enheter</p>
+          <textarea id="t3_hvem" rows="3" placeholder="F.eks. nye mannskaper i søk og redning, alle teamledere, samvirkepartnere..."></textarea>
+        </div>
+
+        <div class="fg">
+          <div class="f">
+            <label class="t">Nåværende kompetansenivå</label>
+            <select id="t3_nivaa">
+              <option value="">— Velg nivå —</option>
+              <option>Nybegynner / grunnleggende</option>
+              <option>Blandet — varierende bakgrunn</option>
+              <option>Viderekommet</option>
+              <option>Erfaren / ekspert</option>
+            </select>
+          </div>
+          <div class="f">
+            <label class="t">Utdyp kompetanse og forutsetninger</label>
+            <textarea id="t3_forut" rows="3" placeholder="F.eks. har gjennomført grunnkurs, kjennskap til prosedyrene, erfaring fra reelle oppdrag..."></textarea>
+          </div>
+        </div>
+
+        <div class="f">
+          <label class="t">Målgruppe og nivå</label>
+          <p class="hint">Hva er riktig nivå for denne øvelsen?</p>
+          <div class="cg">
+            <label class="cl"><input type="checkbox" id="t3_individ" /> Individ — enkeltmannsferdigheter</label>
+            <label class="cl"><input type="checkbox" id="t3_gruppe" /> Gruppe — samhandling i laget</label>
+            <label class="cl"><input type="checkbox" id="t3_org" /> Organisasjon — samvirke og helhetlig respons</label>
+          </div>
+        </div>
+
+        <div class="f">
+          <label class="t">Anbefalt øvelsestype</label>
+          <p class="hint">Hva tilsier analysen? Enkeltferdigheter bør øves og sitte før man øver som gruppe — gruppen bør fungere godt før man kjører fullskala.</p>
+          <div class="cg">
+            <label class="cl"><input type="checkbox" id="t3_drill" /> Ferdighetstrening / drill</label>
+            <label class="cl"><input type="checkbox" id="t3_funk" /> Funksjonsøvelse</label>
+            <label class="cl"><input type="checkbox" id="t3_full" /> Fullskalaøvelse / samvirkeøvelse</label>
+            <label class="cl"><input type="checkbox" id="t3_bord" /> Skrivebordsøvelse</label>
+          </div>
+        </div>
+
+        <hr class="d" />
+
+        <div class="f">
+          <label class="t">Oppsummering av treningsbehov</label>
+          <p class="hint">Saml de viktigste funnene fra T1–T3. Dette blir grunnlaget for øvelsens bakgrunn og læringsmål.</p>
+          <textarea id="t3_oppsummering" rows="4" placeholder="Oppsummer de viktigste treningsbehovene identifisert i analysen..."></textarea>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-tba" onclick="nextPage()">Fullfør TBA →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     OVERGANG
+═══════════════════════════════════════════ -->
+<div class="page" id="page-transition">
+  <div class="trans-wrap">
+    <div class="t-icon">✅</div>
+    <h2>Treningsbehovsanalysen er fullført</h2>
+    <p>Her er en oppsummering av de viktigste funnene. Relevante felt i øvingsplanleggingen er forhåndsutfylt fra analysen — du kan alltid justere dem.</p>
+    <div class="sum-grid" id="sumGrid"></div>
+    <div class="trans-btns">
+      <button class="btn btn-pdf-tba" onclick="generateTBAPDF()">📄 Last ned TBA som PDF</button>
+      <button class="btn btn-pln btn-lg" onclick="startPlanning()">📋 Start øvingsplanlegging →</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake til TBA</button>
+    <span></span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PLAN 1 — GRUNNINFO
+═══════════════════════════════════════════ -->
+<div class="page" id="page-plan-0">
+  <div class="card">
+    <div class="card-hdr pln"><div class="cn">1</div><h2>Grunnleggende informasjon</h2></div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="f span2">
+          <label>Navn på øvelsen</label>
+          <input type="text" id="s1_navn" placeholder="F.eks. Øvelse Nordfjell 2026" />
+        </div>
+        <div class="f"><label>Dato</label><input type="date" id="s1_dato" /></div>
+        <div class="f"><label>Tidspunkt</label><input type="time" id="s1_tid" /></div>
+        <div class="f span2"><label>Sted / Lokasjon</label><input type="text" id="s1_sted" placeholder="Adresse eller stedsnavn" /></div>
+        <div class="f span2">
+          <label>Øvelsestype <span id="type-hint" style="font-size:.71rem;color:var(--tba-mid);font-weight:400;margin-left:6px;"></span></label>
+          <select id="s1_type">
+            <option value="">— Velg type —</option>
+            <option>Skrivebordsøvelse</option>
+            <option>Ferdighetstrening / drill</option>
+            <option>Funksjonsøvelse</option>
+            <option>Fullskalaøvelse</option>
+            <option>Samvirkeøvelse</option>
+            <option>Annet</option>
+          </select>
+        </div>
+        <div class="f"><label>Ansvarlig øvingsleder</label><input type="text" id="s1_leder" placeholder="Fullt navn" /></div>
+        <div class="f"><label>Organisasjon / Lag</label><input type="text" id="s1_org" /></div>
+        <div class="f"><label>Antall deltakere</label><input type="number" id="s1_antall" min="1" placeholder="Antall" /></div>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pln" onclick="nextPage()">Neste: Bakgrunn →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PLAN 2 — BAKGRUNN
+═══════════════════════════════════════════ -->
+<div class="page" id="page-plan-1">
+  <div class="card">
+    <div class="card-hdr pln"><div class="cn">2</div><h2>Bakgrunn og kontekst</h2></div>
+    <div class="card-body">
+      <div class="fg1">
+        <div class="f">
+          <label>Bakgrunn / Kontekst</label>
+          <p class="hint">Beskriv bakgrunnen for øvelsen</p>
+          <textarea id="s2_bakgrunn" rows="4" placeholder="Hva er bakgrunnen for at denne øvelsen gjennomføres?"></textarea>
+        </div>
+        <div class="f">
+          <label>Kompetansegap og treningsbehov <span class="atag" id="gap-atag" style="display:none">Fra TBA</span></label>
+          <textarea id="s2_gap" rows="3" placeholder="Beskriv identifiserte kompetansegap..."></textarea>
+        </div>
+        <div class="f">
+          <label>Hjemmel / Krav <span class="atag" id="krav-atag" style="display:none">Fra TBA</span></label>
+          <textarea id="s2_hjemmel" rows="3" placeholder="Lover, forskrifter, planer eller pålegg..."></textarea>
+        </div>
+        <div class="f">
+          <label>Tidligere øvelser og hendelser</label>
+          <textarea id="s2_tidligere" rows="3" placeholder="Erfaringer fra tidligere øvelser eller reelle hendelser..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pln" onclick="nextPage()">Neste: Læringsmål →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PLAN 3 — LÆRINGSMÅL
+═══════════════════════════════════════════ -->
+<div class="page" id="page-plan-2">
+  <div class="card">
+    <div class="card-hdr pln"><div class="cn">3</div><h2>Læringsmål</h2></div>
+    <div class="card-body">
+      <div class="fg1">
+        <div class="f">
+          <label>Hoved-læringsmål</label>
+          <p class="hint">Hva skal deltakerne ha lært etter øvelsen?</p>
+          <textarea id="s3_hoved" rows="3" placeholder="Etter øvelsen skal deltakerne kunne..."></textarea>
+        </div>
+
+        <hr class="d" />
+
+        <div>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Delmål</label>
+          <p class="hint" style="margin-bottom:10px;">Hvert mål bør være målbart og konkret — huk av SMART-sjekken (Spesifikt · Målbart · Akseptert · Realistisk · Tidsbestemt) for å verifisere.</p>
+          <div class="dl sg" id="maal-list"></div>
+          <button class="add" onclick="addMaal()">+ Legg til delmål</button>
+        </div>
+
+        <hr class="d" />
+
+        <div class="f">
+          <label>Målgruppe <span class="atag" id="mg-atag" style="display:none">Fra TBA</span></label>
+          <div class="cg">
+            <label class="cl"><input type="checkbox" id="s3_individ" /> Individ</label>
+            <label class="cl"><input type="checkbox" id="s3_gruppe" /> Gruppe / Team</label>
+            <label class="cl"><input type="checkbox" id="s3_org" /> Organisasjon</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pln" onclick="nextPage()">Neste: Scenario →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PLAN 4 — SCENARIO
+═══════════════════════════════════════════ -->
+<div class="page" id="page-plan-3">
+  <div class="card">
+    <div class="card-hdr pln"><div class="cn">4</div><h2>Scenario og gjennomføring</h2></div>
+    <div class="card-body">
+      <div class="fg1">
+        <div class="f">
+          <label>Scenariobeskrivelse / Bakgrunnshistorie</label>
+          <p class="hint">Jo mer scenarioet likner reelle situasjoner, desto bedre overføres læringen til praksis</p>
+          <textarea id="s4_scenario" rows="5" placeholder="Beskriv scenarioet..."></textarea>
+        </div>
+        <div class="f">
+          <label>Startpunkt for øvelsen</label>
+          <p class="hint">Hva er situasjonen når øvelsen starter? Hva vet deltakerne?</p>
+          <textarea id="s4_startpunkt" rows="3" placeholder="Beskriv startsituasjonen..."></textarea>
+        </div>
+
+        <hr class="d" />
+        <div>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Injeksjoner / Momenter</label>
+          <p class="hint" style="margin-bottom:9px;">Planlagte hendelser som introduseres under øvelsen</p>
+          <div class="dl" id="inj-list"></div>
+          <button class="add" onclick="addInj()">+ Legg til injeksjon</button>
+        </div>
+
+        <hr class="d" />
+        <div class="f">
+          <label>Markørbeskrivelse og sminke</label>
+          <textarea id="s4_markor" rows="3" placeholder="Beskriv markører, sminke og realistiske skader..."></textarea>
+        </div>
+
+        <hr class="d" />
+        <div>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Nødvendig utstyr</label>
+          <div class="dl" id="uts-list"></div>
+          <button class="add" onclick="addUts()">+ Legg til utstyr</button>
+        </div>
+
+        <hr class="d" />
+        <div>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Roller og ansvar</label>
+          <div class="dl" id="rol-list"></div>
+          <button class="add" onclick="addRol()">+ Legg til rolle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pln" onclick="nextPage()">Neste: Deltakere →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PLAN 5 — DELTAKERE
+═══════════════════════════════════════════ -->
+<div class="page" id="page-plan-4">
+  <div class="card">
+    <div class="card-hdr pln"><div class="cn">5</div><h2>Deltakere</h2></div>
+    <div class="card-body">
+      <div class="fg1">
+        <div>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Deltakerliste</label>
+          <div class="dl" id="delt-list"></div>
+          <button class="add" onclick="addDelt()">+ Legg til deltaker</button>
+        </div>
+        <hr class="d" />
+        <div>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Nøkkelpersoner og kontaktinformasjon</label>
+          <div class="dl" id="kont-list"></div>
+          <button class="add" onclick="addKont()">+ Legg til kontakt</button>
+        </div>
+        <hr class="d" />
+        <div class="f">
+          <label>Eksterne aktører / Samvirkeorganisasjoner</label>
+          <textarea id="s5_ext" rows="3" placeholder="Beskriv samvirkepartnere og deres rolle..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pln" onclick="nextPage()">Neste: Evaluering →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PLAN 6 — EVALUERING
+═══════════════════════════════════════════ -->
+<div class="page" id="page-plan-5">
+  <div class="card">
+    <div class="card-hdr pln"><div class="cn">6</div><h2>Evalueringsplan</h2></div>
+    <div class="card-body">
+      <div class="fg1">
+        <div class="f">
+          <label>Evalueringsmetode</label>
+          <div class="cg">
+            <label class="cl"><input type="checkbox" id="s6_debrief" /> Debrief / gjennomgang etter øvelsen</label>
+            <label class="cl"><input type="checkbox" id="s6_obs" /> Observatørskjema</label>
+            <label class="cl"><input type="checkbox" id="s6_spm" /> Spørreskjema</label>
+            <label class="cl"><input type="checkbox" id="s6_annet" /> Annet</label>
+          </div>
+        </div>
+        <div class="fg">
+          <div class="f">
+            <label>Hvem evaluerer?</label>
+            <input type="text" id="s6_hvem" placeholder="Navn og funksjon" />
+          </div>
+          <div class="f">
+            <label>Evalueringstidspunkt</label>
+            <input type="text" id="s6_tidspunkt" placeholder="F.eks. umiddelbart etter, innen 48 timer..." />
+          </div>
+        </div>
+        <hr class="d" />
+        <div>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Evalueringskriterier knyttet til læringsmål</label>
+          <p class="hint" style="margin-bottom:9px;">Hva konkret skal evalueres, og opp mot hvilket læringsmål?</p>
+          <div class="dl" id="krit-list"></div>
+          <button class="add" onclick="addKrit()">+ Legg til kriterium</button>
+        </div>
+        <hr class="d" />
+        <div class="f">
+          <label>Oppfølging og læringsoverføring</label>
+          <p class="hint">Hvem får rapporten? Hvordan sikres at funn fører til endring i praksis?</p>
+          <textarea id="s6_overf" rows="4" placeholder="Beskriv hvordan erfaringer dokumenteres, deles og implementeres..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="notice">✅ Alle seksjoner er fylt ut — klar for å generere PDF-rapport.</div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pdf" onclick="generatePDF()">📄 Generer øvingsplan (PDF)</button>
+  </div>
+</div>
+
+</div><!-- /.main -->
+<div id="toast">PDF generert!</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE & NAV
+// ═══════════════════════════════════════════
+const PAGES   = ['tba-0','tba-1','tba-2','transition','plan-0','plan-1','plan-2','plan-3','plan-4','plan-5'];
+const TBA_L   = ['Organisasjon','Oppgaver','Personanalyse'];
+const PLN_L   = ['Grunninfo','Bakgrunn','Læringsmål','Scenario','Deltakere','Evaluering'];
+let idx = 0;
+
+function goTo(i) {
+  if (i < 0 || i >= PAGES.length) return;
+  document.getElementById('page-' + PAGES[idx]).classList.remove('active');
+  idx = i;
+  document.getElementById('page-' + PAGES[idx]).classList.add('active');
+  if (PAGES[idx] === 'transition') buildSummary();
+  renderNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function nextPage() { goTo(idx + 1); }
+function prevPage() { goTo(idx - 1); }
+
+function renderNav() {
+  const p = PAGES[idx];
+  const isTBA  = p.startsWith('tba');
+  const isPLN  = p.startsWith('plan');
+  const isTrans= p === 'transition';
+
+  // Phase tabs
+  const t0 = document.getElementById('phTab0');
+  const t1 = document.getElementById('phTab1');
+  t0.className = 'ph-tab';
+  t1.className = 'ph-tab';
+  if (isTBA || isTrans) t0.classList.add('tba-on');
+  if (isPLN) { t0.classList.add('tba-ok'); t1.classList.add('pln-on'); }
+
+  // Step buttons
+  const inner = document.getElementById('stepInner');
+  inner.innerHTML = '';
+  const sep = () => { const d = document.createElement('div'); d.className = 'nav-sep'; return d; };
+
+  TBA_L.forEach((lbl, i) => {
+    const b = document.createElement('button');
+    b.className = 's-btn tba';
+    if (isTBA && +p.split('-')[1] === i) b.classList.add('active');
+    else if (!isTBA || +p.split('-')[1] > i) b.classList.add('done');
+    b.innerHTML = `<span class="sn">T${i+1}</span>${lbl}`;
+    b.onclick = () => goTo(i);
+    inner.appendChild(b);
+  });
+
+  inner.appendChild(sep());
+
+  PLN_L.forEach((lbl, i) => {
+    const b = document.createElement('button');
+    b.className = 's-btn pln';
+    if (isPLN && +p.split('-')[1] === i) b.classList.add('active');
+    else if (isPLN && +p.split('-')[1] > i) b.classList.add('done');
+    b.innerHTML = `<span class="sn">${i+1}</span>${lbl}`;
+    b.onclick = () => { if (isPLN) goTo(i + 4); };
+    inner.appendChild(b);
+  });
+
+  document.getElementById('progFill').style.width = ((idx + 1) / PAGES.length * 100) + '%';
+}
+
+// ═══════════════════════════════════════════
+//  TRANSITION — summary + auto-fill
+// ═══════════════════════════════════════════
+function buildSummary() {
+  const items = [
+    ['Organisasjon',      v('t1_org')],
+    ['Øvingskultur',      v('t1_kultur')],
+    ['Ressurser',         v('t1_ressurser')],
+    ['Begrensninger',     v('t1_begrensninger')],
+    ['Kompetansegap',     v('t2_gap')],
+    ['Målgruppe',         tba_mg()],
+    ['Kompetansenivå',    v('t3_nivaa')],
+    ['Anbefalt type',     tba_type()],
+    ['Treningsbehov',     v('t3_oppsummering')],
+  ];
+  document.getElementById('sumGrid').innerHTML = items.map(([h, val]) =>
+    `<div class="sum-card"><h4>${h}</h4><p class="${val ? '' : 'mt'}">${val || '— ikke utfylt —'}</p></div>`
+  ).join('');
+}
+
+function startPlanning() {
+  // Auto-fill planning from TBA
+  const gap  = v('t2_gap');
+  const krav = v('t1_krav');
+  const bkgr = v('t3_oppsummering');
+  const org  = v('t1_org');
+
+  if (gap)  { set('s2_gap', gap);  show('gap-atag'); }
+  if (krav) { set('s2_hjemmel', krav); show('krav-atag'); }
+  if (bkgr && !v('s2_bakgrunn')) set('s2_bakgrunn', bkgr);
+  if (org  && !v('s1_org'))  set('s1_org', org);
+
+  ['individ','gruppe','org'].forEach(k => {
+    if (document.getElementById('t3_' + k)?.checked)
+      document.getElementById('s3_' + k).checked = true;
+  });
+  if (tba_mg()) show('mg-atag');
+
+  const typ = tba_type();
+  if (typ) document.getElementById('type-hint').textContent = `(TBA anbefaler: ${typ})`;
+
+  goTo(4);
+}
+
+function tba_mg() {
+  return ['individ','gruppe','org']
+    .filter(k => document.getElementById('t3_'+k)?.checked)
+    .map(k => ({ individ:'Individ', gruppe:'Gruppe', org:'Organisasjon' })[k])
+    .join(', ');
+}
+function tba_type() {
+  return [['t3_drill','Ferdighetstrening'],['t3_funk','Funksjonsøvelse'],
+          ['t3_full','Fullskalaøvelse'],['t3_bord','Skrivebordsøvelse']]
+    .filter(([id]) => document.getElementById(id)?.checked)
+    .map(([,l]) => l).join(', ');
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+const v = id => document.getElementById(id)?.value.trim() ?? '';
+const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+const show = id => { const el = document.getElementById(id); if (el) el.style.display = 'inline'; };
+const chkd = id => document.getElementById(id)?.checked ?? false;
+function dynRows(listId) {
+  const rows = [];
+  document.querySelectorAll('#' + listId + ' .di').forEach(item => {
+    const flds = [...item.querySelectorAll('input,textarea,select')].map(f => f.value.trim());
+    if (flds.some(Boolean)) rows.push(flds);
+  });
+  return rows;
+}
+function smartOf(item) {
+  return [...item.querySelectorAll('.scr input[type=checkbox]')].map(c => c.checked);
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════
+//  DYNAMIC LIST BUILDERS
+// ═══════════════════════════════════════════
+function rmBtn() {
+  const b = document.createElement('button');
+  b.className = 'rb'; b.innerHTML = '✕'; b.title = 'Fjern';
+  b.onclick = () => b.closest('.di').remove();
+  return b;
+}
+function inp(ph, flex) {
+  const e = document.createElement('input'); e.type = 'text'; e.placeholder = ph;
+  if (flex) e.style.flex = flex; return e;
+}
+function ta(ph, rows) {
+  const e = document.createElement('textarea'); e.placeholder = ph;
+  e.rows = rows || 2; e.style.flex = '1'; e.style.minWidth = '180px'; return e;
+}
+function sel(opts) {
+  const e = document.createElement('select'); e.style.flex = '1'; e.style.minWidth = '100px';
+  opts.forEach(o => { const op = document.createElement('option'); op.value = o; op.textContent = o; e.appendChild(op); });
+  return e;
+}
+function mkDyn(listId, fields) {
+  const list = document.getElementById(listId);
+  const di = document.createElement('div'); di.className = 'di';
+  const dif = document.createElement('div'); dif.className = 'di-f';
+  fields.forEach(f => dif.appendChild(f));
+  di.appendChild(dif); di.appendChild(rmBtn()); list.appendChild(di);
+}
+
+// TBA list
+function addT2Opp() { mkDyn('t2-opp-list', [ta('Beskriv oppgaven / situasjonen...')]); }
+
+// Læringsmål med SMART-sjekk
+function addMaal() {
+  const list = document.getElementById('maal-list');
+  const di = document.createElement('div'); di.className = 'di';
+  const dif = document.createElement('div'); dif.className = 'di-f';
+
+  const textarea = document.createElement('textarea');
+  textarea.placeholder = 'Beskriv delmålet konkret...';
+  textarea.rows = 2; textarea.style.width = '100%';
+  dif.appendChild(textarea);
+
+  const scr = document.createElement('div'); scr.className = 'scr';
+  const lbl = document.createElement('span'); lbl.className = 'sc-lbl'; lbl.textContent = 'SMART:';
+  scr.appendChild(lbl);
+  [['S','Spesifikt'],['M','Målbart'],['A','Akseptert'],['R','Realistisk'],['T','Tidsbestemt']].forEach(([letter, full]) => {
+    const lab = document.createElement('label'); lab.title = full;
+    const cb = document.createElement('input'); cb.type = 'checkbox';
+    cb.addEventListener('change', () => lab.classList.toggle('on', cb.checked));
+    const sp = document.createElement('span'); sp.textContent = letter;
+    lab.appendChild(cb); lab.appendChild(sp); scr.appendChild(lab);
+  });
+  dif.appendChild(scr);
+  di.appendChild(dif); di.appendChild(rmBtn()); list.appendChild(di);
+}
+
+// Planning lists
+function addInj()  { mkDyn('inj-list',  [inp('Tidspunkt','0 0 auto'), inp('Beskrivelse', 2), inp('Ansvarlig', 1)]); }
+function addUts()  { mkDyn('uts-list',  [inp('Utstyr / Beskrivelse', 2), inp('Antall', 1)]); }
+function addRol()  { mkDyn('rol-list',  [inp('Rolle', 1), inp('Navn', 1), ta('Beskrivelse')]); }
+function addDelt() { mkDyn('delt-list', [inp('Navn', 2), inp('Rolle', 1), sel(['—','Grunnleggende','Viderekommet','Ekspert'])]); }
+function addKont() { mkDyn('kont-list', [inp('Navn', 1), inp('Funksjon', 1), inp('Telefon', 1)]); }
+function addKrit() { mkDyn('krit-list', [ta('Beskriv hva som evalueres og mot hvilket læringsmål...')]); }
+
+// Seed with one empty row each
+['T2Opp','Maal','Inj','Uts','Rol','Delt','Kont','Krit'].forEach(k => window['add'+k]());
+renderNav();
+
+// ═══════════════════════════════════════════
+//  PDF HELPERS (shared)
+// ═══════════════════════════════════════════
+function pdfInit() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, H = 297, M = 18, IW = W - M * 2;
+  const C = {
+    blue:[26,58,92], blueMid:[42,82,152], blueL:[74,127,212],
+    tba:[27,94,56], tbaM:[46,125,82], tbaL:[76,175,128],
+    accent:[200,56,42], bg:[244,246,249], border:[208,215,227],
+    white:[255,255,255], text:[30,42,56], muted:[107,122,141], ok:[46,125,50]
+  };
+
+  let y = 20;
+  const state = { doc, W, H, M, IW, C, get y() { return y; }, set y(val) { y = val; } };
+
+  function chk(need) { if (y + need > H - 16) newPg(); }
+  function newPg() {
+    doc.addPage(); y = 20;
+    doc.setDrawColor(...C.blueL); doc.setLineWidth(0.35);
+    doc.line(M, 11, W - M, 11);
+    doc.setFontSize(7); doc.setTextColor(...C.muted);
+    doc.text('Øvingsplanlegger', M, 9.5);
+    doc.text('Side ' + doc.getNumberOfPages(), W - M, 9.5, { align: 'right' });
+  }
+
+  function secHdr(color, label, title) {
+    chk(13);
+    doc.setFillColor(...color); doc.rect(M, y, IW, 10, 'F');
+    doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
+    doc.text(label + '  ' + title, M + 4, y + 7);
+    y += 13;
+  }
+  function subHdr(text, color) {
+    chk(8); doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...color);
+    doc.text(text, M, y); y += 5;
+  }
+  function fLbl(text, color) {
+    chk(6); doc.setFontSize(7.5); doc.setFont(undefined, 'bold');
+    doc.setTextColor(...(color || C.blueL)); doc.text(text, M, y); y += 4;
+  }
+  function fBody(text, indent) {
+    if (!text) return;
+    const x = M + (indent || 0), w = IW - (indent || 0);
+    doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
+    doc.splitTextToSize(text, w).forEach(l => { chk(5); doc.text(l, x, y); y += 4.7; });
+    y += 1;
+  }
+  function fp(label, text, color) {
+    if (!text) return;
+    fLbl(label, color); fBody(text);
+  }
+  function tblHdr(cols, color) {
+    chk(9); doc.setFillColor(...color); doc.rect(M, y - 1, IW, 7, 'F');
+    doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
+    let x = M + 2; cols.forEach(c => { doc.text(c.l, x, y + 4); x += c.w; });
+    y += 8;
+  }
+  function tblRow(cols, data, ri) {
+    let ml = 1;
+    data.forEach((d, ci) => {
+      if (!d) return;
+      const ls = doc.splitTextToSize(String(d), cols[ci].w - 3);
+      if (ls.length > ml) ml = ls.length;
+    });
+    const rh = ml * 4.7 + 3;
+    chk(rh);
+    if (ri % 2 === 0) { doc.setFillColor(...C.bg); doc.rect(M, y - 1, IW, rh, 'F'); }
+    doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
+    let x = M + 2;
+    data.forEach((d, ci) => {
+      doc.splitTextToSize(String(d || '—'), cols[ci].w - 3).forEach((l, li) => doc.text(l, x, y + 3.5 + li * 4.7));
+      x += cols[ci].w;
+    });
+    doc.setDrawColor(...C.border); doc.setLineWidth(0.18);
+    doc.line(M, y + rh - 1, M + IW, y + rh - 1);
+    y += rh;
+  }
+  function bullets(rows) {
+    rows.forEach(r => {
+      const t = Array.isArray(r) ? r[0] : r; if (!t) return;
+      chk(6);
+      doc.setFontSize(8.5); doc.setFont(undefined, 'normal');
+      doc.setTextColor(...C.tbaL); doc.text('•', M + 1, y);
+      doc.setTextColor(...C.text);
+      const ls = doc.splitTextToSize(t, IW - 7);
+      ls.forEach((l, li) => { if (li > 0) chk(5); doc.text(l, M + 6, y + li * 4.7); });
+      y += ls.length * 4.7 + 1;
+    });
+    y += 1;
+  }
+  function addFooters(label) {
+    const total = doc.getNumberOfPages();
+    for (let p = 1; p <= total; p++) {
+      doc.setPage(p);
+      doc.setDrawColor(...C.border); doc.setLineWidth(0.35);
+      doc.line(M, H - 12, W - M, H - 12);
+      doc.setFontSize(7.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.muted);
+      doc.text(label + ' — ' + new Date().toLocaleDateString('nb-NO'), M, H - 7);
+      doc.text('Side ' + p + ' av ' + total, W - M, H - 7, { align: 'right' });
+    }
+  }
+
+  return { doc, W, H, M, IW, C, state,
+    chk, newPg, secHdr, subHdr, fLbl, fBody, fp, tblHdr, tblRow, bullets, addFooters,
+    getY: () => y, setY: val => { y = val; }
+  };
+}
+
+// ═══════════════════════════════════════════
+//  TBA-ONLY PDF
+// ═══════════════════════════════════════════
+function generateTBAPDF() {
+  const { doc, W, H, M, IW, C, chk, secHdr, subHdr, fLbl, fBody, fp, tblHdr, tblRow, bullets, addFooters, getY, setY } = pdfInit();
+
+  // Cover
+  doc.setFillColor(...C.tba);
+  doc.rect(0, 0, W, 52, 'F');
+  doc.setFontSize(20); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
+  doc.text('TRENINGSBEHOVSANALYSE', M, 24);
+  doc.setFontSize(12); doc.setFont(undefined, 'normal');
+  doc.text(v('t1_org') || 'Organisasjon ikke angitt', M, 34);
+  doc.setFontSize(9); doc.setTextColor(180, 230, 200);
+  doc.text('Gjennomført: ' + new Date().toLocaleDateString('nb-NO'), M, 42);
+
+  setY(62);
+
+  // T1
+  secHdr(C.tba, 'T1', 'Organisasjonsanalyse');
+  fp('Organisasjon', v('t1_org'), C.tbaL);
+  fp('Bakgrunn og formål', v('t1_bakgrunn'), C.tbaL);
+  fp('Øvings- og treningskultur', v('t1_kultur') + (v('t1_kultur_note') ? ' — ' + v('t1_kultur_note') : ''), C.tbaL);
+  fp('Ressurser', v('t1_ressurser'), C.tbaL);
+  fp('Materiell og fasiliteter', v('t1_materiell'), C.tbaL);
+  fp('Begrensninger', v('t1_begrensninger'), C.tbaL);
+  fp('Krav og hjemmel', v('t1_krav'), C.tbaL);
+
+  setY(getY() + 3);
+
+  // T2
+  secHdr(C.tba, 'T2', 'Oppgaveanalyse');
+  const oppRows = dynRows('t2-opp-list');
+  if (oppRows.length) { fLbl('Kritiske oppgaver', C.tbaL); bullets(oppRows); }
+  fp('Kunnskap og ferdigheter som må sitte', v('t2_ntk'), C.tbaL);
+  fp('Kunnskap og informasjon som må vite hvor finnes', v('t2_nta'), C.tbaL);
+  fp('Identifiserte kompetansegap', v('t2_gap'), C.tbaL);
+
+  setY(getY() + 3);
+
+  // T3
+  secHdr(C.tba, 'T3', 'Personanalyse');
+  fp('Hvem trenger treningen', v('t3_hvem'), C.tbaL);
+  fp('Nåværende kompetansenivå', v('t3_nivaa'), C.tbaL);
+  fp('Forutsetninger', v('t3_forut'), C.tbaL);
+  fp('Målgruppe / Nivå', tba_mg(), C.tbaL);
+  fp('Anbefalt øvelsestype', tba_type(), C.tbaL);
+  fp('Oppsummering — prioritert treningsbehov', v('t3_oppsummering'), C.tbaL);
+
+  addFooters('Treningsbehovsanalyse');
+
+  const fname = ('TBA_' + (v('t1_org') || 'ukjent')).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
+  doc.save(fname + '.pdf');
+  showToast('TBA lastet ned!');
+}
+
+// ═══════════════════════════════════════════
+//  FULL ØVINGSPLAN PDF
+// ═══════════════════════════════════════════
+function generatePDF() {
+  const { doc, W, H, M, IW, C, chk, secHdr, subHdr, fLbl, fBody, fp, tblHdr, tblRow, bullets, addFooters, getY, setY } = pdfInit();
+
+  // ── Cover ──
+  doc.setFillColor(...C.blue);
+  doc.rect(0, 0, W, 56, 'F');
+  doc.setFillColor(50, 80, 118);
+  doc.roundedRect(M, 9, 36, 36, 4, 4, 'F');
+  doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
+  doc.text('DSB', M + 18, 29, { align: 'center' });
+  doc.setFontSize(21); doc.setFont(undefined, 'bold');
+  doc.text('ØVINGSPLAN', M + 44, 23);
+  doc.setFontSize(13); doc.setFont(undefined, 'normal');
+  doc.text(v('s1_navn') || 'Uten tittel', M + 44, 33);
+  doc.setFontSize(8.5); doc.setTextColor(200, 215, 240);
+  doc.text('Planleggingsverktøy for beredskapsøvelser', M + 44, 42);
+
+  // Meta strip
+  doc.setFillColor(236, 240, 248); doc.rect(0, 56, W, 28, 'F');
+  const meta = [
+    ['Dato:', v('s1_dato') || '—'], ['Tid:', v('s1_tid') || '—'],
+    ['Type:', v('s1_type') || '—'], ['Sted:', v('s1_sted') || '—'],
+    ['Øvingsleder:', v('s1_leder') || '—'], ['Org:', v('s1_org') || '—'],
+    ['Deltakere:', v('s1_antall') || '—'],
+  ];
+  const cw = IW / 4;
+  meta.forEach(([lbl, val], i) => {
+    const cx = M + (i % 4) * cw, cy = 63 + Math.floor(i / 4) * 11;
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.blue);
+    doc.text(lbl, cx, cy);
+    doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
+    doc.text(val, cx, cy + 5);
+  });
+
+  setY(92);
+
+  // ── TBA Summary ──
+  secHdr(C.tba, 'TBA', 'Treningsbehovsanalyse — Sammendrag');
+  subHdr('Organisasjonsanalyse', C.tbaL);
+  fp('Organisasjon', v('t1_org') || v('s1_org'), C.tbaL);
+  fp('Øvingskultur', v('t1_kultur'), C.tbaL);
+  fp('Ressurser', v('t1_ressurser'), C.tbaL);
+  fp('Begrensninger', v('t1_begrensninger'), C.tbaL);
+  fp('Krav og hjemmel', v('t1_krav'), C.tbaL);
+  setY(getY() + 2);
+  subHdr('Oppgaveanalyse', C.tbaL);
+  const oppR = dynRows('t2-opp-list');
+  if (oppR.length) { fLbl('Kritiske oppgaver', C.tbaL); bullets(oppR); }
+  fp('Kunnskap som må sitte', v('t2_ntk'), C.tbaL);
+  fp('Kompetansegap', v('t2_gap'), C.tbaL);
+  setY(getY() + 2);
+  subHdr('Personanalyse', C.tbaL);
+  fp('Målgruppe', tba_mg(), C.tbaL);
+  fp('Kompetansenivå', v('t3_nivaa'), C.tbaL);
+  fp('Anbefalt øvelsestype', tba_type(), C.tbaL);
+  fp('Prioritert treningsbehov', v('t3_oppsummering'), C.tbaL);
+  setY(getY() + 3);
+
+  // ── Plan seksjoner ──
+  chk(18); secHdr(C.blue, '1', 'Grunnleggende informasjon');
+  [['Øvelsesnavn', v('s1_navn')], ['Dato', v('s1_dato')], ['Tid', v('s1_tid')],
+   ['Type', v('s1_type')], ['Sted', v('s1_sted')], ['Øvingsleder', v('s1_leder')],
+   ['Organisasjon', v('s1_org')], ['Deltakere', v('s1_antall')]].forEach(([l, t]) => fp(l, t));
+
+  chk(18); secHdr(C.blue, '2', 'Bakgrunn og kontekst');
+  fp('Bakgrunn', v('s2_bakgrunn'));
+  fp('Kompetansegap', v('s2_gap'));
+  fp('Hjemmel / Krav', v('s2_hjemmel'));
+  fp('Tidligere øvelser / hendelser', v('s2_tidligere'));
+
+  chk(18); secHdr(C.blue, '3', 'Læringsmål');
+  fp('Hoved-læringsmål', v('s3_hoved'));
+  const maalItems = document.querySelectorAll('#maal-list .di');
+  if (maalItems.length) {
+    fLbl('Delmål (med SMART-verifisering)');
+    maalItems.forEach((item, i) => {
+      const txt = item.querySelector('textarea')?.value.trim();
+      if (!txt) return;
+      const cbs = smartOf(item);
+      const letters = ['S','M','A','R','T'];
+      const smartStr = letters.map((l, idx) => (cbs[idx] ? '✓' : '✗') + l).join('  ');
+      chk(10);
+      if (i % 2 === 0) { doc.setFillColor(...C.bg); doc.rect(M, getY() - 1, IW, 9, 'F'); }
+      doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text);
+      const ls = doc.splitTextToSize(`${i + 1}. ${txt}`, IW - 50);
+      ls.forEach((l, li) => { chk(5); doc.text(l, M + 2, getY() + 4 + li * 4.7); });
+      doc.setFontSize(7); doc.setTextColor(...C.muted);
+      doc.text(smartStr, M + IW - 48, getY() + 4);
+      setY(getY() + Math.max(8, ls.length * 4.7 + 3));
+      doc.setDrawColor(...C.border); doc.setLineWidth(0.18);
+      doc.line(M, getY(), M + IW, getY()); setY(getY() + 2);
+    });
+    setY(getY() + 2);
+  }
+  const mg = [];
+  if (chkd('s3_individ')) mg.push('Individ');
+  if (chkd('s3_gruppe')) mg.push('Gruppe');
+  if (chkd('s3_org')) mg.push('Organisasjon');
+  if (mg.length) fp('Målgruppe', mg.join(', '));
+
+  chk(18); secHdr(C.blue, '4', 'Scenario og gjennomføring');
+  fp('Scenariobeskrivelse', v('s4_scenario'));
+  fp('Startpunkt', v('s4_startpunkt'));
+  const injR = dynRows('inj-list');
+  if (injR.length) {
+    fLbl('Injeksjoner / Momenter');
+    const iC = [{l:'Tidspunkt',w:35},{l:'Beskrivelse',w:108},{l:'Ansvarlig',w:31}];
+    tblHdr(iC, C.blueMid); injR.forEach((r, i) => tblRow(iC, r, i)); setY(getY() + 3);
+  }
+  fp('Markørbeskrivelse og sminke', v('s4_markor'));
+  const utsR = dynRows('uts-list');
+  if (utsR.length) {
+    fLbl('Nødvendig utstyr');
+    const uC = [{l:'Utstyr',w:120},{l:'Antall',w:54}];
+    tblHdr(uC, C.blueMid); utsR.forEach((r, i) => tblRow(uC, r, i)); setY(getY() + 3);
+  }
+  const rolR = dynRows('rol-list');
+  if (rolR.length) {
+    fLbl('Roller og ansvar');
+    const rC = [{l:'Rolle',w:50},{l:'Navn',w:50},{l:'Beskrivelse',w:74}];
+    tblHdr(rC, C.blueMid); rolR.forEach((r, i) => tblRow(rC, r, i)); setY(getY() + 3);
+  }
+
+  chk(18); secHdr(C.blue, '5', 'Deltakere');
+  const dR = dynRows('delt-list');
+  if (dR.length) {
+    fLbl('Deltakerliste');
+    const dC = [{l:'Navn',w:70},{l:'Rolle',w:74},{l:'Nivå',w:30}];
+    tblHdr(dC, C.blueMid); dR.forEach((r, i) => tblRow(dC, r, i)); setY(getY() + 3);
+  }
+  const kR = dynRows('kont-list');
+  if (kR.length) {
+    fLbl('Nøkkelpersoner');
+    const kC = [{l:'Navn',w:60},{l:'Funksjon',w:74},{l:'Telefon',w:40}];
+    tblHdr(kC, C.blueMid); kR.forEach((r, i) => tblRow(kC, r, i)); setY(getY() + 3);
+  }
+  fp('Eksterne aktører', v('s5_ext'));
+
+  chk(18); secHdr(C.blue, '6', 'Evalueringsplan');
+  const em = [];
+  if (chkd('s6_debrief')) em.push('Debrief / gjennomgang');
+  if (chkd('s6_obs')) em.push('Observatørskjema');
+  if (chkd('s6_spm')) em.push('Spørreskjema');
+  if (chkd('s6_annet')) em.push('Annet');
+  if (em.length) fp('Evalueringsmetode', em.join(', '));
+  fp('Hvem evaluerer', v('s6_hvem'));
+  fp('Evalueringstidspunkt', v('s6_tidspunkt'));
+  const kritR = dynRows('krit-list');
+  if (kritR.length) { fLbl('Evalueringskriterier'); bullets(kritR); }
+  fp('Oppfølging og læringsoverføring', v('s6_overf'));
+
+  addFooters('Øvingsplanlegger');
+  const fname = ('Ovingsplan_' + (v('s1_navn') || 'ukjent')).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
+  doc.save(fname + '.pdf');
+  showToast('Øvingsplan lastet ned!');
+}
+</script>
+</body>
+</html>
