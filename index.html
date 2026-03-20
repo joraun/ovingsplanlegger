@@ -188,8 +188,12 @@
     .btn-pln:hover { opacity:.9; }
     .btn-pdf-tba { background:linear-gradient(135deg,var(--tba-mid),var(--tba)); color:#fff; box-shadow:0 2px 6px rgba(46,125,82,.28); padding:12px 22px; }
     .btn-pdf-tba:hover { opacity:.9; }
-    .btn-pdf { background:linear-gradient(135deg,var(--accent),#9b2318); color:#fff; box-shadow:0 2px 6px rgba(200,56,42,.28); padding:12px 26px; font-size:.93rem; }
+    .btn-pdf { background:linear-gradient(135deg,var(--blue-mid),var(--blue)); color:#fff; box-shadow:0 2px 6px rgba(42,82,152,.28); padding:12px 26px; font-size:.93rem; }
     .btn-pdf:hover { opacity:.9; }
+    .btn-pdf-plan { background:var(--white); border:1.5px solid var(--blue-mid); color:var(--blue-mid); font-size:.8rem; padding:8px 14px; }
+    .btn-pdf-plan:hover { background:var(--bg); }
+    .btn-pdf-eval { background:linear-gradient(135deg,#7040b0,#4a2080); color:#fff; box-shadow:0 2px 6px rgba(100,50,180,.28); padding:12px 22px; font-size:.93rem; }
+    .btn-pdf-eval:hover { opacity:.9; }
     .btn-lg { padding:13px 32px; font-size:1rem; }
 
     /* ── Notice strip ── */
@@ -488,6 +492,7 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Bakgrunn →</button>
   </div>
 </div>
@@ -522,6 +527,7 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Læringsmål →</button>
   </div>
 </div>
@@ -564,6 +570,7 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Scenario →</button>
   </div>
 </div>
@@ -615,6 +622,7 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Deltakere →</button>
   </div>
 </div>
@@ -648,6 +656,7 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Evaluering →</button>
   </div>
 </div>
@@ -697,7 +706,8 @@
   <div class="notice">✅ Alle seksjoner er fylt ut — klar for å generere PDF-rapport.</div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
-    <button class="btn btn-pdf" onclick="generatePDF()">📄 Generer øvingsplan (PDF)</button>
+    <button class="btn btn-pdf" onclick="generatePDF()">📄 Øvingsplan PDF</button>
+    <button class="btn btn-pdf-eval" onclick="generateEvalPDF()">📋 Evalueringsrapport PDF</button>
   </div>
 </div>
 
@@ -1561,195 +1571,619 @@ function generateTBAPDF() {
 }
 
 // ═══════════════════════════════════════════
-//  FULL ØVINGSPLAN PDF
+//  FULL ØVINGSPLAN PDF  (TBA-style design, blue)
 // ═══════════════════════════════════════════
 function generatePDF() {
-  const { doc, W, H, M, IW, C, chk, secHdr, subHdr, fLbl, fBody, fp, tblHdr, tblRow, bullets, addFooters, getY, setY } = pdfInit();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, H = 297, M = 18, IW = W - M * 2;
 
-  // Cover
-  doc.setFillColor(...C.blue); doc.rect(0, 0, W, 58, 'F');
-  doc.setFillColor(50, 80, 118); doc.roundedRect(M, 10, 36, 36, 4, 4, 'F');
-  doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
-  doc.text('DSB', M + 18, 30, { align: 'center' });
-  doc.setFontSize(22); doc.setFont(undefined, 'bold');
-  doc.text('ØVINGSPLAN', M + 44, 24);
-  doc.setFontSize(14); doc.setFont(undefined, 'normal');
-  doc.text(v('s1_navn') || 'Uten tittel', M + 44, 35);
-  doc.setFontSize(9); doc.setTextColor(200, 215, 240);
-  doc.text('Planleggingsverktøy for beredskapsøvelser', M + 44, 44);
+  const B = {
+    dk:   [26,  58,  92],
+    md:   [42,  82,  152],
+    lt:   [74,  127, 212],
+    xl:   [180, 210, 245],
+    card: [242, 246, 252],
+    hi:   [224, 234, 250],
+    tdk:  [27,  94,  56],
+    tmd:  [46,  125, 82],
+    tlt:  [82,  160, 115],
+    tcard:[242, 250, 245],
+    thi:  [220, 243, 229],
+    wh:   [255, 255, 255],
+    tx:   [28,  40,  54],
+    mu:   [100, 118, 138],
+    bd:   [208, 215, 227],
+    ok:   [46,  125, 50],
+  };
 
-  doc.setFillColor(236, 240, 248); doc.rect(0, 58, W, 30, 'F');
-  const meta = [['Dato:', v('s1_dato') || '—'],['Tid:', v('s1_tid') || '—'],['Type:', v('s1_type') || '—'],['Sted:', v('s1_sted') || '—'],['Øvingsleder:', v('s1_leder') || '—'],['Org:', v('s1_org') || '—'],['Deltakere:', v('s1_antall') || '—']];
-  const cw = IW / 4;
-  meta.forEach(([lbl, val], i) => {
-    const cx = M + (i % 4) * cw, cy = 65 + Math.floor(i / 4) * 12;
-    doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.blue); doc.text(lbl, cx, cy);
-    doc.setFontSize(9); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.text); doc.text(val, cx, cy + 6);
+  let y = 0;
+
+  function initContentPage() {
+    doc.setFillColor(...B.md); doc.rect(0, 0, 6, H, 'F');
+    doc.setFillColor(...B.lt); doc.rect(6, 0, 1.5, H, 'F');
+    doc.setDrawColor(...B.bd); doc.setLineWidth(0.3);
+    doc.line(M, 15, W - 10, 15);
+    doc.setFontSize(7.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.mu);
+    const orgShort = (v('s1_org') || v('t1_org') || '').toUpperCase();
+    doc.text('ØVINGSPLAN' + (orgShort ? '  ·  ' + orgShort : ''), M, 11);
+    doc.text('Side ' + doc.getNumberOfPages(), W - 10, 11, { align: 'right' });
+    y = 22;
+  }
+
+  function chk(need) {
+    if (y + need > H - 18) { doc.addPage(); initContentPage(); }
+  }
+
+  function fpCard(label, text, highlight, green) {
+    if (!text?.trim()) return;
+    const lines = doc.splitTextToSize(text.trim(), IW - 12);
+    const bh = lines.length * 6 + 16;
+    chk(bh + 4);
+    const bg   = green ? (highlight ? B.thi : B.tcard) : (highlight ? B.hi : B.card);
+    const bar  = green ? (highlight ? B.tdk : B.tlt)   : (highlight ? B.dk : B.lt);
+    const lclr = green ? B.tmd : B.md;
+    doc.setFillColor(...bg); doc.rect(M, y, IW, bh, 'F');
+    doc.setFillColor(...bar); doc.rect(M, y, 4, bh, 'F');
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...lclr);
+    doc.text(label.toUpperCase(), M + 9, y + 7.5);
+    doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.tx);
+    lines.forEach((l, i) => doc.text(l, M + 9, y + 13.5 + i * 6));
+    y += bh + 3;
+  }
+
+  function secHdr(tag, title, green) {
+    chk(18);
+    const dk = green ? B.tdk : B.dk;
+    const md = green ? B.tmd : B.md;
+    doc.setFillColor(...dk); doc.rect(M, y, IW, 12, 'F');
+    doc.setFillColor(...md); doc.circle(M + 9, y + 6, 5, 'F');
+    doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
+    doc.text(tag, M + 9, y + 7.8, { align: 'center' });
+    doc.setFontSize(11.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
+    doc.text(title, M + 20, y + 8);
+    y += 15;
+  }
+
+  function twoCol(leftLabel, leftVal, rightLabel, rightVal, green) {
+    if (!leftVal && !rightVal) return;
+    const hw = (IW - 4) / 2;
+    doc.setFontSize(10); doc.setFont(undefined, 'normal');
+    const lLines = doc.splitTextToSize(leftVal  || '—', hw - 14);
+    const rLines = doc.splitTextToSize(rightVal || '—', hw - 14);
+    const bh = Math.max(24, Math.max(lLines.length, rLines.length) * 5.5 + 16);
+    chk(bh + 4);
+    const ltBar = green ? B.tlt : B.lt;
+    const dkBar = green ? B.tdk : B.dk;
+    const lclr  = green ? B.tmd : B.md;
+    const crd   = green ? B.tcard : B.card;
+    [[M, leftLabel, lLines, ltBar], [M + hw + 4, rightLabel, rLines, dkBar]].forEach(([x, lbl, lines, bar]) => {
+      doc.setFillColor(...crd); doc.rect(x, y, hw, bh, 'F');
+      doc.setFillColor(...bar); doc.rect(x, y, 4, bh, 'F');
+      doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...lclr);
+      doc.text(lbl.toUpperCase(), x + 9, y + 8);
+      doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.tx);
+      lines.forEach((l, i) => doc.text(l, x + 9, y + 15 + i * 5.5));
+    });
+    y += bh + 3;
+  }
+
+  function bulletList(items, green) {
+    const dot = green ? B.tmd : B.md;
+    const crd = green ? B.tcard : B.card;
+    items.forEach((item, ri) => {
+      const t = Array.isArray(item) ? item[0] : item;
+      if (!t?.trim()) return;
+      const lines = doc.splitTextToSize(t.trim(), IW - 14);
+      const bh = lines.length * 6 + 7;
+      chk(bh + 2);
+      if (ri % 2 === 0) { doc.setFillColor(...crd); doc.rect(M, y, IW, bh, 'F'); }
+      doc.setFillColor(...dot); doc.circle(M + 6, y + bh / 2, 1.8, 'F');
+      doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.tx);
+      lines.forEach((l, li) => doc.text(l, M + 12, y + 5.5 + li * 6));
+      y += bh + 2;
+    });
+    y += 2;
+  }
+
+  function tblHdr(cols, green) {
+    const hdr = green ? B.tmd : B.md;
+    chk(10);
+    doc.setFillColor(...hdr); doc.rect(M, y - 1, IW, 8, 'F');
+    doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
+    let x = M + 2; cols.forEach(c => { doc.text(c.l, x, y + 5); x += c.w; }); y += 9;
+  }
+
+  function tblRow(cols, data, ri, green) {
+    const crd = green ? B.tcard : B.card;
+    let ml = 1;
+    data.forEach((d, ci) => { if (!d) return; const ls = doc.splitTextToSize(String(d), cols[ci].w - 3); if (ls.length > ml) ml = ls.length; });
+    const rh = ml * 5.5 + 4; chk(rh);
+    if (ri % 2 === 0) { doc.setFillColor(...crd); doc.rect(M, y - 1, IW, rh, 'F'); }
+    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.tx);
+    let x = M + 2;
+    data.forEach((d, ci) => { doc.splitTextToSize(String(d || '—'), cols[ci].w - 3).forEach((l, li) => doc.text(l, x, y + 4 + li * 5.5)); x += cols[ci].w; });
+    doc.setDrawColor(...B.bd); doc.setLineWidth(0.18);
+    doc.line(M, y + rh - 1, M + IW, y + rh - 1); y += rh;
+  }
+
+  function subLabel(text, green) {
+    chk(8);
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold');
+    doc.setTextColor(...(green ? B.tmd : B.md));
+    doc.text(text.toUpperCase(), M, y); y += 6;
+  }
+
+  // ── COVER PAGE ──
+  const orgName = v('s1_org') || v('t1_org') || 'Organisasjon ikke angitt';
+  const exName  = v('s1_navn') || 'Uten tittel';
+  const dateStr = new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  doc.setFillColor(...B.dk); doc.rect(0, 0, W, H, 'F');
+  doc.setFillColor(36, 68, 112); doc.circle(W + 15, -15, 75, 'F');
+  doc.setFillColor(20, 44, 78);  doc.circle(-15, H + 15, 65, 'F');
+  doc.setFillColor(32, 62, 108); doc.circle(W / 2, H * 0.55, 110, 'F');
+
+  doc.setFillColor(...B.md); doc.rect(0, 0, 8, H, 'F');
+  doc.setFillColor(...B.lt); doc.rect(8, 0, 2, H, 'F');
+
+  doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.xl);
+  doc.text('ØVINGSPLAN', 18, 52);
+
+  doc.setFontSize(30); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
+  const exLines = doc.splitTextToSize(exName, W - 50);
+  exLines.forEach((l, i) => doc.text(l, 18, 65 + i * 14));
+
+  doc.setFontSize(12); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.xl);
+  doc.text(orgName, 18, 68 + exLines.length * 14);
+  doc.setFontSize(10);
+  doc.text(dateStr, 18, 75 + exLines.length * 14);
+
+  const cY = 158, cH = 92;
+  doc.setFillColor(...B.wh); doc.roundedRect(18, cY, IW, cH, 5, 5, 'F');
+  doc.setFillColor(...B.md); doc.roundedRect(18, cY, 5, cH, 3, 3, 'F');
+
+  doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.dk);
+  doc.text('Nøkkelinformasjon', 28, cY + 12);
+  doc.setDrawColor(...B.bd); doc.setLineWidth(0.4);
+  doc.line(28, cY + 15.5, 18 + IW - 6, cY + 15.5);
+
+  const cardFields = [
+    ['Dato',            v('s1_dato')   || '—'],
+    ['Tid',             v('s1_tid')    || '—'],
+    ['Type',            v('s1_type')   || '—'],
+    ['Sted',            v('s1_sted')   || '—'],
+    ['Øvingsleder',     v('s1_leder')  || '—'],
+    ['Antall deltakere',v('s1_antall') || '—'],
+  ];
+  const half = Math.ceil(cardFields.length / 2);
+  cardFields.forEach(([lbl, val], fi) => {
+    const cx  = fi < half ? 28 : 28 + IW / 2;
+    const fy  = cY + 22 + (fi < half ? fi : fi - half) * 14;
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.md);
+    doc.text(lbl.toUpperCase(), cx, fy);
+    doc.setFontSize(9.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.tx);
+    doc.text(String(val), cx, fy + 6);
   });
-  setY(96);
 
-  // TBA Summary
-  secHdr(C.tba, 'TBA', 'Treningsbehovsanalyse — Sammendrag');
-  subHdr('Organisasjonsanalyse', C.tbaL);
-  fp('Organisasjon', v('t1_org') || v('s1_org'), C.tbaL);
-  fp('Øvingskultur', v('t1_kultur'), C.tbaL);
-  fp('Ressurser', v('t1_ressurser'), C.tbaL);
-  fp('Begrensninger', v('t1_begrensninger'), C.tbaL);
-  fp('Krav og hjemmel', v('t1_krav'), C.tbaL);
-  setY(getY() + 2);
-  subHdr('Oppgaveanalyse', C.tbaL);
+  doc.setFillColor(18, 42, 72); doc.rect(0, H - 16, W, 16, 'F');
+  doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.xl);
+  doc.text('Øvingsplanlegger — planleggingsverktøy for beredskapsøvelser', 18, H - 6);
+
+  // ── CONTENT PAGES ──
+  doc.addPage(); initContentPage();
+
+  // TBA-sammendrag
+  secHdr('TBA', 'Treningsbehovsanalyse — Sammendrag', true);
+  fpCard('Organisasjon', v('t1_org') || orgName, false, true);
+  twoCol('Øvingskultur', v('t1_kultur'), 'Ressurser', v('t1_ressurser'), true);
+  fpCard('Begrensninger', v('t1_begrensninger'), false, true);
+  fpCard('Krav og hjemmel', v('t1_krav'), false, true);
   const oppR = dynRows('t2-opp-list');
-  if (oppR.length) { fLbl('Kritiske oppgaver', C.tbaL); bullets(oppR); }
-  fp('Kunnskap som må sitte', v('t2_ntk'), C.tbaL);
-  fp('Kompetansegap', v('t2_gap'), C.tbaL);
-  setY(getY() + 2);
-  subHdr('Personanalyse', C.tbaL);
-  fp('Hvem trenger treningen', v('t3_hvem'), C.tbaL);
-  fp('Kompetansenivå', v('t3_nivaa'), C.tbaL);
-  setY(getY() + 2);
-  subHdr('Konklusjoner', C.tbaL);
-  fp('Treningsnivå', tba_mg(), C.tbaL);
-  fp('Anbefalt øvelsestype', tba_type(), C.tbaL);
-  fp('Prioriterte treningsbehov', v('t4_behov'), C.tbaL);
-  setY(getY() + 4);
+  if (oppR.length) { subLabel('Kritiske oppgaver', true); bulletList(oppR, true); }
+  fpCard('Kompetansegap', v('t2_gap'), true, true);
+  twoCol('Hvem trenger treningen', v('t3_hvem'), 'Kompetansenivå', v('t3_nivaa'), true);
+  twoCol('Treningsnivå', tba_mg(), 'Anbefalt øvelsestype', tba_type(), true);
+  fpCard('Prioriterte treningsbehov og anbefalinger', v('t4_behov'), true, true);
+  y += 6;
 
-  // Plan 1
-  chk(18); secHdr(C.blue, '1', 'Grunnleggende informasjon');
-  [['Øvelsesnavn',v('s1_navn')],['Dato',v('s1_dato')],['Tid',v('s1_tid')],['Type',v('s1_type')],['Sted',v('s1_sted')],['Øvingsleder',v('s1_leder')],['Organisasjon',v('s1_org')],['Deltakere',v('s1_antall')]].forEach(([l,t]) => fp(l,t));
+  // Seksjon 1
+  secHdr('1', 'Grunnleggende informasjon');
+  twoCol('Dato', v('s1_dato'), 'Tid', v('s1_tid'));
+  twoCol('Øvelsestype', v('s1_type'), 'Sted', v('s1_sted'));
+  twoCol('Øvingsleder', v('s1_leder'), 'Antall deltakere', v('s1_antall'));
+  fpCard('Organisasjon', orgName);
+  y += 6;
 
-  // Plan 2
-  chk(18); secHdr(C.blue, '2', 'Bakgrunn og kontekst');
-  fp('Bakgrunn', v('s2_bakgrunn')); fp('Kompetansegap', v('s2_gap'));
-  fp('Hjemmel / Krav', v('s2_hjemmel')); fp('Tidligere øvelser / hendelser', v('s2_tidligere'));
+  // Seksjon 2
+  secHdr('2', 'Bakgrunn og kontekst');
+  fpCard('Bakgrunn / Kontekst', v('s2_bakgrunn'));
+  fpCard('Kompetansegap og treningsbehov', v('s2_gap'), true);
+  fpCard('Hjemmel og krav', v('s2_hjemmel'));
+  fpCard('Tidligere øvelser og hendelser', v('s2_tidligere'));
+  y += 6;
 
-  // Plan 3 — Læringsmål med kriterier
-  chk(18); secHdr(C.blue, '3', 'Læringsmål');
-  fp('Hoved-læringsmål', v('s3_hoved'));
+  // Seksjon 3 — Læringsmål
+  secHdr('3', 'Læringsmål');
+  fpCard('Hoved-læringsmål', v('s3_hoved'), true);
+
   const maalItems = document.querySelectorAll('#maal-list .maal-di');
   if (maalItems.length) {
-    fLbl('Delmål med evalueringskriterier');
+    subLabel('Delmål med evalueringskriterier');
     maalItems.forEach((item, i) => {
       const txt = item.querySelector('.maal-text')?.value.trim();
       if (!txt) return;
       const krits = [...item.querySelectorAll('.krit-inp')].map(k => k.value.trim()).filter(Boolean);
 
-      // Goal row
-      chk(12);
-      const goalBg = i % 2 === 0 ? C.bg : C.white;
-      const goalLines = doc.splitTextToSize(`${i + 1}. ${txt}`, IW - 4);
-      const goalH = goalLines.length * 5.5 + 4 + (krits.length > 0 ? krits.length * 6 + 4 : 0);
-      doc.setFillColor(...goalBg); doc.rect(M, getY() - 1, IW, Math.min(goalH, 30), 'F');
-      doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.blue);
-      goalLines.forEach(l => { chk(6); doc.text(l, M + 2, getY()); setY(getY() + 5.5); });
+      doc.setFontSize(10.5); doc.setFont(undefined, 'bold');
+      const tLines = doc.splitTextToSize(txt, IW - 18);
+      const hdrH = Math.max(12, tLines.length * 5.5 + 6);
+      chk(hdrH + 4);
+      doc.setFillColor(...B.dk); doc.rect(M, y, IW, hdrH, 'F');
+      doc.setFillColor(...B.md); doc.circle(M + 7, y + hdrH / 2, 4, 'F');
+      doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
+      doc.text(String(i + 1), M + 7, y + hdrH / 2 + 1.5, { align: 'center' });
+      doc.setFontSize(10.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
+      tLines.forEach((l, li) => doc.text(l, M + 16, y + 6 + li * 5.5));
+      y += hdrH + 2;
 
-      // Criteria
-      if (krits.length > 0) {
-        krits.forEach(k => {
-          chk(6);
-          doc.setFontSize(9); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.muted);
-          doc.text('→', M + 5, getY());
-          doc.setTextColor(...C.text);
-          const kLines = doc.splitTextToSize(k, IW - 13);
-          kLines.forEach((l, li) => { if (li > 0) chk(5); doc.text(l, M + 10, getY() + li * 5); });
-          setY(getY() + kLines.length * 5 + 1.5);
-        });
-      }
-      doc.setDrawColor(...C.border); doc.setLineWidth(0.18);
-      doc.line(M, getY(), M + IW, getY()); setY(getY() + 3);
+      krits.forEach((k, ki) => {
+        doc.setFontSize(9.5); doc.setFont(undefined, 'normal');
+        const kLines = doc.splitTextToSize(k, IW - 18);
+        const kH = kLines.length * 5.5 + 5;
+        chk(kH);
+        if (ki % 2 === 0) { doc.setFillColor(...B.card); doc.rect(M, y, IW, kH, 'F'); }
+        doc.setFillColor(...B.lt); doc.circle(M + 7, y + kH / 2, 1.5, 'F');
+        doc.setTextColor(...B.tx);
+        kLines.forEach((l, li) => doc.text(l, M + 13, y + 5 + li * 5.5));
+        y += kH;
+      });
+      y += 5;
     });
-    setY(getY() + 2);
   }
+
   const mg = [];
   if (chkd('s3_individ')) mg.push('Individ');
   if (chkd('s3_gruppe'))  mg.push('Gruppe');
   if (chkd('s3_org'))     mg.push('Organisasjon');
-  if (mg.length) fp('Målgruppe', mg.join(', '));
+  if (mg.length) fpCard('Målgruppe', mg.join(', '));
+  y += 6;
 
-  // Plan 4
-  chk(18); secHdr(C.blue, '4', 'Scenario og gjennomføring');
-  fp('Scenariobeskrivelse', v('s4_scenario')); fp('Startpunkt', v('s4_startpunkt'));
+  // Seksjon 4
+  secHdr('4', 'Scenario og gjennomføring');
+  fpCard('Scenariobeskrivelse', v('s4_scenario'));
+  fpCard('Startpunkt for øvelsen', v('s4_startpunkt'));
   const injR = dynRows('inj-list');
-  if (injR.length) { fLbl('Injeksjoner / Momenter'); const iC = [{l:'Tidspunkt',w:35},{l:'Beskrivelse',w:108},{l:'Ansvarlig',w:31}]; tblHdr(iC, C.blueMid); injR.forEach((r,i) => tblRow(iC,r,i)); setY(getY()+4); }
-  fp('Markørbeskrivelse og sminke', v('s4_markor'));
+  if (injR.length) {
+    const iC = [{l:'Tidspunkt',w:35},{l:'Beskrivelse',w:108},{l:'Ansvarlig',w:31}];
+    subLabel('Injeksjoner / Momenter'); tblHdr(iC); injR.forEach((r,i) => tblRow(iC,r,i)); y += 4;
+  }
+  fpCard('Markørbeskrivelse og sminke', v('s4_markor'));
   const utsR = dynRows('uts-list');
-  if (utsR.length) { fLbl('Nødvendig utstyr'); const uC = [{l:'Utstyr',w:120},{l:'Antall',w:54}]; tblHdr(uC, C.blueMid); utsR.forEach((r,i) => tblRow(uC,r,i)); setY(getY()+4); }
+  if (utsR.length) {
+    const uC = [{l:'Utstyr',w:120},{l:'Antall',w:54}];
+    subLabel('Nødvendig utstyr'); tblHdr(uC); utsR.forEach((r,i) => tblRow(uC,r,i)); y += 4;
+  }
   const rolR = dynRows('rol-list');
-  if (rolR.length) { fLbl('Roller og ansvar'); const rC = [{l:'Rolle',w:50},{l:'Navn',w:50},{l:'Beskrivelse',w:74}]; tblHdr(rC, C.blueMid); rolR.forEach((r,i) => tblRow(rC,r,i)); setY(getY()+4); }
+  if (rolR.length) {
+    const rC = [{l:'Rolle',w:50},{l:'Navn',w:50},{l:'Beskrivelse',w:74}];
+    subLabel('Roller og ansvar'); tblHdr(rC); rolR.forEach((r,i) => tblRow(rC,r,i)); y += 4;
+  }
+  y += 6;
 
-  // Plan 5
-  chk(18); secHdr(C.blue, '5', 'Deltakere');
+  // Seksjon 5
+  secHdr('5', 'Deltakere');
   const dR = dynRows('delt-list');
-  if (dR.length) { fLbl('Deltakerliste'); const dC = [{l:'Navn',w:70},{l:'Rolle',w:74},{l:'Nivå',w:30}]; tblHdr(dC, C.blueMid); dR.forEach((r,i) => tblRow(dC,r,i)); setY(getY()+4); }
+  if (dR.length) {
+    const dC = [{l:'Navn',w:70},{l:'Rolle',w:74},{l:'Nivå',w:30}];
+    subLabel('Deltakerliste'); tblHdr(dC); dR.forEach((r,i) => tblRow(dC,r,i)); y += 4;
+  }
   const kR = dynRows('kont-list');
-  if (kR.length) { fLbl('Nøkkelpersoner'); const kC = [{l:'Navn',w:60},{l:'Funksjon',w:74},{l:'Telefon',w:40}]; tblHdr(kC, C.blueMid); kR.forEach((r,i) => tblRow(kC,r,i)); setY(getY()+4); }
-  fp('Eksterne aktører', v('s5_ext'));
+  if (kR.length) {
+    const kC = [{l:'Navn',w:60},{l:'Funksjon',w:74},{l:'Telefon',w:40}];
+    subLabel('Nøkkelpersoner'); tblHdr(kC); kR.forEach((r,i) => tblRow(kC,r,i)); y += 4;
+  }
+  fpCard('Eksterne aktører og samvirkeorganisasjoner', v('s5_ext'));
+  y += 6;
 
-  // Plan 6 — Evaluering med matrise
-  chk(18); secHdr(C.blue, '6', 'Evalueringsplan');
+  // Seksjon 6
+  secHdr('6', 'Evalueringsplan');
   const em = [];
   if (chkd('s6_debrief')) em.push('Debrief / gjennomgang');
   if (chkd('s6_obs'))     em.push('Observatørskjema');
   if (chkd('s6_spm'))     em.push('Spørreskjema');
   if (chkd('s6_annet'))   em.push('Annet');
-  if (em.length) fp('Evalueringsmetode', em.join(', '));
-  fp('Hvem evaluerer', v('s6_hvem'));
-  fp('Evalueringstidspunkt', v('s6_tidspunkt'));
+  if (em.length) fpCard('Evalueringsmetode', em.join(', '));
+  twoCol('Hvem evaluerer', v('s6_hvem'), 'Evalueringstidspunkt', v('s6_tidspunkt'));
+  fpCard('Oppfølging og læringsoverføring', v('s6_overf'));
 
-  // Evalueringsmatrise
-  const evalMaalItems = document.querySelectorAll('#maal-list .maal-di');
-  const hasEvalContent = [...evalMaalItems].some(item => item.querySelector('.maal-text')?.value.trim());
-  if (hasEvalContent) {
-    setY(getY() + 2); fLbl('Evalueringsmatrise');
-    evalMaalItems.forEach((item, i) => {
-      const txt = item.querySelector('.maal-text')?.value.trim();
-      if (!txt) return;
-      const krits = [...item.querySelectorAll('.krit-inp')].map(k => k.value.trim()).filter(Boolean);
-
-      chk(14);
-      // Goal header
-      doc.setFillColor(230, 237, 250); doc.rect(M, getY() - 1, IW, 8, 'F');
-      doc.setFontSize(9.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.blue);
-      const goalLines = doc.splitTextToSize(`${i + 1}. ${txt}`, IW - 4);
-      goalLines.forEach(l => { chk(6); doc.text(l, M + 2, getY() + 5); setY(getY() + 5.5); });
-      setY(getY() + 1);
-
-      // Criteria with checkboxes
-      krits.forEach((krit, ki) => {
-        const cbId = `eval_k_${i}_${ki}`;
-        const checked = document.getElementById(cbId)?.checked || false;
-        chk(7);
-
-        // Checkbox square
-        doc.setDrawColor(...C.border); doc.setLineWidth(0.5);
-        doc.rect(M + 3, getY() - 3.5, 4.5, 4.5);
-        if (checked) {
-          doc.setDrawColor(...C.ok); doc.setLineWidth(0.9);
-          doc.line(M + 3.6, getY() - 1.2, M + 5, getY() + 0.3);
-          doc.line(M + 5, getY() + 0.3, M + 7.5, getY() - 3);
-        }
-
-        if (checked) doc.setTextColor(...C.ok); else doc.setTextColor(...C.text);
-        doc.setFontSize(9.5); doc.setFont(undefined, checked ? 'bold' : 'normal');
-        const kLines = doc.splitTextToSize(krit, IW - 13);
-        kLines.forEach((l, li) => { if (li > 0) chk(5); doc.text(l, M + 10, getY() + li * 5); });
-        setY(getY() + kLines.length * 5 + 2);
-      });
-
-      if (krits.length === 0) {
-        doc.setFontSize(9); doc.setFont(undefined, 'italic'); doc.setTextColor(...C.muted);
-        doc.text('Ingen kriterier definert.', M + 4, getY()); setY(getY() + 5);
-      }
-      doc.setDrawColor(...C.border); doc.setLineWidth(0.18);
-      doc.line(M, getY(), M + IW, getY()); setY(getY() + 3);
-    });
+  // Footer
+  const total = doc.getNumberOfPages();
+  for (let p = 2; p <= total; p++) {
+    doc.setPage(p);
+    doc.setDrawColor(...B.bd); doc.setLineWidth(0.3);
+    doc.line(M, H - 13, W - 10, H - 13);
+    doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.mu);
+    doc.text('Øvingsplan  ·  ' + dateStr, M, H - 7);
+    doc.text('Side ' + p + ' av ' + total, W - 10, H - 7, { align: 'right' });
   }
 
-  fp('Oppfølging og læringsoverføring', v('s6_overf'));
-
-  addFooters('Øvingsplanlegger');
-  const fname = ('Ovingsplan_' + (v('s1_navn') || 'ukjent')).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
+  const fname = ('Ovingsplan_' + exName).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
   doc.save(fname + '.pdf');
   showToast('Øvingsplan lastet ned!');
+}
+
+// ═══════════════════════════════════════════
+//  EVALUERINGSRAPPORT PDF  (purple/indigo)
+// ═══════════════════════════════════════════
+function generateEvalPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, H = 297, M = 18, IW = W - M * 2;
+
+  const E = {
+    dk:   [55,  30,  100],
+    md:   [90,  60,  170],
+    lt:   [140, 110, 220],
+    xl:   [215, 200, 255],
+    card: [246, 243, 255],
+    hi:   [232, 225, 255],
+    wh:   [255, 255, 255],
+    tx:   [28,  40,  54],
+    mu:   [100, 118, 138],
+    bd:   [210, 205, 230],
+    ok:   [46,  125, 50],
+    oklt: [200, 235, 205],
+    warn: [185, 80,  20],
+  };
+
+  let y = 0;
+
+  function initContentPage() {
+    doc.setFillColor(...E.md); doc.rect(0, 0, 6, H, 'F');
+    doc.setFillColor(...E.lt); doc.rect(6, 0, 1.5, H, 'F');
+    doc.setDrawColor(...E.bd); doc.setLineWidth(0.3);
+    doc.line(M, 15, W - 10, 15);
+    doc.setFontSize(7.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.mu);
+    const orgShort = (v('s1_org') || v('t1_org') || '').toUpperCase();
+    doc.text('EVALUERINGSRAPPORT' + (orgShort ? '  ·  ' + orgShort : ''), M, 11);
+    doc.text('Side ' + doc.getNumberOfPages(), W - 10, 11, { align: 'right' });
+    y = 22;
+  }
+
+  function chk(need) {
+    if (y + need > H - 18) { doc.addPage(); initContentPage(); }
+  }
+
+  function fpCard(label, text, highlight) {
+    if (!text?.trim()) return;
+    const lines = doc.splitTextToSize(text.trim(), IW - 12);
+    const bh = lines.length * 6 + 16;
+    chk(bh + 4);
+    doc.setFillColor(...(highlight ? E.hi : E.card)); doc.rect(M, y, IW, bh, 'F');
+    doc.setFillColor(...(highlight ? E.dk : E.lt));   doc.rect(M, y, 4, bh, 'F');
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.md);
+    doc.text(label.toUpperCase(), M + 9, y + 7.5);
+    doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.tx);
+    lines.forEach((l, i) => doc.text(l, M + 9, y + 13.5 + i * 6));
+    y += bh + 3;
+  }
+
+  function twoCol(leftLabel, leftVal, rightLabel, rightVal) {
+    if (!leftVal && !rightVal) return;
+    const hw = (IW - 4) / 2;
+    doc.setFontSize(10); doc.setFont(undefined, 'normal');
+    const lLines = doc.splitTextToSize(leftVal  || '—', hw - 14);
+    const rLines = doc.splitTextToSize(rightVal || '—', hw - 14);
+    const bh = Math.max(24, Math.max(lLines.length, rLines.length) * 5.5 + 16);
+    chk(bh + 4);
+    [[M, leftLabel, lLines, E.lt], [M + hw + 4, rightLabel, rLines, E.dk]].forEach(([x, lbl, lines, bar]) => {
+      doc.setFillColor(...E.card); doc.rect(x, y, hw, bh, 'F');
+      doc.setFillColor(...bar); doc.rect(x, y, 4, bh, 'F');
+      doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.md);
+      doc.text(lbl.toUpperCase(), x + 9, y + 8);
+      doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.tx);
+      lines.forEach((l, i) => doc.text(l, x + 9, y + 15 + i * 5.5));
+    });
+    y += bh + 3;
+  }
+
+  function secHdr(tag, title) {
+    chk(18);
+    doc.setFillColor(...E.dk); doc.rect(M, y, IW, 12, 'F');
+    doc.setFillColor(...E.md); doc.circle(M + 9, y + 6, 5, 'F');
+    doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
+    doc.text(tag, M + 9, y + 7.8, { align: 'center' });
+    doc.setFontSize(11.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
+    doc.text(title, M + 20, y + 8);
+    y += 15;
+  }
+
+  function subLabel(text) {
+    chk(8);
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.md);
+    doc.text(text.toUpperCase(), M, y); y += 6;
+  }
+
+  // ── COVER PAGE ──
+  const exName  = v('s1_navn') || 'Uten tittel';
+  const orgName = v('s1_org')  || v('t1_org') || 'Organisasjon ikke angitt';
+  const dateStr = new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  doc.setFillColor(...E.dk); doc.rect(0, 0, W, H, 'F');
+  doc.setFillColor(70, 40, 120); doc.circle(W + 15, -15, 75, 'F');
+  doc.setFillColor(40, 15, 80);  doc.circle(-15, H + 15, 65, 'F');
+  doc.setFillColor(65, 35, 115); doc.circle(W / 2, H * 0.55, 110, 'F');
+
+  doc.setFillColor(...E.md); doc.rect(0, 0, 8, H, 'F');
+  doc.setFillColor(...E.lt); doc.rect(8, 0, 2, H, 'F');
+
+  doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.xl);
+  doc.text('EVALUERINGSRAPPORT', 18, 48);
+  doc.setFontSize(8); doc.setFont(undefined, 'normal');
+  doc.text('etter gjennomført øvelse', 18, 55);
+
+  doc.setFontSize(30); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
+  const exLines = doc.splitTextToSize(exName, W - 50);
+  exLines.forEach((l, i) => doc.text(l, 18, 68 + i * 14));
+
+  doc.setFontSize(12); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.xl);
+  doc.text(orgName, 18, 72 + exLines.length * 14);
+  doc.setFontSize(10);
+  doc.text('Rapport generert: ' + dateStr, 18, 79 + exLines.length * 14);
+
+  const cY = 155, cH = 100;
+  doc.setFillColor(...E.wh); doc.roundedRect(18, cY, IW, cH, 5, 5, 'F');
+  doc.setFillColor(...E.md); doc.roundedRect(18, cY, 5, cH, 3, 3, 'F');
+
+  doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.dk);
+  doc.text('Øvelsesinformasjon', 28, cY + 12);
+  doc.setDrawColor(...E.bd); doc.setLineWidth(0.4);
+  doc.line(28, cY + 15.5, 18 + IW - 6, cY + 15.5);
+
+  const coverFields = [
+    ['Dato',         v('s1_dato')      || '—'],
+    ['Tid',          v('s1_tid')       || '—'],
+    ['Type',         v('s1_type')      || '—'],
+    ['Sted',         v('s1_sted')      || '—'],
+    ['Øvingsleder',  v('s1_leder')     || '—'],
+    ['Evaluator',    v('s6_hvem')      || '—'],
+    ['Metode',       (() => { const m = []; if(chkd('s6_debrief'))m.push('Debrief'); if(chkd('s6_obs'))m.push('Observatørskjema'); if(chkd('s6_spm'))m.push('Spørreskjema'); return m.join(', ') || '—'; })()],
+  ];
+  const half2 = Math.ceil(coverFields.length / 2);
+  coverFields.forEach(([lbl, val], fi) => {
+    const cx = fi < half2 ? 28 : 28 + IW / 2;
+    const fy = cY + 22 + (fi < half2 ? fi : fi - half2) * 14;
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.md);
+    doc.text(lbl.toUpperCase(), cx, fy);
+    doc.setFontSize(9.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.tx);
+    doc.text(String(val), cx, fy + 6);
+  });
+
+  doc.setFillColor(38, 18, 72); doc.rect(0, H - 16, W, 16, 'F');
+  doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.xl);
+  doc.text('Øvingsplanlegger — evalueringsrapport', 18, H - 6);
+
+  // ── CONTENT PAGES ──
+  doc.addPage(); initContentPage();
+
+  // Øvingsinformasjon
+  secHdr('ØV', 'Øvingsinformasjon');
+  fpCard('Hoved-læringsmål', v('s3_hoved'), true);
+  twoCol('Evalueringsmetode', (() => { const m=[]; if(chkd('s6_debrief'))m.push('Debrief / gjennomgang'); if(chkd('s6_obs'))m.push('Observatørskjema'); if(chkd('s6_spm'))m.push('Spørreskjema'); if(chkd('s6_annet'))m.push('Annet'); return m.join(', ') || '—'; })(), 'Evalueringstidspunkt', v('s6_tidspunkt'));
+  fpCard('Hvem evaluerte', v('s6_hvem'));
+  y += 6;
+
+  // Evalueringsmatrise
+  secHdr('EM', 'Evalueringsmatrise');
+
+  const maalItems = document.querySelectorAll('#maal-list .maal-di');
+  let totalKrits = 0, checkedKrits = 0;
+
+  maalItems.forEach((item, i) => {
+    const txt = item.querySelector('.maal-text')?.value.trim();
+    if (!txt) return;
+    const krits = [...item.querySelectorAll('.krit-inp')].map(k => k.value.trim()).filter(Boolean);
+    const checked = krits.map((_, ki) => document.getElementById(`eval_k_${i}_${ki}`)?.checked || false);
+    const nChecked = checked.filter(Boolean).length;
+    totalKrits += krits.length;
+    checkedKrits += nChecked;
+
+    doc.setFontSize(10.5); doc.setFont(undefined, 'bold');
+    const tLines = doc.splitTextToSize(txt, IW - 26);
+    const hdrH = Math.max(12, tLines.length * 5.5 + 6);
+    chk(hdrH + 6);
+
+    doc.setFillColor(...E.dk); doc.rect(M, y, IW, hdrH, 'F');
+    doc.setFillColor(...E.md); doc.circle(M + 7, y + hdrH / 2, 4, 'F');
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
+    doc.text(String(i + 1), M + 7, y + hdrH / 2 + 1.5, { align: 'center' });
+    doc.setFontSize(10.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
+    tLines.forEach((l, li) => doc.text(l, M + 16, y + 6 + li * 5.5));
+
+    // Score badge
+    if (krits.length > 0) {
+      const scoreText = nChecked + '/' + krits.length;
+      const pct = nChecked / krits.length;
+      const badgeColor = pct >= 1 ? E.ok : (pct >= 0.5 ? [170, 110, 10] : [160, 40, 30]);
+      doc.setFillColor(...badgeColor); doc.roundedRect(M + IW - 22, y + (hdrH - 7) / 2, 20, 7, 2, 2, 'F');
+      doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
+      doc.text(scoreText + ' oppnådd', M + IW - 12, y + (hdrH - 7) / 2 + 5, { align: 'center' });
+    }
+    y += hdrH + 2;
+
+    if (krits.length === 0) {
+      chk(8);
+      doc.setFontSize(9); doc.setFont(undefined, 'italic'); doc.setTextColor(...E.mu);
+      doc.text('Ingen kriterier definert for dette målet.', M + 4, y + 5); y += 10;
+    } else {
+      krits.forEach((k, ki) => {
+        const isChecked = checked[ki];
+        doc.setFontSize(9.5); doc.setFont(undefined, 'normal');
+        const kLines = doc.splitTextToSize(k, IW - 20);
+        const kH = Math.max(9, kLines.length * 5.5 + 6);
+        chk(kH);
+
+        const rowBg = isChecked ? E.oklt : (ki % 2 === 0 ? E.card : E.wh);
+        doc.setFillColor(...rowBg); doc.rect(M, y, IW, kH, 'F');
+
+        // Checkbox
+        doc.setDrawColor(...(isChecked ? E.ok : E.bd)); doc.setLineWidth(0.5);
+        doc.rect(M + 4, y + (kH - 4.5) / 2, 4.5, 4.5);
+        if (isChecked) {
+          doc.setDrawColor(...E.ok); doc.setLineWidth(0.9);
+          const cy2 = y + (kH - 4.5) / 2;
+          doc.line(M + 4.6, cy2 + 2.8, M + 6, cy2 + 4.3);
+          doc.line(M + 6,   cy2 + 4.3, M + 8.5, cy2 + 1);
+        }
+
+        doc.setTextColor(...(isChecked ? E.ok : E.tx));
+        doc.setFont(undefined, isChecked ? 'bold' : 'normal');
+        kLines.forEach((l, li) => doc.text(l, M + 12, y + 5.5 + li * 5.5));
+        doc.setDrawColor(...E.bd); doc.setLineWidth(0.12);
+        doc.line(M, y + kH, M + IW, y + kH);
+        y += kH;
+      });
+    }
+    y += 6;
+  });
+
+  // Sammendrag
+  if (totalKrits > 0) {
+    secHdr('SUM', 'Sammendrag');
+    const pct = Math.round((checkedKrits / totalKrits) * 100);
+    fpCard('Resultat', `${checkedKrits} av ${totalKrits} kriterier oppnådd (${pct}%)`, true);
+
+    // Score bar
+    chk(18);
+    const barW = IW - 20;
+    doc.setFillColor(...E.card); doc.rect(M, y, barW + 20, 12, 'F');
+    doc.setFillColor(...E.bd); doc.rect(M + 10, y + 3, barW, 6);
+    const fillW = barW * (checkedKrits / totalKrits);
+    const barColor = pct >= 80 ? E.ok : (pct >= 50 ? [170, 110, 10] : [160, 40, 30]);
+    doc.setFillColor(...barColor); doc.rect(M + 10, y + 3, fillW, 6, 'F');
+    doc.setFontSize(9); doc.setFont(undefined, 'bold');
+    doc.setTextColor(...barColor);
+    doc.text(pct + '%', M + 10 + fillW + 4, y + 8);
+    y += 15;
+  }
+
+  fpCard('Oppfølging og læringsoverføring', v('s6_overf'), true);
+
+  // Footer
+  const total = doc.getNumberOfPages();
+  for (let p = 2; p <= total; p++) {
+    doc.setPage(p);
+    doc.setDrawColor(...E.bd); doc.setLineWidth(0.3);
+    doc.line(M, H - 13, W - 10, H - 13);
+    doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.mu);
+    doc.text('Evalueringsrapport  ·  ' + exName + '  ·  ' + dateStr, M, H - 7);
+    doc.text('Side ' + p + ' av ' + total, W - 10, H - 7, { align: 'right' });
+  }
+
+  const fname = ('Evalueringsrapport_' + exName).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
+  doc.save(fname + '.pdf');
+  showToast('Evalueringsrapport lastet ned!');
 }
 </script>
 </body>
