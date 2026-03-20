@@ -147,7 +147,7 @@
     /* ── T4 Findings summary ── */
     .findings { background:#f0f9f4; border:1px solid var(--tba-lt); border-radius:var(--r); padding:14px 16px; }
     .findings h4 { font-size:.75rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px; }
-    .findings-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px; }
+    .findings-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px; align-items:start; }
     .fi { background:var(--white); border-radius:5px; padding:8px 11px; border-left:3px solid var(--tba-lt); }
     .fi .fi-lbl { font-size:.68rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.3px; }
     .fi .fi-val { font-size:.82rem; color:var(--text); margin-top:3px; line-height:1.4; }
@@ -165,12 +165,13 @@
     .trans-wrap .t-icon { font-size:2.8rem; margin-bottom:10px; }
     .trans-wrap h2 { font-size:1.35rem; color:var(--blue); margin-bottom:7px; }
     .trans-wrap > p { color:var(--muted); font-size:.88rem; max-width:500px; margin:0 auto 22px; line-height:1.6; }
-    .sum-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:10px; margin-bottom:26px; text-align:left; align-items:start; }
+    .sum-grid { text-align:left; margin-bottom:26px; }
+    .sum-meta { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:9px; margin-bottom:9px; align-items:start; }
+    .sum-long { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    @media(max-width:480px){ .sum-long { grid-template-columns:1fr; } }
     .sum-card { background:var(--white); border:1px solid var(--border); border-radius:var(--r); padding:12px 14px; border-top:3px solid var(--tba-lt); }
-    .sum-card.wide { grid-column:1/-1; border-top-color:var(--tba); display:flex; gap:14px; align-items:flex-start; }
-    .sum-card.wide h4 { white-space:nowrap; min-width:120px; margin-top:2px; }
-    .sum-card.wide p { margin-bottom:0; }
-    .sum-card h4 { font-size:.71rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
+    .sum-card.hi { border-top-color:var(--tba); background:#f8fdf9; }
+    .sum-card h4 { font-size:.71rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
     .sum-card p { font-size:.83rem; color:var(--text); line-height:1.55; }
     .sum-card p.mt { color:var(--muted); font-style:italic; }
     .trans-btns { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
@@ -819,21 +820,22 @@ function updateTypeDesc() {
 // ═══════════════════════════════════════════
 function buildSummary() {
   const trunc = (s, n) => s && s.length > n ? s.slice(0, n) + '…' : s;
-  const card = (h, val, wide) => {
+  const card = (h, val, cls) => {
     const show = val?.trim() || null;
-    const txt  = wide ? trunc(show, 280) : trunc(show, 90);
-    return `<div class="sum-card${wide ? ' wide' : ''}">
-      <h4>${h}</h4><p class="${show ? '' : 'mt'}">${txt || '— ikke utfylt —'}</p>
-    </div>`;
+    return `<div class="sum-card${cls ? ' '+cls : ''}"><h4>${h}</h4><p class="${show?'':'mt'}">${show || '— ikke utfylt —'}</p></div>`;
   };
-  document.getElementById('sumGrid').innerHTML =
-    card('Organisasjon',         v('t1_org'),    false) +
-    card('Øvingskultur',         v('t1_kultur'), false) +
-    card('Kompetansenivå',       v('t3_nivaa'),  false) +
-    card('Treningsnivå',         tba_mg(),       false) +
-    card('Anbefalt øvelsestype', tba_type(),     false) +
-    card('Kompetansegap',        v('t2_gap'),    true)  +
-    card('Prioriterte behov',    v('t4_behov'),  true);
+  document.getElementById('sumGrid').innerHTML = `
+    <div class="sum-meta">
+      ${card('Organisasjon',         trunc(v('t1_org'),   80))}
+      ${card('Øvingskultur',         trunc(v('t1_kultur'),60))}
+      ${card('Kompetansenivå',       v('t3_nivaa'))}
+      ${card('Treningsnivå',         tba_mg())}
+      ${card('Anbefalt øvelsestype', tba_type())}
+    </div>
+    <div class="sum-long">
+      ${card('Kompetansegap',     v('t2_gap'),   'hi')}
+      ${card('Prioriterte behov', v('t4_behov'), 'hi')}
+    </div>`;
 }
 
 function startPlanning() {
