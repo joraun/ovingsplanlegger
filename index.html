@@ -218,7 +218,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.5</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.6</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Last inn demo</button>
@@ -1405,7 +1405,8 @@ function generateTBAPDF() {
   function fpCard(label, text, highlight) {
     const content = text?.trim() || '';
     const empty = !content;
-    const lines = empty ? [] : doc.splitTextToSize(content, IW - 12);
+    doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
+    const lines = empty ? [] : doc.splitTextToSize(content, IW - 14);
     const bh = empty ? 18 : lines.length * 6 + 16;
     chk(bh + 4);
     doc.setFillColor(...(empty ? [245,246,248] : (highlight ? G.hi : G.card))); doc.rect(M, y, IW, bh, 'F');
@@ -1443,6 +1444,7 @@ function generateTBAPDF() {
     items.forEach((item, ri) => {
       const t = Array.isArray(item) ? item[0] : item;
       if (!t?.trim()) return;
+      doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
       const lines = doc.splitTextToSize(t.trim(), IW - 14);
       const bh = lines.length * 6 + 7;
       chk(bh + 2);
