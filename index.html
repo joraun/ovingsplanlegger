@@ -206,6 +206,7 @@
     /* ── Demo button ── */
     .demo-btn { margin-left:auto; background:rgba(255,255,255,.13); border:1.5px solid rgba(255,255,255,.3); color:rgba(255,255,255,.85); border-radius:var(--r); padding:7px 13px; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .15s; white-space:nowrap; }
     .demo-btn:hover { background:rgba(255,255,255,.23); color:#fff; }
+    .ver-badge { font-size:.58rem; font-weight:600; color:rgba(255,255,255,.5); background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:4px; padding:2px 7px; vertical-align:middle; letter-spacing:.3px; margin-left:8px; }
   </style>
 </head>
 <body>
@@ -214,7 +215,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger</h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.1</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Last inn demo</button>
@@ -1605,7 +1606,7 @@ function generatePDF() {
     doc.setDrawColor(...B.bd); doc.setLineWidth(0.3);
     doc.line(M, 15, W - 10, 15);
     doc.setFontSize(7.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.mu);
-    const orgShort = (v('s1_org') || v('t1_org') || '').toUpperCase();
+    const orgShort = (v('s1_org') || v('t1_org') || '').toUpperCase().slice(0, 35);
     doc.text('ØVINGSPLAN' + (orgShort ? '  ·  ' + orgShort : ''), M, 11);
     doc.text('Side ' + doc.getNumberOfPages(), W - 10, 11, { align: 'right' });
     y = 22;
@@ -1617,7 +1618,8 @@ function generatePDF() {
 
   function fpCard(label, text, highlight, green) {
     if (!text?.trim()) return;
-    const lines = doc.splitTextToSize(text.trim(), IW - 12);
+    doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
+    const lines = doc.splitTextToSize(text.trim(), IW - 14);
     const bh = lines.length * 6 + 16;
     chk(bh + 4);
     const bg   = green ? (highlight ? B.thi : B.tcard) : (highlight ? B.hi : B.card);
@@ -1674,7 +1676,8 @@ function generatePDF() {
     items.forEach((item, ri) => {
       const t = Array.isArray(item) ? item[0] : item;
       if (!t?.trim()) return;
-      const lines = doc.splitTextToSize(t.trim(), IW - 14);
+      doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
+      const lines = doc.splitTextToSize(t.trim(), IW - 16);
       const bh = lines.length * 6 + 7;
       chk(bh + 2);
       if (ri % 2 === 0) { doc.setFillColor(...crd); doc.rect(M, y, IW, bh, 'F'); }
@@ -1735,9 +1738,10 @@ function generatePDF() {
   exLines.forEach((l, i) => doc.text(l, 18, 65 + i * 14));
 
   doc.setFontSize(12); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.xl);
-  doc.text(orgName, 18, 68 + exLines.length * 14);
+  const orgLines2 = doc.splitTextToSize(orgName, W - 55);
+  orgLines2.slice(0, 2).forEach((l, i) => doc.text(l, 18, 68 + exLines.length * 14 + i * 7));
   doc.setFontSize(10);
-  doc.text(dateStr, 18, 75 + exLines.length * 14);
+  doc.text(dateStr, 18, 68 + exLines.length * 14 + Math.min(orgLines2.length, 2) * 7 + 1);
 
   const cY = 158, cH = 92;
   doc.setFillColor(...B.wh); doc.roundedRect(18, cY, IW, cH, 5, 5, 'F');
@@ -1757,13 +1761,15 @@ function generatePDF() {
     ['Antall deltakere',v('s1_antall') || '—'],
   ];
   const half = Math.ceil(cardFields.length / 2);
+  const colW = IW / 2 - 18;
   cardFields.forEach(([lbl, val], fi) => {
     const cx  = fi < half ? 28 : 28 + IW / 2;
     const fy  = cY + 22 + (fi < half ? fi : fi - half) * 14;
     doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.md);
     doc.text(lbl.toUpperCase(), cx, fy);
     doc.setFontSize(9.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.tx);
-    doc.text(String(val), cx, fy + 6);
+    const vl = doc.splitTextToSize(String(val), colW);
+    doc.text(vl[0], cx, fy + 6);
   });
 
   doc.setFillColor(18, 42, 72); doc.rect(0, H - 16, W, 16, 'F');
@@ -1945,7 +1951,7 @@ function generateEvalPDF() {
     doc.setDrawColor(...E.bd); doc.setLineWidth(0.3);
     doc.line(M, 15, W - 10, 15);
     doc.setFontSize(7.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.mu);
-    const orgShort = (v('s1_org') || v('t1_org') || '').toUpperCase();
+    const orgShort = (v('s1_org') || v('t1_org') || '').toUpperCase().slice(0, 30);
     doc.text('EVALUERINGSRAPPORT' + (orgShort ? '  ·  ' + orgShort : ''), M, 11);
     doc.text('Side ' + doc.getNumberOfPages(), W - 10, 11, { align: 'right' });
     y = 22;
@@ -1957,7 +1963,8 @@ function generateEvalPDF() {
 
   function fpCard(label, text, highlight) {
     if (!text?.trim()) return;
-    const lines = doc.splitTextToSize(text.trim(), IW - 12);
+    doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
+    const lines = doc.splitTextToSize(text.trim(), IW - 14);
     const bh = lines.length * 6 + 16;
     chk(bh + 4);
     doc.setFillColor(...(highlight ? E.hi : E.card)); doc.rect(M, y, IW, bh, 'F');
@@ -2028,9 +2035,10 @@ function generateEvalPDF() {
   exLines.forEach((l, i) => doc.text(l, 18, 68 + i * 14));
 
   doc.setFontSize(12); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.xl);
-  doc.text(orgName, 18, 72 + exLines.length * 14);
+  const orgLinesE = doc.splitTextToSize(orgName, W - 55);
+  orgLinesE.slice(0, 2).forEach((l, i) => doc.text(l, 18, 72 + exLines.length * 14 + i * 7));
   doc.setFontSize(10);
-  doc.text('Rapport generert: ' + dateStr, 18, 79 + exLines.length * 14);
+  doc.text('Rapport generert: ' + dateStr, 18, 72 + exLines.length * 14 + Math.min(orgLinesE.length, 2) * 7 + 1);
 
   const cY = 155, cH = 100;
   doc.setFillColor(...E.wh); doc.roundedRect(18, cY, IW, cH, 5, 5, 'F');
@@ -2051,13 +2059,15 @@ function generateEvalPDF() {
     ['Metode',       (() => { const m = []; if(chkd('s6_debrief'))m.push('Debrief'); if(chkd('s6_obs'))m.push('Observatørskjema'); if(chkd('s6_spm'))m.push('Spørreskjema'); return m.join(', ') || '—'; })()],
   ];
   const half2 = Math.ceil(coverFields.length / 2);
+  const colWE = IW / 2 - 18;
   coverFields.forEach(([lbl, val], fi) => {
     const cx = fi < half2 ? 28 : 28 + IW / 2;
     const fy = cY + 22 + (fi < half2 ? fi : fi - half2) * 14;
     doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.md);
     doc.text(lbl.toUpperCase(), cx, fy);
     doc.setFontSize(9.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.tx);
-    doc.text(String(val), cx, fy + 6);
+    const vl = doc.splitTextToSize(String(val), colWE);
+    doc.text(vl[0], cx, fy + 6);
   });
 
   doc.setFillColor(38, 18, 72); doc.rect(0, H - 16, W, 16, 'F');
@@ -2089,8 +2099,10 @@ function generateEvalPDF() {
     totalKrits += krits.length;
     checkedKrits += nChecked;
 
+    const hasBadge = krits.length > 0;
+    const tMaxW = hasBadge ? IW - 44 : IW - 26;
     doc.setFontSize(10.5); doc.setFont(undefined, 'bold');
-    const tLines = doc.splitTextToSize(txt, IW - 26);
+    const tLines = doc.splitTextToSize(txt, tMaxW);
     const hdrH = Math.max(12, tLines.length * 5.5 + 6);
     chk(hdrH + 6);
 
@@ -2102,13 +2114,12 @@ function generateEvalPDF() {
     tLines.forEach((l, li) => doc.text(l, M + 16, y + 6 + li * 5.5));
 
     // Score badge
-    if (krits.length > 0) {
-      const scoreText = nChecked + '/' + krits.length;
+    if (hasBadge) {
       const pct = nChecked / krits.length;
       const badgeColor = pct >= 1 ? E.ok : (pct >= 0.5 ? [170, 110, 10] : [160, 40, 30]);
-      doc.setFillColor(...badgeColor); doc.roundedRect(M + IW - 22, y + (hdrH - 7) / 2, 20, 7, 2, 2, 'F');
-      doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
-      doc.text(scoreText + ' oppnådd', M + IW - 12, y + (hdrH - 7) / 2 + 5, { align: 'center' });
+      doc.setFillColor(...badgeColor); doc.roundedRect(M + IW - 24, y + (hdrH - 7) / 2, 22, 7, 2, 2, 'F');
+      doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
+      doc.text(nChecked + '/' + krits.length, M + IW - 13, y + (hdrH - 7) / 2 + 5, { align: 'center' });
     }
     y += hdrH + 2;
 
