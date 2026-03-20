@@ -218,7 +218,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.7</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.8</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Last inn demo</button>
@@ -1726,11 +1726,12 @@ function generatePDF() {
   }
 
   function tblRow(cols, data, ri, pal = BLUE) {
+    doc.setFontSize(10); doc.setFont(undefined, 'normal');
     let ml = 1;
     data.forEach((d, ci) => { if (!d) return; const ls = doc.splitTextToSize(String(d), cols[ci].w - 3); if (ls.length > ml) ml = ls.length; });
     const rh = ml * 5.5 + 4; chk(rh);
     if (ri % 2 === 0) { doc.setFillColor(...pal.card); doc.rect(M, y - 1, IW, rh, 'F'); }
-    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.tx);
+    doc.setTextColor(...B.tx);
     let x = M + 2;
     data.forEach((d, ci) => { doc.splitTextToSize(String(d || '—'), cols[ci].w - 3).forEach((l, li) => doc.text(l, x, y + 4 + li * 5.5)); x += cols[ci].w; });
     doc.setDrawColor(...B.bd); doc.setLineWidth(0.18);
