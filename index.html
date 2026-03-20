@@ -1304,50 +1304,235 @@ function pdfInit() {
 //  TBA-ONLY PDF
 // ═══════════════════════════════════════════
 function generateTBAPDF() {
-  const { doc, W, H, M, IW, C, chk, secHdr, subHdr, fLbl, fBody, fp, bullets, addFooters, getY, setY } = pdfInit();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, H = 297, M = 18, IW = W - M * 2;
 
-  doc.setFillColor(...C.tba); doc.rect(0, 0, W, 54, 'F');
-  doc.setFontSize(22); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.white);
-  doc.text('TRENINGSBEHOVSANALYSE', M, 25);
-  doc.setFontSize(13); doc.setFont(undefined, 'normal');
-  doc.text(v('t1_org') || 'Organisasjon ikke angitt', M, 36);
-  doc.setFontSize(10); doc.setTextColor(180, 230, 200);
-  doc.text('Gjennomført: ' + new Date().toLocaleDateString('nb-NO'), M, 46);
+  // Colour palette
+  const G = {
+    dk:   [27,  94,  56],   // dark green
+    md:   [46,  125, 82],   // medium green
+    lt:   [82,  160, 115],  // light green
+    xl:   [180, 230, 200],  // very light green
+    card: [242, 250, 245],  // card bg
+    hi:   [220, 243, 229],  // highlighted card bg
+    wh:   [255, 255, 255],
+    tx:   [28,  40,  54],   // body text
+    mu:   [100, 118, 138],  // muted
+    bd:   [210, 220, 230],  // border
+  };
 
-  setY(64);
+  let y = 0;
 
-  secHdr(C.tba, 'T1', 'Organisasjonsanalyse');
-  fp('Organisasjon', v('t1_org'), C.tbaL);
-  fp('Bakgrunn og formål', v('t1_bakgrunn'), C.tbaL);
-  fp('Øvings- og treningskultur', v('t1_kultur') + (v('t1_kultur_note') ? ' — ' + v('t1_kultur_note') : ''), C.tbaL);
-  fp('Ressurser', v('t1_ressurser'), C.tbaL);
-  fp('Materiell og fasiliteter', v('t1_materiell'), C.tbaL);
-  fp('Begrensninger', v('t1_begrensninger'), C.tbaL);
-  fp('Krav og hjemmel', v('t1_krav'), C.tbaL);
-  setY(getY() + 4);
+  // ── Page setup helpers ──
+  function initContentPage() {
+    // Left accent bar
+    doc.setFillColor(...G.md); doc.rect(0, 0, 6, H, 'F');
+    // Thin decorative stripe
+    doc.setFillColor(...G.lt); doc.rect(6, 0, 1.5, H, 'F');
+    // Header rule
+    doc.setDrawColor(...G.bd); doc.setLineWidth(0.3);
+    doc.line(M, 15, W - 10, 15);
+    // Header text
+    doc.setFontSize(7.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.mu);
+    const orgShort = (v('t1_org') || '').toUpperCase();
+    doc.text('TRENINGSBEHOVSANALYSE' + (orgShort ? '  ·  ' + orgShort : ''), M, 11);
+    doc.text('Side ' + doc.getNumberOfPages(), W - 10, 11, { align: 'right' });
+    y = 22;
+  }
 
-  secHdr(C.tba, 'T2', 'Oppgaveanalyse');
+  function chk(need) {
+    if (y + need > H - 18) { doc.addPage(); initContentPage(); }
+  }
+
+  // ── Field card (label + value in a shaded box) ──
+  function fpCard(label, text, highlight) {
+    if (!text?.trim()) return;
+    const lines = doc.splitTextToSize(text.trim(), IW - 12);
+    const bh = lines.length * 6 + 16;
+    chk(bh + 4);
+    const bg = highlight ? G.hi : G.card;
+    const bar = highlight ? G.dk : G.lt;
+    doc.setFillColor(...bg); doc.rect(M, y, IW, bh, 'F');
+    doc.setFillColor(...bar); doc.rect(M, y, 4, bh, 'F');
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold');
+    doc.setTextColor(...(highlight ? G.dk : G.md));
+    doc.text(label.toUpperCase(), M + 9, y + 7.5);
+    doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.tx);
+    lines.forEach((l, i) => doc.text(l, M + 9, y + 13.5 + i * 6));
+    y += bh + 3;
+  }
+
+  // ── Section header bar ──
+  function secHdr(tag, title) {
+    chk(18);
+    // Green bar
+    doc.setFillColor(...G.dk); doc.rect(M, y, IW, 12, 'F');
+    // Tag badge (circle)
+    doc.setFillColor(...G.md); doc.circle(M + 9, y + 6, 5, 'F');
+    doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.wh);
+    doc.text(tag, M + 9, y + 7.8, { align: 'center' });
+    // Title
+    doc.setFontSize(11.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.wh);
+    doc.text(title, M + 20, y + 8);
+    y += 15;
+  }
+
+  // ── Bullet list ──
+  function bulletList(items) {
+    items.forEach((item, ri) => {
+      const t = Array.isArray(item) ? item[0] : item;
+      if (!t?.trim()) return;
+      const lines = doc.splitTextToSize(t.trim(), IW - 14);
+      const bh = lines.length * 6 + 7;
+      chk(bh + 2);
+      if (ri % 2 === 0) { doc.setFillColor(...G.card); doc.rect(M, y, IW, bh, 'F'); }
+      doc.setFillColor(...G.md); doc.circle(M + 6, y + bh / 2, 1.8, 'F');
+      doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.tx);
+      lines.forEach((l, li) => doc.text(l, M + 12, y + 5.5 + li * 6));
+      y += bh + 2;
+    });
+    y += 2;
+  }
+
+  // ── Two-column mini-card ──
+  function twoCol(leftLabel, leftVal, rightLabel, rightVal) {
+    if (!leftVal && !rightVal) return;
+    chk(26);
+    const hw = (IW - 4) / 2;
+    [[M, leftLabel, leftVal, G.lt], [M + hw + 4, rightLabel, rightVal, G.dk]].forEach(([x, lbl, val, bar]) => {
+      doc.setFillColor(...G.card); doc.rect(x, y, hw, 22, 'F');
+      doc.setFillColor(...bar); doc.rect(x, y, 4, 22, 'F');
+      doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.md);
+      doc.text(lbl.toUpperCase(), x + 9, y + 8);
+      doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.tx);
+      const vl = doc.splitTextToSize(val || '—', hw - 14);
+      vl.forEach((l, i) => doc.text(l, x + 9, y + 15 + i * 5.5));
+    });
+    y += 26;
+  }
+
+  // ═══════════════════════════════
+  //  COVER PAGE
+  // ═══════════════════════════════
+  const orgName = v('t1_org') || 'Organisasjon ikke angitt';
+  const dateStr = new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Background
+  doc.setFillColor(...G.dk); doc.rect(0, 0, W, H, 'F');
+
+  // Decorative circles
+  doc.setFillColor(36, 110, 66); doc.circle(W + 15, -15, 75, 'F');
+  doc.setFillColor(22, 75, 44);  doc.circle(-15, H + 15, 65, 'F');
+  doc.setFillColor(33, 102, 60); doc.circle(W / 2, H * 0.55, 110, 'F');
+
+  // Left accent stripe
+  doc.setFillColor(...G.md); doc.rect(0, 0, 8, H, 'F');
+  doc.setFillColor(...G.lt); doc.rect(8, 0, 2, H, 'F');
+
+  // Tag label
+  doc.setFontSize(9); doc.setFont(undefined, 'bold');
+  doc.setTextColor(...G.xl);
+  doc.text('TRENINGSBEHOVSANALYSE', 18, 52);
+
+  // Org name
+  doc.setFontSize(30); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.wh);
+  const orgLines = doc.splitTextToSize(orgName, W - 50);
+  orgLines.forEach((l, i) => doc.text(l, 18, 65 + i * 14));
+
+  // Date
+  doc.setFontSize(12); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.xl);
+  doc.text(dateStr, 18, 68 + orgLines.length * 14);
+
+  // White info card
+  const cY = 160, cH = 82;
+  doc.setFillColor(...G.wh); doc.roundedRect(18, cY, IW, cH, 5, 5, 'F');
+  doc.setFillColor(...G.md); doc.roundedRect(18, cY, 5, cH, 3, 3, 'F');
+
+  // Card title
+  doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.dk);
+  doc.text('Nøkkelinformasjon', 28, cY + 12);
+  doc.setDrawColor(...G.bd); doc.setLineWidth(0.4);
+  doc.line(28, cY + 15.5, 18 + IW - 6, cY + 15.5);
+
+  // Card fields
+  const cardFields = [
+    ['Formål',             v('t1_bakgrunn')],
+    ['Kompetansenivå',     v('t3_nivaa')],
+    ['Anbefalt øvelsestype', tba_type()],
+  ];
+  let cy = cY + 22;
+  cardFields.forEach(([lbl, val]) => {
+    if (!val) return;
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.md);
+    doc.text(lbl.toUpperCase(), 28, cy);
+    cy += 5;
+    doc.setFontSize(9.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.tx);
+    const vl = doc.splitTextToSize(val, IW - 22);
+    vl.slice(0, 2).forEach((l, i) => { doc.text(l, 28, cy + i * 5.5); });
+    cy += Math.min(vl.length, 2) * 5.5 + 3;
+  });
+
+  // Bottom strip on cover
+  doc.setFillColor(20, 68, 40); doc.rect(0, H - 16, W, 16, 'F');
+  doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.xl);
+  doc.text('Øvingsplanlegger — planleggingsverktøy for beredskapsøvelser', 18, H - 6);
+
+  // ═══════════════════════════════
+  //  CONTENT PAGES
+  // ═══════════════════════════════
+  doc.addPage();
+  initContentPage();
+
+  // ── T1 Organisasjonsanalyse ──
+  secHdr('T1', 'Organisasjonsanalyse');
+  fpCard('Organisasjon', orgName);
+  fpCard('Bakgrunn og formål', v('t1_bakgrunn'));
+  fpCard('Øvings- og treningskultur', [v('t1_kultur'), v('t1_kultur_note')].filter(Boolean).join(' — '));
+  twoCol('Ressurser', v('t1_ressurser'), 'Materiell og fasiliteter', v('t1_materiell'));
+  fpCard('Begrensninger og utfordringer', v('t1_begrensninger'));
+  fpCard('Krav og hjemmel', v('t1_krav'));
+  y += 6;
+
+  // ── T2 Oppgaveanalyse ──
+  secHdr('T2', 'Oppgaveanalyse');
   const oppRows = dynRows('t2-opp-list');
-  if (oppRows.length) { fLbl('Kritiske oppgaver', C.tbaL); bullets(oppRows); }
-  fp('Kunnskap og ferdigheter som må sitte', v('t2_ntk'), C.tbaL);
-  fp('Kunnskap og informasjon som må vite hvor finnes', v('t2_nta'), C.tbaL);
-  fp('Identifiserte kompetansegap', v('t2_gap'), C.tbaL);
-  setY(getY() + 4);
+  if (oppRows.length) {
+    chk(12);
+    doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.md);
+    doc.text('KRITISKE OPPGAVER SOM MÅ MESTRES', M, y); y += 5;
+    bulletList(oppRows);
+  }
+  twoCol('Kunnskap som MÅ sitte', v('t2_ntk'), 'Kunnskap som MÅ vite hvor finnes', v('t2_nta'));
+  y += 2;
+  fpCard('Identifiserte kompetansegap', v('t2_gap'), true);   // highlighted
+  y += 6;
 
-  secHdr(C.tba, 'T3', 'Personanalyse');
-  fp('Hvem trenger treningen', v('t3_hvem'), C.tbaL);
-  fp('Nåværende kompetansenivå', v('t3_nivaa'), C.tbaL);
-  fp('Forutsetninger', v('t3_forut'), C.tbaL);
-  fp('Spesielle hensyn', v('t3_hensyn'), C.tbaL);
-  setY(getY() + 4);
+  // ── T3 Personanalyse ──
+  secHdr('T3', 'Personanalyse');
+  fpCard('Hvem trenger treningen', v('t3_hvem'));
+  twoCol('Nåværende kompetansenivå', v('t3_nivaa'), 'Spesielle hensyn', v('t3_hensyn'));
+  fpCard('Forutsetninger og bakgrunn', v('t3_forut'));
+  y += 6;
 
-  secHdr(C.tba, 'T4', 'Konklusjoner og anbefalinger');
-  fp('Treningsnivå', tba_mg(), C.tbaL);
-  fp('Anbefalt øvelsestype', tba_type(), C.tbaL);
-  fp('Prioriterte treningsbehov', v('t4_behov'), C.tbaL);
+  // ── T4 Konklusjoner ──
+  secHdr('T4', 'Konklusjoner og anbefalinger');
+  twoCol('Treningsnivå', tba_mg(), 'Anbefalt øvelsestype', tba_type());
+  y += 2;
+  fpCard('Prioriterte treningsbehov og anbefalinger', v('t4_behov'), true);
 
-  addFooters('Treningsbehovsanalyse');
-  const fname = ('TBA_' + (v('t1_org') || 'ukjent')).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
+  // ── Footers on all content pages ──
+  const total = doc.getNumberOfPages();
+  for (let p = 2; p <= total; p++) {
+    doc.setPage(p);
+    doc.setDrawColor(...G.bd); doc.setLineWidth(0.3);
+    doc.line(M, H - 13, W - 10, H - 13);
+    doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.mu);
+    doc.text('Treningsbehovsanalyse  ·  ' + dateStr, M, H - 7);
+    doc.text('Side ' + p + ' av ' + total, W - 10, H - 7, { align: 'right' });
+  }
+
+  const fname = ('TBA_' + orgName).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
   doc.save(fname + '.pdf');
   showToast('TBA lastet ned!');
 }
