@@ -1834,14 +1834,14 @@ function generatePDF() {
       y += hdrH + 2;
 
       krits.forEach((k, ki) => {
-        doc.setFontSize(9.5); doc.setFont(undefined, 'normal');
+        doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
         const kLines = doc.splitTextToSize(k, IW - 18);
-        const kH = kLines.length * 5.5 + 5;
+        const kH = kLines.length * 6 + 6;
         chk(kH);
         if (ki % 2 === 0) { doc.setFillColor(...B.card); doc.rect(M, y, IW, kH, 'F'); }
         doc.setFillColor(...B.lt); doc.circle(M + 7, y + kH / 2, 1.5, 'F');
         doc.setTextColor(...B.tx);
-        kLines.forEach((l, li) => doc.text(l, M + 13, y + 5 + li * 5.5));
+        kLines.forEach((l, li) => doc.text(l, M + 13, y + 6 + li * 6));
         y += kH;
       });
       y += 5;
