@@ -137,6 +137,9 @@
     .eval-krit-item input[type=checkbox] { width:16px; height:16px; accent-color:var(--ok); cursor:pointer; flex-shrink:0; }
     .eval-krit-item.checked { color:var(--ok); font-weight:600; }
     .eval-empty { color:var(--muted); font-size:.84rem; font-style:italic; padding:6px 0; }
+    .eval-komm { margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+    .eval-komm-label { font-size:.78rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px; display:block; }
+    .eval-komm-ta { width:100%; font-size:.85rem; resize:vertical; }
 
     /* ── Divider ── */
     hr.d { border:none; border-top:1px solid var(--border); margin:14px 0; }
@@ -215,7 +218,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.4</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.5</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Last inn demo</button>
@@ -890,6 +893,7 @@ function buildEvalMatrix() {
   // Save existing checkbox states
   const saved = {};
   container.querySelectorAll('input[type=checkbox]').forEach(cb => { if (cb.id) saved[cb.id] = cb.checked; });
+  container.querySelectorAll('textarea[id]').forEach(ta => { saved[ta.id] = ta.value; });
   container.innerHTML = '';
 
   const maalItems = document.querySelectorAll('#maal-list .maal-di');
@@ -934,6 +938,20 @@ function buildEvalMatrix() {
       p.textContent = 'Ingen kriterier definert for dette målet.';
       maalDiv.appendChild(p);
     }
+
+    // Evaluators kommentarfelt per delmål
+    const kommDiv = document.createElement('div');
+    kommDiv.className = 'eval-komm';
+    const kommLabel = document.createElement('label');
+    kommLabel.className = 'eval-komm-label';
+    kommLabel.textContent = 'Evaluators kommentar / Observasjoner';
+    const kommId = `eval_komm_${i}`;
+    const kommTa = document.createElement('textarea');
+    kommTa.id = kommId; kommTa.className = 'eval-komm-ta'; kommTa.rows = 2;
+    kommTa.placeholder = 'Skriv inn observasjoner, kommentarer og læringsnotater...';
+    kommTa.value = saved[kommId] || '';
+    kommDiv.appendChild(kommLabel); kommDiv.appendChild(kommTa);
+    maalDiv.appendChild(kommDiv);
     container.appendChild(maalDiv);
   });
 
@@ -1385,19 +1403,23 @@ function generateTBAPDF() {
 
   // ── Field card (label + value in a shaded box) ──
   function fpCard(label, text, highlight) {
-    if (!text?.trim()) return;
-    const lines = doc.splitTextToSize(text.trim(), IW - 12);
-    const bh = lines.length * 6 + 16;
+    const content = text?.trim() || '';
+    const empty = !content;
+    const lines = empty ? [] : doc.splitTextToSize(content, IW - 12);
+    const bh = empty ? 18 : lines.length * 6 + 16;
     chk(bh + 4);
-    const bg = highlight ? G.hi : G.card;
-    const bar = highlight ? G.dk : G.lt;
-    doc.setFillColor(...bg); doc.rect(M, y, IW, bh, 'F');
-    doc.setFillColor(...bar); doc.rect(M, y, 4, bh, 'F');
+    doc.setFillColor(...(empty ? [245,246,248] : (highlight ? G.hi : G.card))); doc.rect(M, y, IW, bh, 'F');
+    doc.setFillColor(...(empty ? [210,215,222] : (highlight ? G.dk : G.lt)));   doc.rect(M, y, 4, bh, 'F');
     doc.setFontSize(7.5); doc.setFont(undefined, 'bold');
-    doc.setTextColor(...(highlight ? G.dk : G.md));
+    doc.setTextColor(...(highlight && !empty ? G.dk : G.md));
     doc.text(label.toUpperCase(), M + 9, y + 7.5);
-    doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.tx);
-    lines.forEach((l, i) => doc.text(l, M + 9, y + 13.5 + i * 6));
+    if (empty) {
+      doc.setFontSize(9); doc.setFont(undefined, 'italic'); doc.setTextColor(158, 162, 172);
+      doc.text('— Ikke fylt ut —', M + 9, y + 14);
+    } else {
+      doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...G.tx);
+      lines.forEach((l, i) => doc.text(l, M + 9, y + 13.5 + i * 6));
+    }
     y += bh + 3;
   }
 
@@ -1627,20 +1649,23 @@ function generatePDF() {
   }
 
   function fpCard(label, text, highlight, pal = BLUE) {
-    if (!text?.trim()) return;
+    const content = text?.trim() || '';
+    const empty = !content;
     doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
-    const lines = doc.splitTextToSize(text.trim(), IW - 14);
-    const bh = lines.length * 6 + 16;
+    const lines = empty ? [] : doc.splitTextToSize(content, IW - 14);
+    const bh = empty ? 18 : lines.length * 6 + 16;
     chk(bh + 4);
-    const bg   = highlight ? pal.hi  : pal.card;
-    const bar  = highlight ? pal.dk  : pal.lt;
-    const lclr = pal.md;
-    doc.setFillColor(...bg); doc.rect(M, y, IW, bh, 'F');
-    doc.setFillColor(...bar); doc.rect(M, y, 4, bh, 'F');
-    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...lclr);
+    doc.setFillColor(...(empty ? [245,246,248] : (highlight ? pal.hi : pal.card))); doc.rect(M, y, IW, bh, 'F');
+    doc.setFillColor(...(empty ? [210,215,222] : (highlight ? pal.dk : pal.lt)));   doc.rect(M, y, 4, bh, 'F');
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...pal.md);
     doc.text(label.toUpperCase(), M + 9, y + 7.5);
-    doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.tx);
-    lines.forEach((l, i) => doc.text(l, M + 9, y + 13.5 + i * 6));
+    if (empty) {
+      doc.setFontSize(9); doc.setFont(undefined, 'italic'); doc.setTextColor(158, 162, 172);
+      doc.text('— Ikke fylt ut —', M + 9, y + 14);
+    } else {
+      doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...B.tx);
+      lines.forEach((l, i) => doc.text(l, M + 9, y + 13.5 + i * 6));
+    }
     y += bh + 3;
   }
 
@@ -1958,17 +1983,23 @@ function generateEvalPDF() {
   }
 
   function fpCard(label, text, highlight) {
-    if (!text?.trim()) return;
+    const content = text?.trim() || '';
+    const empty = !content;
     doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
-    const lines = doc.splitTextToSize(text.trim(), IW - 14);
-    const bh = lines.length * 6 + 16;
+    const lines = empty ? [] : doc.splitTextToSize(content, IW - 14);
+    const bh = empty ? 18 : lines.length * 6 + 16;
     chk(bh + 4);
-    doc.setFillColor(...(highlight ? E.hi : E.card)); doc.rect(M, y, IW, bh, 'F');
-    doc.setFillColor(...(highlight ? E.dk : E.lt));   doc.rect(M, y, 4, bh, 'F');
+    doc.setFillColor(...(empty ? [245,246,248] : (highlight ? E.hi : E.card))); doc.rect(M, y, IW, bh, 'F');
+    doc.setFillColor(...(empty ? [210,215,222] : (highlight ? E.dk : E.lt)));   doc.rect(M, y, 4, bh, 'F');
     doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.md);
     doc.text(label.toUpperCase(), M + 9, y + 7.5);
-    doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.tx);
-    lines.forEach((l, i) => doc.text(l, M + 9, y + 13.5 + i * 6));
+    if (empty) {
+      doc.setFontSize(9); doc.setFont(undefined, 'italic'); doc.setTextColor(158, 162, 172);
+      doc.text('— Ikke fylt ut —', M + 9, y + 14);
+    } else {
+      doc.setFontSize(10.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...E.tx);
+      lines.forEach((l, i) => doc.text(l, M + 9, y + 13.5 + i * 6));
+    }
     y += bh + 3;
   }
 
@@ -2151,6 +2182,24 @@ function generateEvalPDF() {
         doc.line(M, y + kH, M + IW, y + kH);
         y += kH;
       });
+    }
+
+    // Evaluators kommentar
+    const komm = document.getElementById(`eval_komm_${i}`)?.value.trim();
+    if (komm) {
+      chk(10);
+      doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.md);
+      doc.text('EVALUATORS KOMMENTAR', M + 4, y + 5);
+      y += 9;
+      doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
+      const kommLines = doc.splitTextToSize(komm, IW - 14);
+      const kommH = Math.max(10, kommLines.length * 6 + 8);
+      chk(kommH);
+      doc.setFillColor(...E.hi); doc.rect(M, y, IW, kommH, 'F');
+      doc.setFillColor(...E.md); doc.rect(M, y, 3, kommH, 'F');
+      doc.setFontSize(10.5); doc.setFont(undefined, 'italic'); doc.setTextColor(...E.tx);
+      kommLines.forEach((l, li) => doc.text(l, M + 8, y + 6 + li * 6));
+      y += kommH + 3;
     }
     y += 6;
   });
