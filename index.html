@@ -215,7 +215,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.2</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.3</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Last inn demo</button>
@@ -2130,9 +2130,9 @@ function generateEvalPDF() {
     } else {
       krits.forEach((k, ki) => {
         const isChecked = checked[ki];
-        doc.setFontSize(9.5); doc.setFont(undefined, 'normal');
+        doc.setFontSize(10.5); doc.setFont(undefined, 'normal');
         const kLines = doc.splitTextToSize(k, IW - 20);
-        const kH = Math.max(9, kLines.length * 5.5 + 6);
+        const kH = Math.max(10, kLines.length * 6 + 6);
         chk(kH);
 
         const rowBg = isChecked ? E.oklt : (ki % 2 === 0 ? E.card : E.wh);
@@ -2150,7 +2150,7 @@ function generateEvalPDF() {
 
         doc.setTextColor(...(isChecked ? E.ok : E.tx));
         doc.setFont(undefined, isChecked ? 'bold' : 'normal');
-        kLines.forEach((l, li) => doc.text(l, M + 12, y + 5.5 + li * 5.5));
+        kLines.forEach((l, li) => doc.text(l, M + 12, y + 6 + li * 6));
         doc.setDrawColor(...E.bd); doc.setLineWidth(0.12);
         doc.line(M, y + kH, M + IW, y + kH);
         y += kH;
