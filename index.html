@@ -147,11 +147,12 @@
     /* ── T4 Findings summary ── */
     .findings { background:#f0f9f4; border:1px solid var(--tba-lt); border-radius:var(--r); padding:14px 16px; }
     .findings h4 { font-size:.75rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px; }
-    .findings-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px; align-items:start; }
-    .fi { background:var(--white); border-radius:5px; padding:8px 11px; border-left:3px solid var(--tba-lt); }
-    .fi .fi-lbl { font-size:.68rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.3px; }
-    .fi .fi-val { font-size:.82rem; color:var(--text); margin-top:3px; line-height:1.4; }
-    .fi .fi-val.mt { color:var(--muted); font-style:italic; }
+    .findings-grid { display:flex; flex-direction:column; gap:0; }
+    .fi-row { display:grid; grid-template-columns:130px 1fr; gap:6px 14px; padding:7px 4px; border-bottom:1px solid rgba(82,168,120,.2); align-items:baseline; }
+    .fi-row:last-child { border-bottom:none; }
+    .fi-lbl { font-size:.69rem; font-weight:700; color:var(--tba-mid); text-transform:uppercase; letter-spacing:.35px; white-space:nowrap; }
+    .fi-val { font-size:.84rem; color:var(--text); line-height:1.45; }
+    .fi-val.mt { color:var(--muted); font-style:italic; }
 
     /* ── Suggestion box ── */
     .suggest-box { background:#e8f5ee; border:1.5px solid var(--tba-lt); border-radius:var(--r); padding:10px 14px; display:flex; gap:9px; align-items:flex-start; margin-bottom:8px; }
@@ -769,17 +770,22 @@ function renderNav() {
 //  T4 — FINDINGS SUMMARY + AUTO-SUGGEST
 // ═══════════════════════════════════════════
 function buildT4Summary() {
+  const tr = (s, n) => s && s.length > n ? s.slice(0, n) + '…' : (s || '');
+  const opp = dynRows('t2-opp-list').map(r => r[0]).filter(Boolean);
+  const oppText = opp.length
+    ? tr(opp[0], 70) + (opp.length > 1 ? ` — og ${opp.length - 1} til` : '')
+    : '';
   const items = [
-    ['Organisasjon',         v('t1_org')],
-    ['Øvingskultur',         v('t1_kultur')],
-    ['Begrensninger',        v('t1_begrensninger')],
-    ['Kritiske oppgaver',    dynRows('t2-opp-list').map(r => r[0]).filter(Boolean).join(', ')],
-    ['Kompetansegap',        v('t2_gap')],
-    ['Hvem trenger trening', v('t3_hvem')],
-    ['Kompetansenivå',       v('t3_nivaa')],
+    ['Organisasjon',     v('t1_org')],
+    ['Øvingskultur',     v('t1_kultur')],
+    ['Begrensninger',    tr(v('t1_begrensninger'), 90)],
+    ['Krit. oppgaver',   oppText],
+    ['Kompetansegap',    tr(v('t2_gap'), 110)],
+    ['Hvem trenger',     tr(v('t3_hvem'), 80)],
+    ['Kompetansenivå',   v('t3_nivaa')],
   ];
   document.getElementById('t4-findings-grid').innerHTML = items.map(([lbl, val]) =>
-    `<div class="fi"><div class="fi-lbl">${lbl}</div><div class="fi-val ${val ? '' : 'mt'}">${val || '— ikke utfylt —'}</div></div>`
+    `<div class="fi-row"><span class="fi-lbl">${lbl}</span><span class="fi-val${val ? '' : ' mt'}">${val || '— ikke utfylt —'}</span></div>`
   ).join('');
 }
 
