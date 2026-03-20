@@ -193,6 +193,10 @@
     /* ── Toast ── */
     #toast { position:fixed; bottom:22px; right:22px; background:var(--ok); color:#fff; padding:11px 18px; border-radius:var(--r); box-shadow:var(--sh-lg); font-size:.87rem; font-weight:600; opacity:0; pointer-events:none; transition:opacity .3s; z-index:999; }
     #toast.show { opacity:1; }
+
+    /* ── Demo button ── */
+    .demo-btn { margin-left:auto; background:rgba(255,255,255,.13); border:1.5px solid rgba(255,255,255,.3); color:rgba(255,255,255,.85); border-radius:var(--r); padding:7px 13px; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    .demo-btn:hover { background:rgba(255,255,255,.23); color:#fff; }
   </style>
 </head>
 <body>
@@ -204,6 +208,7 @@
       <h1>Øvingsplanlegger</h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
+    <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Last inn demo</button>
   </div>
   <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
 </header>
@@ -1030,6 +1035,181 @@ function addKont() { mkDyn('kont-list', [inp('Navn', 1), inp('Funksjon', 1), inp
 // Seed initial rows
 ['T2Opp','Maal','Inj','Uts','Rol','Delt','Kont'].forEach(k => window['add'+k]());
 renderNav();
+
+// ═══════════════════════════════════════════
+//  DEMO — Fiktiv kommunal kriseledelse
+// ═══════════════════════════════════════════
+function fillDemo() {
+  // ── TBA T1 ──
+  set('t1_org',           'Fjordheim kommune — Kommunal kriseledelse');
+  set('t1_bakgrunn',      'Kommunen har ikke gjennomført øvelse av kriseledelsen siden desember 2022. En strømhendelse i oktober 2024 rammet kommunen i over 18 timer og avdekket svakheter i varslingsrutiner og etablering av krisestaben. Ny beredskapskoordinator ønsker å kartlegge treningsbehovet systematisk før ny øvelse planlegges.');
+  set('t1_kultur',        'Middels — noe struktur, varierende');
+  set('t1_kultur_note',   'Administrativt nivå har noe erfaring, men deltakelsen er varierende. Ny ordfører og tre nye kommunalsjefer etter valget i 2023 har ingen øvelseserfaring fra politisk ledelse.');
+  set('t1_ressurser',     'Ca. 8 timer per halvår tilgjengelig for øving. Budsjett 15 000 kr per øvelse. Beredskapskoordinator + én ekstern instruktør.');
+  set('t1_materiell',     'Kriseledelserommet i rådhuset (kapasitet 14 pers.), bærbare PC-er med CIM-tilgang, sambandsradioer (4 stk), projektor.');
+  set('t1_begrensninger', 'Høy politisk turnover etter kommunevalget 2023 — ny ordfører og tre nye kommunalsjefer. Varamedlemmer lite involvert i beredskapsarbeid. Begrenset tilgjengelig tid fra politisk ledelse.');
+  set('t1_krav',          'Sivilbeskyttelsesloven §14 — kommunal beredskapsplikt. Kommunens ROS-analyse (2025) identifiserer kriseledelse som kritisk kompetanseområde. DSB-tilsyn i 2023 pekte på behov for mer regelmessig øving av kriseledelsen.');
+
+  // ── TBA T2 ──
+  const t2List = document.getElementById('t2-opp-list');
+  t2List.innerHTML = '';
+  ['Varsle og innkalle kriseledelsen innen 30 minutter fra hendelse er bekreftet',
+   'Etablere og bemanne krisestaben — tildele roller og klargjøre kriseledelserommet',
+   'Gjennomføre løpende situasjonsrapportering og oppdatere felles situasjonsbilde i CIM',
+   'Koordinere med Statsforvalteren og relevante samvirkepartnere',
+   'Håndtere ekstern kommunikasjon og mediehenvendelser koordinert'
+  ].forEach(t => { addT2Opp(); t2List.querySelector('.di:last-child textarea').value = t; });
+
+  set('t2_ntk', 'Varslingsprosedyrer og hvem som innkaller hvem. Rollefordeling og beslutningsmyndighet i kriseledelsen. Bruk av CIM til logging og situasjonsrapportering. Rapporteringsformat og tidsfrister mot Statsforvalteren. PLIVO-prosedyre ved hendelser med mulig smittefare.');
+  set('t2_nta', 'Kommunens helhetlige ROS-analyse og beredskapsplan. Ressurs- og personelloversikter. Kontaktlister for samvirkepartnere (politi, brann, helse, Statsforvalter). Evakueringsplaner for kritiske objekter (skoler, sykehjem).');
+  set('t2_gap', 'Kriseledelsens evne til rask etablering er utilstrekkelig — strømhendelsen i 2024 viste at det tok over 90 minutter å etablere stab (målet er 30 min). Rolleforståelsen er uklar blant nye politiske ledere. CIM brukes ikke konsekvent og loggføring er mangelfull. Koordinering med Statsforvalteren har vært reaktiv, ikke proaktiv. Ekstern kommunikasjon har vært ukoordinert og for sen.');
+
+  // ── TBA T3 ──
+  set('t3_hvem',  'Kommunens kriseledelse: ordfører, rådmann, kommunalsjef beredskap, kommunikasjonssjef, teknisk sjef samt varamedlemmer for disse. Totalt 10–12 personer.');
+  set('t3_nivaa', 'Blandet — varierende bakgrunn');
+  set('t3_forut', 'Rådmannen og beredskapskoordinatoren har deltatt på øvelser tidligere og kjenner prosedyrene. Ny ordfører og tre nye kommunalsjefer har ingen øvelseserfaring. To varamedlemmer har militær beredskapserfaring.');
+  set('t3_hensyn', 'Ny ordfører uten beredskapserfaring — må ivaretas spesielt i rollekortdesign og briefing. Høy politisk turnover gjør det vanskelig å bygge kontinuerlig kompetanse. Ekstern observatør fra Statsforvalteren deltar, noe som kan påvirke dynamikken i staben.');
+
+  // ── TBA T4 ──
+  document.getElementById('t4_gruppe').checked = true;
+  document.getElementById('t4_org').checked = true;
+  set('t4_type', 'Diskusjonsøvelse');
+  updateTypeDesc();
+  set('t4_behov', 'Øvelsen bør prioritere: (1) Rask og korrekt etablering av kriseledelsen — mål under 30 min, (2) Avklaring av roller og beslutningsmyndighet under press, (3) Korrekt bruk av CIM og situasjonsrapportering til Statsforvalteren, (4) Koordinert og proaktiv ekstern kommunikasjon mot media og publikum.\n\nDiskusjonsøvelse anbefales som første steg — grunnleggende rolleforståelse og planverk må testes og innarbeides før man kjører mer krevende øvelsesformer (spilløvelse / fullskala).');
+
+  // ── PLAN 1 ──
+  set('s1_navn',   'Øvelse Fjordheim 2026');
+  set('s1_dato',   '2026-05-14');
+  set('s1_tid',    '09:00');
+  set('s1_sted',   'Rådhuset, Fjordheim — Kriseledelserommet, 2. etasje');
+  set('s1_type',   'Diskusjonsøvelse');
+  set('s1_leder',  'Kari Bakken (Beredskapskoordinator)');
+  set('s1_org',    'Fjordheim kommune');
+  set('s1_antall', '12');
+
+  // ── PLAN 2 ──
+  set('s2_bakgrunn',  'Fjordheim kommune gjennomfører denne øvelsen som ledd i oppfylling av kommunal beredskapsplikt. En strømhendelse i oktober 2024 rammet kommunen i over 18 timer og avdekket svakheter i kriseledelsens evne til rask etablering og koordinering. Øvelsen bygger direkte på funn fra treningsbehovsanalysen gjennomført mars 2026.');
+  set('s2_gap',       'Etableringstid for krisestab er for lang (90 min vs. mål 30 min). Rolleforståelsen er uklar blant nyvalgt politisk ledelse. CIM brukes ikke konsekvent. Koordinering med Statsforvalteren er reaktiv. Ekstern kommunikasjon har vært ukoordinert og for sen.');
+  set('s2_hjemmel',   'Sivilbeskyttelsesloven §14 — kommunal beredskapsplikt. Kommunens ROS-analyse (2025). DSB-tilsyn 2023.');
+  set('s2_tidligere', 'Siste øvelse: desember 2022 (fullskalaøvelse — flom). Evalueringen pekte på behov for bedre kommunikasjonsprosedyrer og klarere rollefordeling. Ingen øvelse gjennomført 2023–2025. Reell hendelse oktober 2024 (strømbrudd 18 timer) avdekket ytterligere gap.');
+
+  // ── PLAN 3 — Delmål med kriterier ──
+  set('s3_hoved', 'Etter øvelsen skal kriseledelsen kunne etablere og lede kommunens krisehåndtering i henhold til beredskapsplanen, med klar rollefordeling, løpende situasjonsrapportering og koordinert ekstern kommunikasjon.');
+  document.getElementById('s3_gruppe').checked = true;
+  document.getElementById('s3_org').checked = true;
+
+  const maalList = document.getElementById('maal-list');
+  maalList.innerHTML = '';
+  const maals = [
+    { maal: 'Etablere kriseledelsen raskt og i henhold til beredskapsplanen',
+      kriterier: ['Alle nøkkelpersoner varslet innen 15 minutter', 'Kriseledelserommet etablert og operativt innen 30 minutter', 'Roller og ansvar avklart og kommunisert til alle i staben', 'Hendelseslogg startet i CIM'] },
+    { maal: 'Gjennomføre løpende situasjonsrapportering og opprettholde felles situasjonsforståelse',
+      kriterier: ['Første situasjonsrapport sendt Statsforvalteren innen 60 minutter etter etablering', 'CIM oppdatert løpende med korrekt informasjon', 'Felles situasjonsforståelse kommunisert i staben ved hvert statusmøte', 'Beslutningslogg ført gjennom hele øvelsen'] },
+    { maal: 'Håndtere ekstern kommunikasjon koordinert og proaktivt',
+      kriterier: ['Pressestrategi avklart innen 45 minutter', 'Talsperson utpekt og briefet før første mediekontakt', 'Ingen ukoordinerte uttalelser til media fra enkeltpersoner', 'Informasjon til befolkningen publisert på kommunens hjemmeside innen 60 minutter'] }
+  ];
+  maals.forEach(({ maal, kriterier }) => {
+    addMaal();
+    const di = maalList.querySelector('.maal-di:last-child');
+    di.querySelector('.maal-text').value = maal;
+    const kritList = di.querySelector('.krit-sub-list');
+    const inps = kritList.querySelectorAll('.krit-inp');
+    if (inps[0]) inps[0].value = kriterier[0];
+    for (let i = 1; i < kriterier.length; i++) {
+      addKritItem(kritList);
+      kritList.querySelectorAll('.krit-inp')[i].value = kriterier[i];
+    }
+  });
+
+  // ── PLAN 4 ──
+  set('s4_scenario',   'Torsdag 14. mai kl. 08:45 mottar kommunens vakttelefon melding fra jernbaneoperatøren om at et godstog har sporet av ved Fjordheim stasjon. Toget transporterte kjemikalier, og det er meldt om røykutvikling fra ett av vognene. Ca. 200 meter fra sporet ligger Fjordheim ungdomsskole med 350 elever og 40 ansatte. Brannvesenet er varslet og rykker ut. Politiet sperrer av et område på 150 meter rundt avsporingen.');
+  set('s4_startpunkt', 'Kl. 09:00 ringer beredskapskoordinatoren (spilleder) rådmannen og informerer om hendelsen. Rådmannen må ta stilling til om kriseledelsen skal innkalles og kriseledelserommet etableres. Ingen øvrige i staben er foreløpig informert.');
+
+  const injList = document.getElementById('inj-list');
+  injList.innerHTML = '';
+  [['09:15', 'Brannvesenet bekrefter at røyken inneholder klorhydrogen. Evakuering av skolen anbefales — 350 elever og 40 ansatte berøres.', 'Spilleder'],
+   ['09:30', 'NRK Vestland ringer kommunens pressetelefon og ber om kommentar. En journalist er allerede på plass ved sperringen og filmer.', 'Spilleder'],
+   ['10:00', 'Statsforvalteren i Vestland ber om første situasjonsrapport og spør om kommunen trenger bistand.', 'Spilleder'],
+   ['10:30', 'En forelder poster bilder fra evakueringsområdet på Facebook: «Kommunen tier og informerer ikke». Innlegget spres raskt med mange negative kommentarer.', 'Spilleder']
+  ].forEach(([tid, besk, ans]) => {
+    addInj();
+    const row = injList.querySelector('.di:last-child');
+    const inps = row.querySelectorAll('input');
+    inps[0].value = tid; inps[1].value = besk; inps[2].value = ans;
+  });
+
+  set('s4_markor', 'Ingen markører eller sminke — diskusjonsøvelse gjennomføres uten feltaktivitet. Scenariet presenteres muntlig og via injeksjonskort.');
+
+  const utsList = document.getElementById('uts-list');
+  utsList.innerHTML = '';
+  [['Bærbare PC-er med CIM-tilgang', '12'], ['Sambandsradioer', '4'], ['Rollekort til alle deltakere', '12'],
+   ['Injeksjonskort (utskrift)', '20'], ['Whiteboard og flipover', '2'], ['Utskrift av beredskapsplan og varslingslister', '15']
+  ].forEach(([uts, ant]) => {
+    addUts();
+    const row = utsList.querySelector('.di:last-child');
+    const inps = row.querySelectorAll('input');
+    inps[0].value = uts; inps[1].value = ant;
+  });
+
+  const rolList = document.getElementById('rol-list');
+  rolList.innerHTML = '';
+  [['Spilleder', 'Kari Bakken', 'Leder øvelsen og introduserer injeksjoner. Observerer og noterer.'],
+   ['Ordfører (fiktiv)', 'Per Johansen', 'Leder kriseledelsen og er ansvarlig for politiske beslutninger.'],
+   ['Rådmann (fiktiv)', 'Anne Sørensen', 'Administrativ leder — koordinerer tverrsektoriell innsats.'],
+   ['Kommunikasjonssjef', 'Lars Moen', 'Ansvarlig for pressehåndtering og informasjon til publikum.'],
+   ['Observatør', 'Ingrid Vik (Statsforvalteren)', 'Observerer øvelsen og bidrar i evalueringen. Er ikke aktiv deltaker.']
+  ].forEach(([rolle, navn, besk]) => {
+    addRol();
+    const row = rolList.querySelector('.di:last-child');
+    const inps = row.querySelectorAll('input');
+    inps[0].value = rolle; inps[1].value = navn;
+    row.querySelector('textarea').value = besk;
+  });
+
+  // ── PLAN 5 ──
+  const deltList = document.getElementById('delt-list');
+  deltList.innerHTML = '';
+  [['Per Johansen',   'Ordfører',                         'Grunnleggende'],
+   ['Anne Sørensen',  'Rådmann',                          'Viderekommet'],
+   ['Kari Bakken',    'Beredskapskoordinator / Spilleder', 'Ekspert'],
+   ['Lars Moen',      'Kommunikasjonssjef',                'Grunnleggende'],
+   ['Tor Hansen',     'Teknisk sjef',                      'Grunnleggende'],
+   ['Eva Nordheim',   'Kommunalsjef beredskap',            'Grunnleggende'],
+   ['Mari Dalen',     'Vara — ordfører',                   'Grunnleggende'],
+   ['Jon Fjeld',      'Vara — rådmann',                    'Grunnleggende']
+  ].forEach(([navn, rolle, nivaa]) => {
+    addDelt();
+    const row = deltList.querySelector('.di:last-child');
+    const inps = row.querySelectorAll('input');
+    inps[0].value = navn; inps[1].value = rolle;
+    row.querySelector('select').value = nivaa;
+  });
+
+  const kontList = document.getElementById('kont-list');
+  kontList.innerHTML = '';
+  [['Kari Bakken',                    'Beredskapskoordinator / Spilleder', '900 12 345'],
+   ['Statsforvalteren beredskap',     'Faglig støtte og observatør',       '55 57 20 00'],
+   ['Brann- og redningsvesenet',      'Scenario-aktør (via telefon)',       '110'],
+   ['Lokal politistasjonssjef',       'Samvirkeaktør i scenario',           '02800']
+  ].forEach(([navn, funk, tlf]) => {
+    addKont();
+    const row = kontList.querySelector('.di:last-child');
+    const inps = row.querySelectorAll('input');
+    inps[0].value = navn; inps[1].value = funk; inps[2].value = tlf;
+  });
+
+  set('s5_ext', 'Statsforvalteren i Vestland deltar som observatør og bidrar i evalueringen. Brann- og redningsetaten er scenario-aktør og kommuniserer via telefon. Politiet nevnes i scenariet, men deltar ikke aktivt i øvelsen.');
+
+  // ── PLAN 6 ──
+  document.getElementById('s6_debrief').checked = true;
+  document.getElementById('s6_obs').checked = true;
+  set('s6_hvem',     'Kari Bakken (intern) + Ingrid Vik, Statsforvalteren (ekstern observatør)');
+  set('s6_tidspunkt', 'Hot wash umiddelbart etter øvelsen (30 min). Skriftlig evalueringsrapport innen 5 virkedager.');
+  set('s6_overf',    'Evalueringsrapport sendes rådmannen og politisk ledelse innen 20. mai 2026. Funn implementeres i revidert beredskapsplan innen 31. august 2026. Rapporten sendes Statsforvalteren som del av årsrapportering. Ny øvelse (spilløvelse) planlegges tidlig 2027 for å verifisere forbedringer.');
+
+  renderNav();
+  showToast('Demoscenario lastet inn — Fjordheim kommune 🏔️');
+}
 
 // ═══════════════════════════════════════════
 //  PDF HELPERS (shared)
