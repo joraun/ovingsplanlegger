@@ -218,7 +218,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.6</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.7</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Last inn demo</button>
@@ -1738,10 +1738,11 @@ function generatePDF() {
   }
 
   function subLabel(text, pal = BLUE) {
-    chk(8);
-    doc.setFontSize(7.5); doc.setFont(undefined, 'bold');
+    y += 8;
+    chk(15);
+    doc.setFontSize(9); doc.setFont(undefined, 'bold');
     doc.setTextColor(...pal.md);
-    doc.text(text.toUpperCase(), M, y); y += 6;
+    doc.text(text.toUpperCase(), M, y); y += 7;
   }
 
   // ── COVER PAGE ──
@@ -2036,9 +2037,10 @@ function generateEvalPDF() {
   }
 
   function subLabel(text) {
-    chk(8);
-    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.md);
-    doc.text(text.toUpperCase(), M, y); y += 6;
+    y += 8;
+    chk(15);
+    doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.md);
+    doc.text(text.toUpperCase(), M, y); y += 7;
   }
 
   // ── COVER PAGE ──
