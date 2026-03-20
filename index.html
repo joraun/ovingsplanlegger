@@ -218,7 +218,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.8</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.9</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Last inn demo</button>
@@ -1432,7 +1432,7 @@ function generateTBAPDF() {
     // Tag badge (circle)
     doc.setFillColor(...G.md); doc.circle(M + 9, y + 6, 5, 'F');
     doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.wh);
-    doc.text(tag, M + 9, y + 7.8, { align: 'center' });
+    doc.text(tag, M + 9, y + 6, { align: 'center', baseline: 'middle' });
     // Title
     doc.setFontSize(11.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...G.wh);
     doc.text(title, M + 20, y + 8);
@@ -1676,7 +1676,7 @@ function generatePDF() {
     doc.setFillColor(...pal.dk); doc.rect(M, y, IW, 12, 'F');
     doc.setFillColor(...pal.md); doc.circle(M + 9, y + 6, 5, 'F');
     doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
-    doc.text(tag, M + 9, y + 7.8, { align: 'center' });
+    doc.text(tag, M + 9, y + 6, { align: 'center', baseline: 'middle' });
     doc.setFontSize(11.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
     doc.text(title, M + 20, y + 8);
     y += 15;
@@ -1857,7 +1857,7 @@ function generatePDF() {
       doc.setFillColor(...B.dk); doc.rect(M, y, IW, hdrH, 'F');
       doc.setFillColor(...B.md); doc.circle(M + 7, y + hdrH / 2, 4, 'F');
       doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
-      doc.text(String(i + 1), M + 7, y + hdrH / 2 + 1.5, { align: 'center' });
+      doc.text(String(i + 1), M + 7, y + hdrH / 2, { align: 'center', baseline: 'middle' });
       doc.setFontSize(10.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...B.wh);
       tLines.forEach((l, li) => doc.text(l, M + 16, y + 6 + li * 5.5));
       y += hdrH + 2;
@@ -2031,7 +2031,7 @@ function generateEvalPDF() {
     doc.setFillColor(...E.dk); doc.rect(M, y, IW, 12, 'F');
     doc.setFillColor(...E.md); doc.circle(M + 9, y + 6, 5, 'F');
     doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
-    doc.text(tag, M + 9, y + 7.8, { align: 'center' });
+    doc.text(tag, M + 9, y + 6, { align: 'center', baseline: 'middle' });
     doc.setFontSize(11.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
     doc.text(title, M + 20, y + 8);
     y += 15;
@@ -2141,7 +2141,7 @@ function generateEvalPDF() {
     doc.setFillColor(...E.dk); doc.rect(M, y, IW, hdrH, 'F');
     doc.setFillColor(...E.md); doc.circle(M + 7, y + hdrH / 2, 4, 'F');
     doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
-    doc.text(String(i + 1), M + 7, y + hdrH / 2 + 1.5, { align: 'center' });
+    doc.text(String(i + 1), M + 7, y + hdrH / 2, { align: 'center', baseline: 'middle' });
     doc.setFontSize(10.5); doc.setFont(undefined, 'bold'); doc.setTextColor(...E.wh);
     tLines.forEach((l, li) => doc.text(l, M + 16, y + 6 + li * 5.5));
 
