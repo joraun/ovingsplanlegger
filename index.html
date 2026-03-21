@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.11</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.12</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -1289,6 +1289,20 @@ function importJSON() {
   document.getElementById('import-file-input').click();
 }
 
+function _validateImportData(data) {
+  // Må være et objekt
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
+  // Må ha minst én av de forventede nøklene
+  const requiredKeys = ['fields', 'lists', 'page'];
+  const hasStructure = requiredKeys.every(k => k in data);
+  if (!hasStructure) return false;
+  // fields-objektet må ha minst én kjent nøkkel fra appen
+  const knownFields = ['t1_org', 't1_bakgrunn', 's1_navn', 's1_org', 't2_gap', 't3_hvem'];
+  const fields = data.fields || {};
+  const hasKnownField = knownFields.some(k => k in fields);
+  return hasKnownField;
+}
+
 function handleImportFile(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -1296,14 +1310,21 @@ function handleImportFile(e) {
   reader.onload = ev => {
     try {
       const data = JSON.parse(ev.target.result);
+      if (!_validateImportData(data)) {
+        showToast('⚠️ Ugyldig fil — ikke en øvingsplan');
+        alert('Dette ser ikke ut som en gyldig øvingsplan-fil.\n\nFilen mangler forventet struktur. Bruk en fil eksportert fra Øvingsplanlegger.');
+        return;
+      }
       _applyData(data);
       if (typeof data.page === 'number') goTo(data.page);
       _saveToLocalStorage();
       showToast('Data importert fra fil 📂');
     } catch(err) {
-      alert('Kunne ikke lese filen. Kontroller at det er en gyldig JSON-fil fra Øvingsplanlegger.');
+      showToast('⚠️ Kunne ikke lese filen');
+      alert('Filen kunne ikke leses.\n\nKontroller at det er en gyldig JSON-fil (.json) eksportert fra Øvingsplanlegger, og ikke et bilde eller annen filtype.');
+    } finally {
+      e.target.value = '';
     }
-    e.target.value = '';
   };
   reader.readAsText(file);
 }
