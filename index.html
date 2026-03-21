@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.18</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.19</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -686,7 +686,8 @@
         </div>
         <hr class="d" />
         <div>
-          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Nøkkelpersoner og kontaktinformasjon</label>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;">Kontaktliste for øvingsdagen</label>
+          <p class="hint" style="margin-bottom:9px;"><strong>Spillstab</strong> — reelle personer med ekte nummer. <strong>Scenario-aktør</strong> — person som spiller en rolle via telefon (bruk vedkommendes mobilnummer, ikke organisasjonens). <strong>Nødnummer</strong> — ved reell hendelse under øvelsen.</p>
           <div class="dl" id="kont-list"></div>
           <button class="add" onclick="addKont()">+ Legg til kontakt</button>
         </div>
@@ -1170,7 +1171,7 @@ function addInj() {
 function addUts()  { mkDyn('uts-list',  [inp('Utstyr / Beskrivelse', 2), inp('Antall', 1)]); }
 function addRol()  { mkDyn('rol-list',  [inp('Rolle', 1), inp('Navn', 1), ta('Beskrivelse')]); }
 function addDelt() { mkDyn('delt-list', [inp('Navn', 2), inp('Rolle', 1), sel(['—','Grunnleggende','Viderekommet','Ekspert'])]); }
-function addKont() { mkDyn('kont-list', [inp('Navn', 1), inp('Funksjon', 1), inp('Telefon', 1)]); }
+function addKont() { mkDyn('kont-list', [inp('Navn', 1), inp('Funksjon', 1), inp('Telefon', 1), sel(['Spillstab', 'Scenario-aktør', 'Nødnummer'])]); }
 
 // Seed initial rows
 ['T2Opp','Maal','Inj','Uts','Rol','Delt','Kont'].forEach(k => window['add'+k]());
@@ -1510,9 +1511,9 @@ function fillDemo() {
   injList.innerHTML = '';
   // [tidspunkt, beskrivelse, ansvarlig, maalIndex (0-based, null = ikke koblet)]
   [['09:15', 'Brannvesenet bekrefter at røyken inneholder klorhydrogen. Evakuering av skolen anbefales — 350 elever og 40 ansatte berøres.', 'Spilleder', 4],
-   ['09:30', 'NRK Vestland ringer kommunens pressetelefon og ber om kommentar. En journalist er allerede på plass ved sperringen og filmer.', 'Spilleder', 2],
+   ['09:30', 'NRK Vestland ringer kommunens pressetelefon og ber om kommentar. En journalist er allerede på plass ved sperringen og filmer.', 'Per Haugen (rollespiller)', 2],
    ['10:00', 'Statsforvalteren i Vestland ber om første situasjonsrapport og spør om kommunen trenger bistand.', 'Spilleder', 1],
-   ['10:30', 'En forelder poster bilder fra evakueringsområdet på Facebook: «Kommunen tier og informerer ikke». Innlegget spres raskt med mange negative kommentarer.', 'Spilleder', 2]
+   ['10:30', 'En forelder poster bilder fra evakueringsområdet på Facebook: «Kommunen tier og informerer ikke». Innlegget spres raskt med mange negative kommentarer.', 'Per Haugen (rollespiller)', 2]
   ].forEach(([tid, besk, ans, maalIdx]) => {
     addInj();
     const row = injList.querySelector('.di:last-child');
@@ -1571,18 +1572,21 @@ function fillDemo() {
 
   const kontList = document.getElementById('kont-list');
   kontList.innerHTML = '';
-  [['Kari Bakken',                    'Beredskapskoordinator / Spilleder', '900 12 345'],
-   ['Statsforvalteren beredskap',     'Faglig støtte og observatør',       '55 57 20 00'],
-   ['Brann- og redningsvesenet',      'Scenario-aktør (via telefon)',       '110'],
-   ['Lokal politistasjonssjef',       'Samvirkeaktør i scenario',           '02800']
-  ].forEach(([navn, funk, tlf]) => {
+  // [navn, funksjon, telefon, type]
+  [['Kari Bakken',   'Spilleder / Evaluator',                          '900 12 345', 'Spillstab'],
+   ['Ingrid Vik',    'Observatør (Statsforvalteren)',                   '901 45 678', 'Spillstab'],
+   ['Per Haugen',    'Rollespiller: NRK-journalist og Facebook-forelder', '902 67 890', 'Scenario-aktør'],
+   ['Brann og redning', 'Reell hendelse under øvelsen',                '110',         'Nødnummer'],
+   ['Politi',        'Reell hendelse under øvelsen',                   '112',         'Nødnummer']
+  ].forEach(([navn, funk, tlf, type]) => {
     addKont();
     const row = kontList.querySelector('.di:last-child');
     const inps = row.querySelectorAll('input');
     inps[0].value = navn; inps[1].value = funk; inps[2].value = tlf;
+    row.querySelector('select').value = type;
   });
 
-  set('s5_ext', 'Statsforvalteren i Vestland deltar som observatør og bidrar i evalueringen. Brann- og redningsetaten er scenario-aktør og kommuniserer via telefon. Politiet nevnes i scenariet, men deltar ikke aktivt i øvelsen.');
+  set('s5_ext', 'Statsforvalteren i Vestland deltar som observatør ved Ingrid Vik. Per Haugen (ekstern rollespiller) spiller NRK-journalist og Facebook-forelder via telefon. Brann- og redningsetaten og politiet er nevnt i scenariet, men deltar ikke aktivt — reelle nødnummer er notert i kontaktlisten.');
 
   // ── PLAN 6 ──
   document.getElementById('s6_debrief').checked = true;
@@ -2054,8 +2058,8 @@ function generatePDF() {
   }
   const kR = dynRows('kont-list');
   if (kR.length) {
-    const kC = [{l:'Navn',w:60},{l:'Funksjon',w:74},{l:'Telefon',w:40}];
-    subLabel('Nøkkelpersoner'); tblHdr(kC); kR.forEach((r,i) => tblRow(kC,r,i)); $.y += 4;
+    const kC = [{l:'Navn',w:48},{l:'Funksjon',w:55},{l:'Telefon',w:30},{l:'Type',w:41}];
+    subLabel('Kontaktliste for øvingsdagen'); tblHdr(kC); kR.forEach((r,i) => tblRow(kC,r,i)); $.y += 4;
   }
   fpCard('Eksterne aktører og samvirkeorganisasjoner', v('s5_ext'));
   $.y += 6;
