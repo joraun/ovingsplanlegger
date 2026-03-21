@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.10</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.11</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -891,6 +891,7 @@ function startPlanning() {
   const typ = tba_type();
   if (typ) document.getElementById('type-hint').textContent = `(TBA anbefaler: ${typ})`;
   goTo(5);
+  _saveToLocalStorage();
 }
 
 function tba_mg() {
@@ -1497,6 +1498,7 @@ function fillDemo() {
   set('s6_overf',    'Evalueringsrapport sendes rådmannen og politisk ledelse innen 20. mai 2026. Funn implementeres i revidert beredskapsplan innen 31. august 2026. Rapporten sendes Statsforvalteren som del av årsrapportering. Ny øvelse (spilløvelse) planlegges tidlig 2027 for å verifisere forbedringer.');
 
   renderNav();
+  _saveToLocalStorage();
   showToast('Demoscenario lastet inn — Fjordheim kommune 🏔️');
 }
 
