@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.14</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.15</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -619,7 +619,10 @@
           <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Injeksjoner / Momenter</label>
           <p class="hint" style="margin-bottom:9px;">Planlagte hendelser som introduseres under øvelsen. Koble hver injeksjon til et læringsmål (siste felt) for å sikre at alle hendelser tester noe meningsfullt.</p>
           <div class="dl" id="inj-list"></div>
-          <button class="add" onclick="addInj()">+ Legg til injeksjon</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="add" onclick="addInj()">+ Legg til injeksjon</button>
+            <button class="add" onclick="sortInjByTime()" title="Sorterer radene kronologisk etter tidspunkt-feltet">⏱️ Sorter etter tid</button>
+          </div>
         </div>
         <hr class="d" />
         <div class="f">
@@ -1112,6 +1115,24 @@ function _refreshInjMaalDropdowns() {
     if ([...sel.options].some(o => o.value === current)) sel.value = current;
     else sel.value = '— Ikke koblet —';
   });
+}
+
+function _injTimeVal(str) {
+  const m = str.match(/(\d{1,2})[.:+](\d{2})/);
+  return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : Infinity;
+}
+function sortInjByTime() {
+  const list = document.getElementById('inj-list');
+  const rows = [...list.querySelectorAll('.di')];
+  rows.sort((a, b) => {
+    const tA = a.querySelectorAll('input')[0]?.value.trim() || '';
+    const tB = b.querySelectorAll('input')[0]?.value.trim() || '';
+    const nA = _injTimeVal(tA), nB = _injTimeVal(tB);
+    if (nA !== nB) return nA - nB;
+    return tA.localeCompare(tB, 'nb');
+  });
+  rows.forEach(r => list.appendChild(r));
+  _scheduleSave();
 }
 
 // Planning lists
@@ -1976,10 +1997,12 @@ function generatePDF() {
   if (injR.length) {
     const goalTexts = [...document.querySelectorAll('#maal-list .maal-di .maal-text')].map(t => t.value.trim());
     const iC = [{l:'Tidspunkt',w:28},{l:'Beskrivelse',w:75},{l:'Ansvarlig',w:27},{l:'Delmål',w:44}];
-    const injData = injR.map(r => {
-      const gi = goalTexts.findIndex(g => g === (r[3] || ''));
-      return [r[0], r[1], r[2], gi >= 0 ? 'Delmål ' + (gi + 1) : '—'];
-    });
+    const injData = injR
+      .sort((a, b) => { const nA = _injTimeVal(a[0]||''), nB = _injTimeVal(b[0]||''); return nA !== nB ? nA - nB : (a[0]||'').localeCompare(b[0]||'', 'nb'); })
+      .map(r => {
+        const gi = goalTexts.findIndex(g => g === (r[3] || ''));
+        return [r[0], r[1], r[2], gi >= 0 ? 'Delmål ' + (gi + 1) : '—'];
+      });
     subLabel('Injeksjoner / Momenter'); tblHdr(iC); injData.forEach((r,i) => tblRow(iC,r,i)); $.y += 4;
   }
   fpCard('Markørbeskrivelse og sminke', v('s4_markor'));
