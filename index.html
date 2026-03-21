@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.15</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.16</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -640,6 +640,25 @@
           <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Roller og ansvar</label>
           <div class="dl" id="rol-list"></div>
           <button class="add" onclick="addRol()">+ Legg til rolle</button>
+        </div>
+        <hr class="d" />
+        <div>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;">Øvingssikkerhet og HMS</label>
+          <p class="hint" style="margin-bottom:10px;">For funksjons- og fullskalaøvelser: definer sikkerhetsleder, kodeord for reell hendelse og nødvendige sikkerhetsregler. La feltene stå tomme for diskusjonsøvelser.</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;">
+            <div class="f" style="flex:1;min-width:180px;">
+              <label>Sikkerhetsleder</label>
+              <input id="s4_sikkerhetsleder" type="text" placeholder="Navn og rolle" />
+            </div>
+            <div class="f" style="flex:1;min-width:150px;">
+              <label>Kodeord for reell hendelse</label>
+              <input id="s4_kodeord" type="text" placeholder='F.eks. «NO PLAY»' />
+            </div>
+          </div>
+          <div class="f">
+            <label>Sikkerhetsbestemmelser og øvelsesregler</label>
+            <textarea id="s4_hms" rows="3" placeholder="Beskriv sikkerhetsregler, markørregler, medisinsk beredskap under øvelsen og andre HMS-tiltak..."></textarea>
+          </div>
         </div>
       </div>
     </div>
@@ -1502,6 +1521,9 @@ function fillDemo() {
   });
 
   set('s4_markor', 'Ingen markører eller sminke — diskusjonsøvelse gjennomføres uten feltaktivitet. Scenariet presenteres muntlig og via injeksjonskort.');
+  set('s4_sikkerhetsleder', 'Kari Bakken (spilleder)');
+  set('s4_kodeord', 'NO PLAY');
+  set('s4_hms', 'Diskusjonsøvelse — ingen fysisk aktivitet eller feltoperasjoner. Kodeordet «NO PLAY» stanser øvelsen umiddelbart ved en reell hendelse; alle deltakere informeres om dette ved oppstart. Øvingsleder har ansvar for å avbryte og varsle ved behov.');
 
   const utsList = document.getElementById('uts-list');
   utsList.innerHTML = '';
@@ -2015,6 +2037,12 @@ function generatePDF() {
   if (rolR.length) {
     const rC = [{l:'Rolle',w:50},{l:'Navn',w:50},{l:'Beskrivelse',w:74}];
     subLabel('Roller og ansvar'); tblHdr(rC); rolR.forEach((r,i) => tblRow(rC,r,i)); $.y += 4;
+  }
+  const sLeder = v('s4_sikkerhetsleder'), kodeord = v('s4_kodeord'), hmsText = v('s4_hms');
+  if (sLeder || kodeord || hmsText) {
+    subLabel('Øvingssikkerhet og HMS');
+    if (sLeder || kodeord) twoCol('Sikkerhetsleder', sLeder, 'Kodeord for reell hendelse', kodeord);
+    fpCard('Sikkerhetsbestemmelser', hmsText, true);
   }
   $.y += 6;
 
