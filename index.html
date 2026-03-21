@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.21</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.22</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -616,8 +616,16 @@
         </div>
         <hr class="d" />
         <div>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;">Øvingsorganisasjon og spillstab</label>
+          <p class="hint" style="margin-bottom:9px;">Hvem leder, evaluerer og observerer øvelsen? Navnene her brukes som forslag i «Ansvarlig»-feltet for injeksjonene nedenfor. Deltakerne som skal øves føres i deltakerlisten (S5).</p>
+          <div class="dl" id="rol-list"></div>
+          <button class="add" onclick="addRol()">+ Legg til rolle</button>
+        </div>
+        <hr class="d" />
+        <div>
           <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Injeksjoner / Momenter</label>
           <p class="hint" style="margin-bottom:9px;">Planlagte hendelser som introduseres under øvelsen. Koble hver injeksjon til et læringsmål (siste felt) for å sikre at alle hendelser tester noe meningsfullt.</p>
+          <datalist id="spillstab-datalist"></datalist>
           <div class="dl" id="inj-list"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="add" onclick="addInj()">+ Legg til injeksjon</button>
@@ -676,13 +684,6 @@
           <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Deltakerliste</label>
           <div class="dl" id="delt-list"></div>
           <button class="add" onclick="addDelt()">+ Legg til deltaker</button>
-        </div>
-        <hr class="d" />
-        <div>
-          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;">Øvingsorganisasjon og spillstab</label>
-          <p class="hint" style="margin-bottom:9px;">Hvem leder, evaluerer og observerer øvelsen? Deltakerne som skal øves føres opp i deltakerlisten ovenfor, ikke her.</p>
-          <div class="dl" id="rol-list"></div>
-          <button class="add" onclick="addRol()">+ Legg til rolle</button>
         </div>
         <hr class="d" />
         <div>
@@ -1157,6 +1158,22 @@ function sortInjByTime() {
 }
 
 // Planning lists
+function _refreshSpillstabDatalist() {
+  const dl = document.getElementById('spillstab-datalist');
+  if (!dl) return;
+  dl.innerHTML = '';
+  document.querySelectorAll('#rol-list .di').forEach(r => {
+    const inputs = r.querySelectorAll('input');
+    const navn = inputs[1]?.value.trim() || '';
+    const rolle = inputs[0]?.value.trim() || '';
+    if (navn) {
+      const opt = document.createElement('option');
+      opt.value = navn;
+      if (rolle) opt.label = rolle;
+      dl.appendChild(opt);
+    }
+  });
+}
 function addInj() {
   const maalSel = document.createElement('select');
   maalSel.className = 'inj-maal-sel';
@@ -1165,8 +1182,11 @@ function addInj() {
   const noneOp = document.createElement('option');
   noneOp.value = '— Ikke koblet —'; noneOp.textContent = '— Ikke koblet —';
   maalSel.appendChild(noneOp);
-  mkDyn('inj-list', [inp('Tidspunkt', '0 0 auto'), inp('Beskrivelse', 2), inp('Ansvarlig', 1), maalSel]);
+  const ansvInp = inp('Ansvarlig', 1);
+  ansvInp.setAttribute('list', 'spillstab-datalist');
+  mkDyn('inj-list', [inp('Tidspunkt', '0 0 auto'), inp('Beskrivelse', 2), ansvInp, maalSel]);
   _refreshInjMaalDropdowns();
+  _refreshSpillstabDatalist();
 }
 function addUts()  { mkDyn('uts-list',  [inp('Utstyr / Beskrivelse', 2), inp('Antall', 1)]); }
 function addRol()  { mkDyn('rol-list',  [inp('Rolle', 1), inp('Navn', 1), ta('Beskrivelse')]); }
@@ -1410,6 +1430,11 @@ function resetAll() {
 // ── Auto-lagring ──
 document.addEventListener('input',  _scheduleSave);
 document.addEventListener('change', _scheduleSave);
+
+// ── Oppdater spillstab-datalist når rol-list endres ──
+document.addEventListener('input', e => {
+  if (e.target.closest('#rol-list')) _refreshSpillstabDatalist();
+});
 
 // ── Last inn lagret data ved oppstart ──
 _loadFromLocalStorage();
