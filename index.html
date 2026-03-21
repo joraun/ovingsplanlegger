@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.23</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.24</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -1476,16 +1476,16 @@ function fillDemo() {
   // ── TBA T4 ──
   document.getElementById('t4_gruppe').checked = true;
   document.getElementById('t4_org').checked = true;
-  set('t4_type', 'Diskusjonsøvelse');
+  set('t4_type', 'Spilløvelse');
   updateTypeDesc();
-  set('t4_behov', 'Øvelsen bør prioritere: (1) Rask og korrekt etablering av kriseledelsen — mål under 30 min, (2) Avklaring av roller og beslutningsmyndighet under press, (3) Korrekt bruk av CIM og situasjonsrapportering til Statsforvalteren, (4) Koordinert og proaktiv ekstern kommunikasjon mot media og publikum.\n\nDiskusjonsøvelse anbefales som første steg — grunnleggende rolleforståelse og planverk må testes og innarbeides før man kjører mer krevende øvelsesformer (spilløvelse / fullskala).');
+  set('t4_behov', 'Øvelsen bør prioritere: (1) Rask og korrekt etablering av kriseledelsen — mål under 30 min, (2) Avklaring av roller og beslutningsmyndighet under press, (3) Korrekt bruk av CIM og situasjonsrapportering til Statsforvalteren, (4) Koordinert og proaktiv ekstern kommunikasjon mot media og publikum.\n\nSpilløvelse er valgt da tidligere diskusjonsøvelse og reell hendelse (2024) har gitt grunnleggende rolleforståelse. Nå trenes beslutninger under tidspress og i møte med realistiske innspill fra eksterne aktører via telefon.');
 
   // ── PLAN 1 ──
   set('s1_navn',   'Øvelse Fjordheim 2026');
   set('s1_dato',   '2026-05-14');
   set('s1_tid',    '09:00');
   set('s1_sted',   'Rådhuset, Fjordheim — Kriseledelserommet, 2. etasje');
-  set('s1_type',   'Diskusjonsøvelse');
+  set('s1_type',   'Spilløvelse');
   set('s1_leder',  'Kari Bakken (Beredskapskoordinator)');
   set('s1_org',    'Fjordheim kommune');
   set('s1_antall', '12');
@@ -1535,10 +1535,16 @@ function fillDemo() {
   const injList = document.getElementById('inj-list');
   injList.innerHTML = '';
   // [tidspunkt, beskrivelse, ansvarlig, maalIndex (0-based, null = ikke koblet)]
-  [['09:15', 'Brannvesenet bekrefter at røyken inneholder klorhydrogen. Evakuering av skolen anbefales — 350 elever og 40 ansatte berøres.', 'Spilleder', 4],
-   ['09:30', 'NRK Vestland ringer kommunens pressetelefon og ber om kommentar. En journalist er allerede på plass ved sperringen og filmer.', 'Per Haugen (rollespiller)', 2],
-   ['10:00', 'Statsforvalteren i Vestland ber om første situasjonsrapport og spør om kommunen trenger bistand.', 'Spilleder', 1],
-   ['10:30', 'En forelder poster bilder fra evakueringsområdet på Facebook: «Kommunen tier og informerer ikke». Innlegget spres raskt med mange negative kommentarer.', 'Per Haugen (rollespiller)', 2]
+  [['09:05', 'TELEFON — Innsatsleder brannvesen: «Vogn 3 lekker aktivt. Vi bekrefter klorhydrogen. Anbefaler umiddelbar evakuering av Fjordheim ungdomsskole — 150 meter fra sporet.»', 'Mari Strand', 3],
+   ['09:20', 'TELEFON — Rektor Fjordheim ungdomsskole: «Hva gjør vi? Elevene er urolige og foreldre ringer allerede. Skal vi evakuere på egenhånd eller vente på ordre?»', 'Mari Strand', 4],
+   ['09:30', 'TELEFON — NRK Vestland: «Jeg er journalist og står 100 meter fra sperringen. Kan ordføreren stille til direkteintervju nå? Vi sender om 10 minutter.»', 'Per Haugen', 2],
+   ['09:45', 'MELDING — Kommunens IKT-avdeling varsler om at interntelefonsystemet i rådhuset er nede. Stabsmedlemmer kan kun nås på mobiltelefon.', 'Kari Bakken', 1],
+   ['10:00', 'TELEFON — Statsforvalterens beredskapsrådgiver: «Vi trenger situasjonsrapport innen 30 minutter. Har kommunen behov for bistand fra Statsforvalteren?»', 'Mari Strand', 1],
+   ['10:20', 'TELEFON — Jernbaneoperatøren: «Vi har hentet frem fraktseddelen — totalt 4,2 tonn klorhydrogen i vogn 3. Sender MSDS-ark på e-post nå. Dere bør koordinere med Miljødirektoratet.»', 'Per Haugen', 3],
+   ['10:35', 'SOSIALE MEDIER — Spilleder viser skjermbilde på projektor: Forelder på Facebook: «Min datter er på skolen!! Ingen informasjon fra kommunen — dette er skandaløst!!» — 340 delinger på 20 minutter.', 'Kari Bakken', 2],
+   ['10:50', 'TELEFON — Hjemmetjenesteleder: «To av våre pasienter bor innenfor evakueringssonen. En av dem er helt avhengig av oksygenkonsentrator uten batteri. Vi trenger beslutning nå.»', 'Mari Strand', 4],
+   ['11:05', 'TELEFON — Ordfører i Bergheim kommune: «Vi hørte dere har en kjemikaliehendelse. Vi har ledig nødstrømaggregat og kan stille med to kommunale biler. Trenger dere bistand?»', 'Per Haugen', 3],
+   ['11:20', 'MELDING — NRK sender nå direkteoverføring fra stedet. Programleder stiller spørsmål ved kommunens håndtering av evakueringen. Produsenten ber om offisiell uttalelse innen 15 minutter.', 'Kari Bakken', 2]
   ].forEach(([tid, besk, ans, maalIdx]) => {
     addInj();
     const row = injList.querySelector('.di:last-child');
@@ -1547,10 +1553,10 @@ function fillDemo() {
     if (maalIdx !== null) row.querySelector('.inj-maal-sel').value = maals[maalIdx].maal;
   });
 
-  set('s4_markor', 'Ingen markører eller sminke — diskusjonsøvelse gjennomføres uten feltaktivitet. Scenariet presenteres muntlig og via injeksjonskort.');
+  set('s4_markor', 'Ingen markører eller sminke — spilløvelsen foregår i kriseledelserommet uten feltaktivitet. Rollespillerne befinner seg i tilstøtende rom og injiserer utelukkende via telefon.');
   set('s4_sikkerhetsleder', 'Kari Bakken (spilleder)');
   set('s4_kodeord', 'NO PLAY');
-  set('s4_hms', 'Diskusjonsøvelse — ingen fysisk aktivitet eller feltoperasjoner. Kodeordet «NO PLAY» stanser øvelsen umiddelbart ved en reell hendelse; alle deltakere informeres om dette ved oppstart. Øvingsleder har ansvar for å avbryte og varsle ved behov.');
+  set('s4_hms', 'Spilløvelsen foregår innendørs i kriseledelserommet — ingen fysisk risiko eller feltoperasjoner. Kodeordet «NO PLAY» stanser øvelsen umiddelbart ved en reell hendelse; alle deltakere informeres om dette ved oppstart. Rollespillerne (Per Haugen og Mari Strand) befinner seg i møterom 2B og skal ikke avbrytes under gjennomføringen. Spilleder har ansvar for å avbryte og varsle ved behov.');
 
   const utsList = document.getElementById('uts-list');
   utsList.innerHTML = '';
@@ -1565,8 +1571,9 @@ function fillDemo() {
 
   const rolList = document.getElementById('rol-list');
   rolList.innerHTML = '';
-  [['Spilleder / Evaluator', 'Kari Bakken', 'Leder øvelsesforløpet og introduserer injeksjoner. Observerer, noterer og leder evalueringen etter øvelsen.'],
-   ['Rollespiller', 'Per Haugen', 'Spiller NRK-journalist (09:30) og Facebook-forelder (10:30) via telefon. Briefes av spilleder i forkant og holder seg utenfor øvingsrommet under gjennomføringen.'],
+  [['Spilleder / Evaluator', 'Kari Bakken', 'Leder øvelsesforløpet, introduserer skriftlige injeksjoner og koordinerer rollespillerne. Observerer, noterer og leder evalueringen etter øvelsen.'],
+   ['Rollespiller A', 'Per Haugen', 'Spiller NRK-journalist (09:30), jernbaneoperatøren (10:20) og ordfører Bergheim (11:05) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
+   ['Rollespiller B', 'Mari Strand', 'Spiller innsatsleder brannvesen (09:05), rektor (09:20), Statsforvalterens beredskapsrådgiver (10:00) og hjemmetjenesteleder (10:50) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
    ['Observatør', 'Ingrid Vik (Statsforvalteren)', 'Observerer øvelsen på vegne av Statsforvalteren. Bidrar ikke aktivt i krisehåndteringen, men gir faglig tilbakemelding i debrief og evaluering.']
   ].forEach(([rolle, navn, besk]) => {
     addRol();
@@ -1599,9 +1606,11 @@ function fillDemo() {
   const kontList = document.getElementById('kont-list');
   kontList.innerHTML = '';
   // [navn, funksjon, telefon, type]
-  [['Per Haugen',    'Rollespiller: NRK-journalist og Facebook-forelder', '902 67 890', 'Scenario-aktør'],
-   ['Brann og redning', 'Reell hendelse under øvelsen',                '110',         'Nødnummer'],
-   ['Politi',        'Reell hendelse under øvelsen',                   '112',         'Nødnummer']
+  [['Per Haugen',    'Rollespiller A: NRK-journalist, jernbaneoperatøren, ordfører Bergheim', '902 67 890', 'Scenario-aktør'],
+   ['Mari Strand',   'Rollespiller B: Innsatsleder brann, rektor, Statsforvalteren, hjemmetjenesten', '903 45 678', 'Scenario-aktør'],
+   ['Brann og redning', 'Reell hendelse under øvelsen',  '110', 'Nødnummer'],
+   ['Politi',           'Reell hendelse under øvelsen',  '112', 'Nødnummer'],
+   ['Ambulanse',        'Reell hendelse under øvelsen',  '113', 'Nødnummer']
   ].forEach(([navn, funk, tlf, type]) => {
     addKont();
     const row = kontList.querySelector('.di:last-child');
@@ -1610,14 +1619,14 @@ function fillDemo() {
     row.querySelector('select').value = type;
   });
 
-  set('s5_ext', 'Statsforvalteren i Vestland deltar som observatør ved Ingrid Vik. Per Haugen (ekstern rollespiller) spiller NRK-journalist og Facebook-forelder via telefon. Brann- og redningsetaten og politiet er nevnt i scenariet, men deltar ikke aktivt — reelle nødnummer er notert i kontaktlisten.');
+  set('s5_ext', 'Statsforvalteren i Vestland deltar som observatør ved Ingrid Vik. Per Haugen og Mari Strand er eksterne rollespillere som injiserer via telefon fra møterom 2B — de spiller til sammen syv ulike aktører gjennom øvelsen. Brann- og redningsetaten, politiet og jernbaneoperatøren er representert i scenariet via rollespillerne, men deltar ikke med ekte personell.');
 
   // ── PLAN 6 ──
   document.getElementById('s6_debrief').checked = true;
   document.getElementById('s6_obs').checked = true;
   set('s6_hvem',     'Kari Bakken (intern) + Ingrid Vik, Statsforvalteren (ekstern observatør)');
   set('s6_tidspunkt', 'Hot wash umiddelbart etter øvelsen (30 min). Skriftlig evalueringsrapport innen 5 virkedager.');
-  set('s6_overf',    'Evalueringsrapport sendes kommunedirektøren og politisk ledelse innen 20. mai 2026. Funn implementeres i revidert beredskapsplan innen 31. august 2026. Rapporten sendes Statsforvalteren som del av årsrapportering. Ny øvelse (spilløvelse) planlegges tidlig 2027 for å verifisere forbedringer.');
+  set('s6_overf',    'Evalueringsrapport sendes kommunedirektøren og politisk ledelse innen 20. mai 2026. Funn implementeres i revidert beredskapsplan innen 31. august 2026. Rapporten sendes Statsforvalteren som del av årsrapportering. Ny øvelse (fullskalaøvelse) vurderes gjennomført tidlig 2028 for å verifisere forbedringer under mer realistiske betingelser.');
 
   renderNav();
   _saveToLocalStorage();
