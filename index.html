@@ -207,9 +207,17 @@
     #toast.show { opacity:1; }
 
     /* ── Demo button ── */
-    .demo-btn { margin-left:auto; background:rgba(255,255,255,.13); border:1.5px solid rgba(255,255,255,.3); color:rgba(255,255,255,.85); border-radius:var(--r); padding:7px 13px; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    .demo-btn { background:rgba(255,255,255,.13); border:1.5px solid rgba(255,255,255,.3); color:rgba(255,255,255,.85); border-radius:var(--r); padding:7px 13px; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .15s; white-space:nowrap; }
     .demo-btn:hover { background:rgba(255,255,255,.23); color:#fff; }
     .ver-badge { font-size:.58rem; font-weight:600; color:rgba(255,255,255,.5); background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:4px; padding:2px 7px; vertical-align:middle; letter-spacing:.3px; margin-left:8px; }
+
+    /* ── Header right actions ── */
+    .hdr-right { margin-left:auto; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .save-ind { font-size:.67rem; color:rgba(255,255,255,.5); white-space:nowrap; padding-right:4px; }
+    .hdr-btn { background:rgba(255,255,255,.13); border:1.5px solid rgba(255,255,255,.25); color:rgba(255,255,255,.85); border-radius:var(--r); padding:6px 11px; font-size:.75rem; font-weight:600; cursor:pointer; transition:all .15s; white-space:nowrap; font-family:inherit; }
+    .hdr-btn:hover { background:rgba(255,255,255,.23); color:#fff; }
+    .hdr-btn-red { border-color:rgba(200,100,100,.4); color:rgba(255,180,180,.85); }
+    .hdr-btn-red:hover { background:rgba(200,56,42,.3); border-color:rgba(200,56,42,.6); color:#fff; }
   </style>
 </head>
 <body>
@@ -218,10 +226,19 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.9</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.10</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
-    <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Last inn demo</button>
+    <div class="hdr-right">
+      <span id="save-indicator" class="save-ind"></span>
+      <button class="hdr-btn" onclick="exportJSON()" title="Last ned all data som JSON-fil">💾 Eksporter</button>
+      <label class="hdr-btn" title="Last inn data fra JSON-fil" style="cursor:pointer">
+        📂 Importer
+        <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(event)">
+      </label>
+      <button class="hdr-btn hdr-btn-red" onclick="resetAll()" title="Slett all data og start på nytt">🗑️ Nullstill</button>
+      <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Demo</button>
+    </div>
   </div>
   <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
 </header>
@@ -890,8 +907,8 @@ function tba_type() { return v('t4_type'); }
 function buildEvalMatrix() {
   const container = document.getElementById('eval-matrix');
 
-  // Save existing checkbox states
-  const saved = {};
+  // Merge localStorage state (base) with current DOM state (override)
+  const saved = Object.assign({}, window._evalMatrixState || {});
   container.querySelectorAll('input[type=checkbox]').forEach(cb => { if (cb.id) saved[cb.id] = cb.checked; });
   container.querySelectorAll('textarea[id]').forEach(ta => { saved[ta.id] = ta.value; });
   container.innerHTML = '';
@@ -1087,6 +1104,222 @@ function addKont() { mkDyn('kont-list', [inp('Navn', 1), inp('Funksjon', 1), inp
 // Seed initial rows
 ['T2Opp','Maal','Inj','Uts','Rol','Delt','Kont'].forEach(k => window['add'+k]());
 renderNav();
+
+// ═══════════════════════════════════════════
+//  LAGRING — localStorage + JSON eksport/import
+// ═══════════════════════════════════════════
+const STORAGE_KEY = 'ovingsplanlegger_v1';
+let _saveTimer = null;
+
+// ── Serialisering ──
+function _serializeDynList(listId) {
+  const rows = [];
+  document.querySelectorAll('#' + listId + ' .di').forEach(item => {
+    rows.push([...item.querySelectorAll('input,textarea,select')].map(f =>
+      f.type === 'checkbox' ? f.checked : f.value
+    ));
+  });
+  return rows;
+}
+
+function _serializeMaalList() {
+  return [...document.querySelectorAll('#maal-list .maal-di')].map(item => ({
+    maal: item.querySelector('.maal-text')?.value || '',
+    kriterier: [...item.querySelectorAll('.krit-inp')].map(k => k.value)
+  }));
+}
+
+function _serializeEvalMatrix() {
+  const state = {};
+  document.querySelectorAll('#eval-matrix input[type=checkbox][id]').forEach(cb => { state[cb.id] = cb.checked; });
+  document.querySelectorAll('#eval-matrix textarea[id]').forEach(ta => { state[ta.id] = ta.value; });
+  return state;
+}
+
+function _collectData() {
+  const dynListIds = ['t2-opp-list','inj-list','uts-list','rol-list','delt-list','kont-list'];
+  const dynContainers = dynListIds.map(id => document.getElementById(id));
+  const maalContainer = document.getElementById('maal-list');
+  const evalContainer = document.getElementById('eval-matrix');
+
+  const fields = {};
+  document.querySelectorAll('input[id],textarea[id],select[id]').forEach(el => {
+    // Skip elements inside dynamic list containers and eval-matrix (handled separately)
+    if (dynContainers.some(c => c && c.contains(el))) return;
+    if (maalContainer && maalContainer.contains(el)) return;
+    if (evalContainer && evalContainer.contains(el)) return;
+    // Skip the file input
+    if (el.id === 'import-file-input') return;
+    fields[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+
+  return {
+    page: idx,
+    fields,
+    lists: {
+      't2-opp-list': _serializeDynList('t2-opp-list'),
+      'maal-list':   _serializeMaalList(),
+      'inj-list':    _serializeDynList('inj-list'),
+      'uts-list':    _serializeDynList('uts-list'),
+      'rol-list':    _serializeDynList('rol-list'),
+      'delt-list':   _serializeDynList('delt-list'),
+      'kont-list':   _serializeDynList('kont-list')
+    },
+    evalMatrix: _serializeEvalMatrix()
+  };
+}
+
+// ── Gjenoppretting ──
+function _restoreDynList(listId, rows, addFn) {
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  const toRestore = rows.length > 0 ? rows : [[]];
+  toRestore.forEach(fields => {
+    addFn();
+    const item = list.querySelector('.di:last-child');
+    [...item.querySelectorAll('input,textarea,select')].forEach((el, i) => {
+      if (i >= fields.length) return;
+      if (el.type === 'checkbox') el.checked = fields[i];
+      else el.value = fields[i];
+    });
+  });
+}
+
+function _restoreMaalList(maals) {
+  const list = document.getElementById('maal-list');
+  list.innerHTML = '';
+  const toRestore = maals.length > 0 ? maals : [{ maal: '', kriterier: [''] }];
+  toRestore.forEach(({ maal, kriterier }) => {
+    addMaal();
+    const di = list.querySelector('.maal-di:last-child');
+    const maalText = di.querySelector('.maal-text');
+    if (maalText) maalText.value = maal || '';
+    const kritList = di.querySelector('.krit-sub-list');
+    const existingInps = kritList.querySelectorAll('.krit-inp');
+    kriterier.forEach((k, i) => {
+      if (i === 0 && existingInps[0]) {
+        existingInps[0].value = k;
+      } else {
+        addKritItem(kritList);
+        kritList.querySelectorAll('.krit-inp')[i].value = k;
+      }
+    });
+  });
+}
+
+function _applyData(data) {
+  if (!data) return;
+
+  // Statiske felt
+  Object.entries(data.fields || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = val;
+    else el.value = val;
+  });
+
+  // Dynamiske lister
+  const L = data.lists || {};
+  if (L['t2-opp-list']) _restoreDynList('t2-opp-list', L['t2-opp-list'], addT2Opp);
+  if (L['maal-list'])   _restoreMaalList(L['maal-list']);
+  if (L['inj-list'])    _restoreDynList('inj-list', L['inj-list'], addInj);
+  if (L['uts-list'])    _restoreDynList('uts-list', L['uts-list'], addUts);
+  if (L['rol-list'])    _restoreDynList('rol-list', L['rol-list'], addRol);
+  if (L['delt-list'])   _restoreDynList('delt-list', L['delt-list'], addDelt);
+  if (L['kont-list'])   _restoreDynList('kont-list', L['kont-list'], addKont);
+
+  // Evalueringsmatrise — lagres til bruk når matrisen bygges
+  window._evalMatrixState = data.evalMatrix || {};
+}
+
+// ── localStorage ──
+function _updateSaveIndicator(isoStr) {
+  const el = document.getElementById('save-indicator');
+  if (!el) return;
+  if (!isoStr) { el.textContent = ''; return; }
+  const d = new Date(isoStr);
+  el.textContent = 'Lagret ' + d.toLocaleTimeString('no', { hour: '2-digit', minute: '2-digit' });
+}
+
+function _saveToLocalStorage() {
+  try {
+    const data = _collectData();
+    data._savedAt = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    _updateSaveIndicator(data._savedAt);
+  } catch(e) {}
+}
+
+function _loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    _applyData(data);
+    if (data._savedAt) _updateSaveIndicator(data._savedAt);
+    if (typeof data.page === 'number') goTo(data.page);
+    return true;
+  } catch(e) { return false; }
+}
+
+function _scheduleSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_saveToLocalStorage, 800);
+}
+
+// ── JSON Eksport ──
+function exportJSON() {
+  const data = _collectData();
+  data._exportedAt = new Date().toISOString();
+  const name = data.fields?.s1_navn || data.fields?.t1_org || 'ovingsplan';
+  const safeName = name.replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').trim().slice(0, 40) || 'ovingsplan';
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = safeName + '_' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Data eksportert som JSON-fil 💾');
+}
+
+// ── JSON Import ──
+function importJSON() {
+  document.getElementById('import-file-input').click();
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      _applyData(data);
+      if (typeof data.page === 'number') goTo(data.page);
+      _saveToLocalStorage();
+      showToast('Data importert fra fil 📂');
+    } catch(err) {
+      alert('Kunne ikke lese filen. Kontroller at det er en gyldig JSON-fil fra Øvingsplanlegger.');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ── Nullstill ──
+function resetAll() {
+  if (!confirm('Er du sikker? All data vil bli slettet og siden lastes på nytt.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// ── Auto-lagring ──
+document.addEventListener('input',  _scheduleSave);
+document.addEventListener('change', _scheduleSave);
+
+// ── Last inn lagret data ved oppstart ──
+_loadFromLocalStorage();
 
 // ═══════════════════════════════════════════
 //  DEMO — Fiktiv kommunal kriseledelse
