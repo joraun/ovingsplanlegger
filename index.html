@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.13</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.14</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -617,7 +617,7 @@
         <hr class="d" />
         <div>
           <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Injeksjoner / Momenter</label>
-          <p class="hint" style="margin-bottom:9px;">Planlagte hendelser som introduseres under øvelsen</p>
+          <p class="hint" style="margin-bottom:9px;">Planlagte hendelser som introduseres under øvelsen. Koble hver injeksjon til et læringsmål (siste felt) for å sikre at alle hendelser tester noe meningsfullt.</p>
           <div class="dl" id="inj-list"></div>
           <button class="add" onclick="addInj()">+ Legg til injeksjon</button>
         </div>
@@ -717,9 +717,9 @@
         </div>
         <hr class="d" />
         <div class="f">
-          <label>Oppfølging og læringsoverføring</label>
-          <p class="hint">Hvem får rapporten? Hvordan sikres at funn fører til endring i praksis?</p>
-          <textarea id="s6_overf" rows="4" placeholder="Beskriv hvordan erfaringer dokumenteres, deles og implementeres..."></textarea>
+          <label>Ansvarsfordeling for oppfølging og læringsoverføring</label>
+          <p class="hint">Hvem har ansvar for at identifiserte tiltak faktisk gjennomføres? Angi navn/rolle og tidsfrist per tiltak.</p>
+          <textarea id="s6_overf" rows="4" placeholder="F.eks.: «Rådmann ansvarlig for revisjon av beredskapsplan innen 31.08. Kommunikasjonssjef følger opp mediehåndtering innen 01.06.»"></textarea>
         </div>
       </div>
     </div>
@@ -751,6 +751,7 @@ function goTo(i) {
   document.getElementById('page-' + PAGES[idx]).classList.add('active');
   if (PAGES[idx] === 'tba-3')     { buildT4Summary(); autoSuggest(); }
   if (PAGES[idx] === 'transition') buildSummary();
+  if (PAGES[idx] === 'plan-3')    _refreshInjMaalDropdowns();
   if (PAGES[idx] === 'plan-5')    buildEvalMatrix();
   renderNav();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1050,7 +1051,7 @@ function addMaal() {
   // Goal textarea
   const textarea = document.createElement('textarea');
   textarea.className = 'maal-text';
-  textarea.placeholder = 'Beskriv delmålet konkret — hva skal deltakerne kunne gjøre?';
+  textarea.placeholder = 'Bruk handlingsverb: f.eks. «Iverksette evakuering innen 10 min» eller «Beslutte og formidle tiltak innen 30 min». Kvalitative mål er også gyldige: «Vise evne til å prioritere under press».';
   textarea.rows = 2;
   body.appendChild(textarea);
 
@@ -1095,8 +1096,36 @@ function addKritItem(listEl) {
   listEl.appendChild(row);
 }
 
+// ── Injeksjon → læringsmål-kobling ──
+function _refreshInjMaalDropdowns() {
+  const goals = [...document.querySelectorAll('#maal-list .maal-di .maal-text')]
+    .map(t => t.value.trim()).filter(Boolean);
+  document.querySelectorAll('#inj-list .inj-maal-sel').forEach(sel => {
+    const current = sel.value;
+    while (sel.options.length > 1) sel.remove(1);
+    goals.forEach((g, i) => {
+      const op = document.createElement('option');
+      op.value = g;
+      op.textContent = 'Delmål ' + (i + 1) + ': ' + (g.length > 42 ? g.slice(0, 42) + '…' : g);
+      sel.appendChild(op);
+    });
+    if ([...sel.options].some(o => o.value === current)) sel.value = current;
+    else sel.value = '— Ikke koblet —';
+  });
+}
+
 // Planning lists
-function addInj()  { mkDyn('inj-list',  [inp('Tidspunkt','0 0 auto'), inp('Beskrivelse', 2), inp('Ansvarlig', 1)]); }
+function addInj() {
+  const maalSel = document.createElement('select');
+  maalSel.className = 'inj-maal-sel';
+  maalSel.style.flex = '1';
+  maalSel.style.minWidth = '120px';
+  const noneOp = document.createElement('option');
+  noneOp.value = '— Ikke koblet —'; noneOp.textContent = '— Ikke koblet —';
+  maalSel.appendChild(noneOp);
+  mkDyn('inj-list', [inp('Tidspunkt', '0 0 auto'), inp('Beskrivelse', 2), inp('Ansvarlig', 1), maalSel]);
+  _refreshInjMaalDropdowns();
+}
 function addUts()  { mkDyn('uts-list',  [inp('Utstyr / Beskrivelse', 2), inp('Antall', 1)]); }
 function addRol()  { mkDyn('rol-list',  [inp('Rolle', 1), inp('Navn', 1), ta('Beskrivelse')]); }
 function addDelt() { mkDyn('delt-list', [inp('Navn', 2), inp('Rolle', 1), sel(['—','Grunnleggende','Viderekommet','Ekspert'])]); }
@@ -1438,15 +1467,17 @@ function fillDemo() {
 
   const injList = document.getElementById('inj-list');
   injList.innerHTML = '';
-  [['09:15', 'Brannvesenet bekrefter at røyken inneholder klorhydrogen. Evakuering av skolen anbefales — 350 elever og 40 ansatte berøres.', 'Spilleder'],
-   ['09:30', 'NRK Vestland ringer kommunens pressetelefon og ber om kommentar. En journalist er allerede på plass ved sperringen og filmer.', 'Spilleder'],
-   ['10:00', 'Statsforvalteren i Vestland ber om første situasjonsrapport og spør om kommunen trenger bistand.', 'Spilleder'],
-   ['10:30', 'En forelder poster bilder fra evakueringsområdet på Facebook: «Kommunen tier og informerer ikke». Innlegget spres raskt med mange negative kommentarer.', 'Spilleder']
-  ].forEach(([tid, besk, ans]) => {
+  // [tidspunkt, beskrivelse, ansvarlig, maalIndex (0-based, null = ikke koblet)]
+  [['09:15', 'Brannvesenet bekrefter at røyken inneholder klorhydrogen. Evakuering av skolen anbefales — 350 elever og 40 ansatte berøres.', 'Spilleder', 4],
+   ['09:30', 'NRK Vestland ringer kommunens pressetelefon og ber om kommentar. En journalist er allerede på plass ved sperringen og filmer.', 'Spilleder', 2],
+   ['10:00', 'Statsforvalteren i Vestland ber om første situasjonsrapport og spør om kommunen trenger bistand.', 'Spilleder', 1],
+   ['10:30', 'En forelder poster bilder fra evakueringsområdet på Facebook: «Kommunen tier og informerer ikke». Innlegget spres raskt med mange negative kommentarer.', 'Spilleder', 2]
+  ].forEach(([tid, besk, ans, maalIdx]) => {
     addInj();
     const row = injList.querySelector('.di:last-child');
     const inps = row.querySelectorAll('input');
     inps[0].value = tid; inps[1].value = besk; inps[2].value = ans;
+    if (maalIdx !== null) row.querySelector('.inj-maal-sel').value = maals[maalIdx].maal;
   });
 
   set('s4_markor', 'Ingen markører eller sminke — diskusjonsøvelse gjennomføres uten feltaktivitet. Scenariet presenteres muntlig og via injeksjonskort.');
@@ -1943,8 +1974,13 @@ function generatePDF() {
   fpCard('Startpunkt for øvelsen', v('s4_startpunkt'));
   const injR = dynRows('inj-list');
   if (injR.length) {
-    const iC = [{l:'Tidspunkt',w:35},{l:'Beskrivelse',w:108},{l:'Ansvarlig',w:31}];
-    subLabel('Injeksjoner / Momenter'); tblHdr(iC); injR.forEach((r,i) => tblRow(iC,r,i)); $.y += 4;
+    const goalTexts = [...document.querySelectorAll('#maal-list .maal-di .maal-text')].map(t => t.value.trim());
+    const iC = [{l:'Tidspunkt',w:28},{l:'Beskrivelse',w:75},{l:'Ansvarlig',w:27},{l:'Delmål',w:44}];
+    const injData = injR.map(r => {
+      const gi = goalTexts.findIndex(g => g === (r[3] || ''));
+      return [r[0], r[1], r[2], gi >= 0 ? 'Delmål ' + (gi + 1) : '—'];
+    });
+    subLabel('Injeksjoner / Momenter'); tblHdr(iC); injData.forEach((r,i) => tblRow(iC,r,i)); $.y += 4;
   }
   fpCard('Markørbeskrivelse og sminke', v('s4_markor'));
   const utsR = dynRows('uts-list');
@@ -1979,7 +2015,7 @@ function generatePDF() {
   const emStr = getEvalMetoder();
   if (emStr !== '—') fpCard('Evalueringsmetode', emStr);
   twoCol('Hvem evaluerer', v('s6_hvem'), 'Evalueringstidspunkt', v('s6_tidspunkt'));
-  fpCard('Oppfølging og læringsoverføring', v('s6_overf'));
+  fpCard('Ansvarsfordeling for oppfølging og læringsoverføring', v('s6_overf'));
 
   addPageFooters('Øvingsplan  ·  ' + dateStr);
   const fname = ('Ovingsplan_' + exName).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
@@ -2196,7 +2232,7 @@ function generateEvalPDF() {
     $.y += 15;
   }
 
-  fpCard('Oppfølging og læringsoverføring', v('s6_overf'), true);
+  fpCard('Ansvarsfordeling for oppfølging og læringsoverføring', v('s6_overf'), true);
 
   addPageFooters('Evalueringsrapport  ·  ' + exName + '  ·  ' + dateStr);
 
