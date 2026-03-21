@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.22</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.23</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -617,7 +617,7 @@
         <hr class="d" />
         <div>
           <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;">Øvingsorganisasjon og spillstab</label>
-          <p class="hint" style="margin-bottom:9px;">Hvem leder, evaluerer og observerer øvelsen? Navnene her brukes som forslag i «Ansvarlig»-feltet for injeksjonene nedenfor. Deltakerne som skal øves føres i deltakerlisten (S5).</p>
+          <p class="hint" style="margin-bottom:9px;">Personene som planlegger og gjennomfører øvelsen: spilleder, evaluator(er), observatører og rollespillere. Deltakerne som skal øves føres i deltakerlisten (S5).</p>
           <div class="dl" id="rol-list"></div>
           <button class="add" onclick="addRol()">+ Legg til rolle</button>
         </div>
@@ -688,7 +688,7 @@
         <hr class="d" />
         <div>
           <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;">Kontaktliste for øvingsdagen</label>
-          <p class="hint" style="margin-bottom:9px;"><strong>Spillstab</strong> — reelle personer med ekte nummer. <strong>Scenario-aktør</strong> — person som spiller en rolle via telefon (bruk vedkommendes mobilnummer, ikke organisasjonens). <strong>Nødnummer</strong> — ved reell hendelse under øvelsen.</p>
+          <p class="hint" style="margin-bottom:9px;">Kun personer som trenger å bli oppringt under øvelsen. <strong>Scenario-aktør</strong> — rollespiller som injiserer via telefon fra et annet rom (bruk mobilnummeret, ikke organisasjonens). <strong>Nødnummer</strong> — ved reell hendelse under øvelsen. Spilleder og observatører er fysisk til stede og trenger ikke stå her.</p>
           <div class="dl" id="kont-list"></div>
           <button class="add" onclick="addKont()">+ Legg til kontakt</button>
         </div>
@@ -1599,9 +1599,7 @@ function fillDemo() {
   const kontList = document.getElementById('kont-list');
   kontList.innerHTML = '';
   // [navn, funksjon, telefon, type]
-  [['Kari Bakken',   'Spilleder / Evaluator',                          '900 12 345', 'Spillstab'],
-   ['Ingrid Vik',    'Observatør (Statsforvalteren)',                   '901 45 678', 'Spillstab'],
-   ['Per Haugen',    'Rollespiller: NRK-journalist og Facebook-forelder', '902 67 890', 'Scenario-aktør'],
+  [['Per Haugen',    'Rollespiller: NRK-journalist og Facebook-forelder', '902 67 890', 'Scenario-aktør'],
    ['Brann og redning', 'Reell hendelse under øvelsen',                '110',         'Nødnummer'],
    ['Politi',        'Reell hendelse under øvelsen',                   '112',         'Nødnummer']
   ].forEach(([navn, funk, tlf, type]) => {
