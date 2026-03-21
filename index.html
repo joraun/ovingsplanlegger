@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.17</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.18</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -637,7 +637,8 @@
         </div>
         <hr class="d" />
         <div>
-          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:5px;">Roller og ansvar</label>
+          <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;">Øvingsorganisasjon og spillstab</label>
+          <p class="hint" style="margin-bottom:9px;">Hvem leder, evaluerer og observerer øvelsen? Deltakerne som skal øves føres opp i deltakerlisten, ikke her.</p>
           <div class="dl" id="rol-list"></div>
           <button class="add" onclick="addRol()">+ Legg til rolle</button>
         </div>
@@ -741,7 +742,7 @@
         <div class="f">
           <label>Ansvarsfordeling for oppfølging og læringsoverføring</label>
           <p class="hint">Hvem har ansvar for at identifiserte tiltak faktisk gjennomføres? Angi navn/rolle og tidsfrist per tiltak.</p>
-          <textarea id="s6_overf" rows="4" placeholder="F.eks.: «Rådmann ansvarlig for revisjon av beredskapsplan innen 31.08. Kommunikasjonssjef følger opp mediehåndtering innen 01.06.»"></textarea>
+          <textarea id="s6_overf" rows="4" placeholder="F.eks.: «Kommunedirektør ansvarlig for revisjon av beredskapsplan innen 31.08. Kommunikasjonssjef følger opp mediehåndtering innen 01.06.»"></textarea>
         </div>
       </div>
     </div>
@@ -1441,9 +1442,9 @@ function fillDemo() {
   set('t2_gap', 'Kriseledelsens evne til rask etablering er utilstrekkelig — strømhendelsen i 2024 viste at det tok over 90 minutter å etablere stab (målet er 30 min). Rolleforståelsen er uklar blant nye politiske ledere. CIM brukes ikke konsekvent og loggføring er mangelfull. Koordinering med Statsforvalteren har vært reaktiv, ikke proaktiv. Ekstern kommunikasjon har vært ukoordinert og for sen.');
 
   // ── TBA T3 ──
-  set('t3_hvem',  'Kommunens kriseledelse: ordfører, rådmann, kommunalsjef beredskap, kommunikasjonssjef, teknisk sjef samt varamedlemmer for disse. Totalt 10–12 personer.');
+  set('t3_hvem',  'Kommunens kriseledelse: ordfører, kommunedirektør, kommunalsjef beredskap, kommunikasjonssjef, teknisk sjef samt varamedlemmer for disse. Totalt 10–12 personer.');
   set('t3_nivaa', 'Blandet — varierende bakgrunn');
-  set('t3_forut', 'Rådmannen og beredskapskoordinatoren har deltatt på øvelser tidligere og kjenner prosedyrene. Ny ordfører og tre nye kommunalsjefer har ingen øvelseserfaring. To varamedlemmer har militær beredskapserfaring.');
+  set('t3_forut', 'Kommunedirektøren og beredskapskoordinatoren har deltatt på øvelser tidligere og kjenner prosedyrene. Ny ordfører og tre nye kommunalsjefer har ingen øvelseserfaring. To varamedlemmer har militær beredskapserfaring.');
   set('t3_hensyn', 'Ny ordfører uten beredskapserfaring — må ivaretas spesielt i rollekortdesign og briefing. Høy politisk turnover gjør det vanskelig å bygge kontinuerlig kompetanse. Ekstern observatør fra Statsforvalteren deltar, noe som kan påvirke dynamikken i staben.');
 
   // ── TBA T4 ──
@@ -1503,7 +1504,7 @@ function fillDemo() {
 
   // ── PLAN 4 ──
   set('s4_scenario',   'Torsdag 14. mai kl. 08:45 mottar kommunens vakttelefon melding fra jernbaneoperatøren om at et godstog har sporet av ved Fjordheim stasjon. Toget transporterte kjemikalier, og det er meldt om røykutvikling fra ett av vognene. Ca. 200 meter fra sporet ligger Fjordheim ungdomsskole med 350 elever og 40 ansatte. Brannvesenet er varslet og rykker ut. Politiet sperrer av et område på 150 meter rundt avsporingen.');
-  set('s4_startpunkt', 'Kl. 09:00 ringer beredskapskoordinatoren (spilleder) rådmannen og informerer om hendelsen. Rådmannen må ta stilling til om kriseledelsen skal innkalles og kriseledelserommet etableres. Ingen øvrige i staben er foreløpig informert.');
+  set('s4_startpunkt', 'Kl. 09:00 ringer beredskapskoordinatoren (spilleder) kommunedirektøren og informerer om hendelsen. Kommunedirektøren må ta stilling til om kriseledelsen skal innkalles og kriseledelserommet etableres. Ingen øvrige i staben er foreløpig informert.');
 
   const injList = document.getElementById('inj-list');
   injList.innerHTML = '';
@@ -1538,10 +1539,7 @@ function fillDemo() {
 
   const rolList = document.getElementById('rol-list');
   rolList.innerHTML = '';
-  [['Spilleder', 'Kari Bakken', 'Leder øvelsen og introduserer injeksjoner. Observerer og noterer underveis.'],
-   ['Ordfører', 'Per Johansen', 'Leder kriseledelsen og er ansvarlig for politiske beslutninger under øvelsen.'],
-   ['Rådmann', 'Anne Sørensen', 'Administrativ leder — koordinerer tverrsektoriell innsats og støtter ordføreren.'],
-   ['Kommunikasjonssjef', 'Lars Moen', 'Ansvarlig for pressehåndtering og informasjon til publikum.'],
+  [['Spilleder / Evaluator', 'Kari Bakken', 'Leder øvelsesforløpet og introduserer injeksjoner. Observerer, noterer og leder evalueringen etter øvelsen.'],
    ['Observatør', 'Ingrid Vik (Statsforvalteren)', 'Observerer øvelsen på vegne av Statsforvalteren. Bidrar ikke aktivt i krisehåndteringen, men gir faglig tilbakemelding i debrief og evaluering.']
   ].forEach(([rolle, navn, besk]) => {
     addRol();
@@ -1555,13 +1553,13 @@ function fillDemo() {
   const deltList = document.getElementById('delt-list');
   deltList.innerHTML = '';
   [['Per Johansen',   'Ordfører',                         'Grunnleggende'],
-   ['Anne Sørensen',  'Rådmann',                          'Viderekommet'],
+   ['Anne Sørensen',  'Kommunedirektør',                   'Viderekommet'],
    ['Kari Bakken',    'Beredskapskoordinator / Spilleder', 'Ekspert'],
    ['Lars Moen',      'Kommunikasjonssjef',                'Grunnleggende'],
    ['Tor Hansen',     'Teknisk sjef',                      'Grunnleggende'],
    ['Eva Nordheim',   'Kommunalsjef beredskap',            'Grunnleggende'],
    ['Mari Dalen',     'Vara — ordfører',                   'Grunnleggende'],
-   ['Jon Fjeld',      'Vara — rådmann',                    'Grunnleggende'],
+   ['Jon Fjeld',      'Vara — kommunedirektør',             'Grunnleggende'],
    ['Ingrid Vik',     'Observatør (Statsforvalteren)',      'Ekspert']
   ].forEach(([navn, rolle, nivaa]) => {
     addDelt();
@@ -1591,7 +1589,7 @@ function fillDemo() {
   document.getElementById('s6_obs').checked = true;
   set('s6_hvem',     'Kari Bakken (intern) + Ingrid Vik, Statsforvalteren (ekstern observatør)');
   set('s6_tidspunkt', 'Hot wash umiddelbart etter øvelsen (30 min). Skriftlig evalueringsrapport innen 5 virkedager.');
-  set('s6_overf',    'Evalueringsrapport sendes rådmannen og politisk ledelse innen 20. mai 2026. Funn implementeres i revidert beredskapsplan innen 31. august 2026. Rapporten sendes Statsforvalteren som del av årsrapportering. Ny øvelse (spilløvelse) planlegges tidlig 2027 for å verifisere forbedringer.');
+  set('s6_overf',    'Evalueringsrapport sendes kommunedirektøren og politisk ledelse innen 20. mai 2026. Funn implementeres i revidert beredskapsplan innen 31. august 2026. Rapporten sendes Statsforvalteren som del av årsrapportering. Ny øvelse (spilløvelse) planlegges tidlig 2027 for å verifisere forbedringer.');
 
   renderNav();
   _saveToLocalStorage();
@@ -2037,7 +2035,7 @@ function generatePDF() {
   const rolR = dynRows('rol-list');
   if (rolR.length) {
     const rC = [{l:'Rolle',w:50},{l:'Navn',w:50},{l:'Beskrivelse',w:74}];
-    subLabel('Roller og ansvar'); tblHdr(rC); rolR.forEach((r,i) => tblRow(rC,r,i)); $.y += 4;
+    subLabel('Øvingsorganisasjon og spillstab'); tblHdr(rC); rolR.forEach((r,i) => tblRow(rC,r,i)); $.y += 4;
   }
   const sLeder = v('s4_sikkerhetsleder'), kodeord = v('s4_kodeord'), hmsText = v('s4_hms');
   if (sLeder || kodeord || hmsText) {
