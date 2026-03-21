@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.16</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.17</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -1538,11 +1538,11 @@ function fillDemo() {
 
   const rolList = document.getElementById('rol-list');
   rolList.innerHTML = '';
-  [['Spilleder', 'Kari Bakken', 'Leder øvelsen og introduserer injeksjoner. Observerer og noterer.'],
-   ['Ordfører (fiktiv)', 'Per Johansen', 'Leder kriseledelsen og er ansvarlig for politiske beslutninger.'],
-   ['Rådmann (fiktiv)', 'Anne Sørensen', 'Administrativ leder — koordinerer tverrsektoriell innsats.'],
+  [['Spilleder', 'Kari Bakken', 'Leder øvelsen og introduserer injeksjoner. Observerer og noterer underveis.'],
+   ['Ordfører', 'Per Johansen', 'Leder kriseledelsen og er ansvarlig for politiske beslutninger under øvelsen.'],
+   ['Rådmann', 'Anne Sørensen', 'Administrativ leder — koordinerer tverrsektoriell innsats og støtter ordføreren.'],
    ['Kommunikasjonssjef', 'Lars Moen', 'Ansvarlig for pressehåndtering og informasjon til publikum.'],
-   ['Observatør', 'Ingrid Vik (Statsforvalteren)', 'Observerer øvelsen og bidrar i evalueringen. Er ikke aktiv deltaker.']
+   ['Observatør', 'Ingrid Vik (Statsforvalteren)', 'Observerer øvelsen på vegne av Statsforvalteren. Bidrar ikke aktivt i krisehåndteringen, men gir faglig tilbakemelding i debrief og evaluering.']
   ].forEach(([rolle, navn, besk]) => {
     addRol();
     const row = rolList.querySelector('.di:last-child');
@@ -1561,7 +1561,8 @@ function fillDemo() {
    ['Tor Hansen',     'Teknisk sjef',                      'Grunnleggende'],
    ['Eva Nordheim',   'Kommunalsjef beredskap',            'Grunnleggende'],
    ['Mari Dalen',     'Vara — ordfører',                   'Grunnleggende'],
-   ['Jon Fjeld',      'Vara — rådmann',                    'Grunnleggende']
+   ['Jon Fjeld',      'Vara — rådmann',                    'Grunnleggende'],
+   ['Ingrid Vik',     'Observatør (Statsforvalteren)',      'Ekspert']
   ].forEach(([navn, rolle, nivaa]) => {
     addDelt();
     const row = deltList.querySelector('.di:last-child');
