@@ -256,7 +256,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.9</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.10</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -2133,6 +2133,7 @@ function pdfInit(palette, headerLabel, orgFn) {
     chk(rh);
     doc.setFontSize(10); doc.setFont(undefined, 'normal');
     if (doc.getNumberOfPages() > pgBefore && tblRow._lastCols) { tblHdr(tblRow._lastCols, pal); }
+    doc.setFontSize(10); doc.setFont(undefined, 'normal');
     if (ri % 2 === 0) { doc.setFillColor(...pal.card); doc.rect(M, $.y - 1, IW, rh, 'F'); }
     doc.setTextColor(...P.tx);
     let x = M + 2;
