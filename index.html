@@ -234,7 +234,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.2.2</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.2.3</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1567,7 +1567,7 @@ function fillDemo() {
   set('s1_tid',    '09:00');
   set('s1_sted',   'Rådhuset, Fjordheim — Kriseledelserommet, 2. etasje');
   set('s1_type',   'Spilløvelse');
-  set('s1_leder',  'Kari Bakken (Beredskapskoordinator)');
+  set('s1_leder',  'Erik Vangen (Ekstern spilleder)');
   set('s1_org',    'Fjordheim kommune');
   set('s1_antall', '12');
 
@@ -1619,13 +1619,13 @@ function fillDemo() {
   [['09:05', 'TELEFON — Innsatsleder brannvesen: «Vogn 3 lekker aktivt. Vi bekrefter klorhydrogen. Anbefaler umiddelbar evakuering av Fjordheim ungdomsskole — 150 meter fra sporet.»', 'Mari Strand', 3],
    ['09:20', 'TELEFON — Rektor Fjordheim ungdomsskole: «Hva gjør vi? Elevene er urolige og foreldre ringer allerede. Skal vi evakuere på egenhånd eller vente på ordre?»', 'Mari Strand', 4],
    ['09:30', 'TELEFON — NRK Vestland: «Jeg er journalist og står 100 meter fra sperringen. Kan ordføreren stille til direkteintervju nå? Vi sender om 10 minutter.»', 'Per Haugen', 2],
-   ['09:45', 'MELDING — Kommunens IKT-avdeling varsler om at interntelefonsystemet i rådhuset er nede. Stabsmedlemmer kan kun nås på mobiltelefon.', 'Kari Bakken', 1],
+   ['09:45', 'MELDING — Kommunens IKT-avdeling varsler om at interntelefonsystemet i rådhuset er nede. Stabsmedlemmer kan kun nås på mobiltelefon.', 'Erik Vangen', 1],
    ['10:00', 'TELEFON — Statsforvalterens beredskapsrådgiver: «Vi trenger situasjonsrapport innen 30 minutter. Har kommunen behov for bistand fra Statsforvalteren?»', 'Lars Erik Dahl', 1],
    ['10:20', 'TELEFON — Jernbaneoperatøren: «Vi har hentet frem fraktseddelen — totalt 4,2 tonn klorhydrogen i vogn 3. Sender MSDS-ark på e-post nå. Dere bør koordinere med Miljødirektoratet.»', 'Per Haugen', 3],
-   ['10:35', 'SOSIALE MEDIER — Spilleder viser skjermbilde på projektor: Forelder på Facebook: «Min datter er på skolen!! Ingen informasjon fra kommunen — dette er skandaløst!!» — 340 delinger på 20 minutter.', 'Kari Bakken', 2],
+   ['10:35', 'SOSIALE MEDIER — Spilleder viser skjermbilde på projektor: Forelder på Facebook: «Min datter er på skolen!! Ingen informasjon fra kommunen — dette er skandaløst!!» — 340 delinger på 20 minutter.', 'Erik Vangen', 2],
    ['10:50', 'TELEFON — Hjemmetjenesteleder: «To av våre pasienter bor innenfor evakueringssonen. En av dem er helt avhengig av oksygenkonsentrator uten batteri. Vi trenger beslutning nå.»', 'Silje Nygård', 4],
    ['11:05', 'TELEFON — Ordfører i Bergheim kommune: «Vi hørte dere har en kjemikaliehendelse. Vi har ledig nødstrømaggregat og kan stille med to kommunale biler. Trenger dere bistand?»', 'Lars Erik Dahl', 3],
-   ['11:20', 'MELDING — NRK sender nå direkteoverføring fra stedet. Programleder stiller spørsmål ved kommunens håndtering av evakueringen. Produsenten ber om offisiell uttalelse innen 15 minutter.', 'Kari Bakken', 2]
+   ['11:20', 'MELDING — NRK sender nå direkteoverføring fra stedet. Programleder stiller spørsmål ved kommunens håndtering av evakueringen. Produsenten ber om offisiell uttalelse innen 15 minutter.', 'Erik Vangen', 2]
   ].forEach(([tid, besk, ans, maalIdx]) => {
     addInj();
     const row = injList.querySelector('.di:last-child');
@@ -1637,9 +1637,9 @@ function fillDemo() {
   });
 
   set('s4_markor', 'Ingen markører eller sminke — spilløvelsen foregår i kriseledelserommet uten feltaktivitet. Rollespillerne befinner seg i tilstøtende rom og injiserer utelukkende via telefon.');
-  set('s4_sikkerhetsleder', 'Kari Bakken (spilleder)');
+  set('s4_sikkerhetsleder', 'Erik Vangen (spilleder)');
   set('s4_kodeord', 'NO PLAY');
-  set('s4_hms', 'Spilløvelsen foregår innendørs i kriseledelserommet — ingen fysisk risiko eller feltoperasjoner. Kodeordet «NO PLAY» stanser øvelsen umiddelbart ved en reell hendelse; alle deltakere informeres om dette ved oppstart. Rollespillerne (Per Haugen, Mari Strand, Lars Erik Dahl og Silje Nygård) befinner seg i møterom 2B og skal ikke avbrytes under gjennomføringen. Spilleder har ansvar for å avbryte og varsle ved behov.');
+  set('s4_hms', 'Spilløvelsen foregår innendørs i kriseledelserommet — ingen fysisk risiko eller feltoperasjoner. Kodeordet «NO PLAY» stanser øvelsen umiddelbart ved en reell hendelse; alle deltakere informeres om dette ved oppstart. Rollespillerne (Per Haugen, Mari Strand, Lars Erik Dahl og Silje Nygård) befinner seg i møterom 2B og skal ikke avbrytes under gjennomføringen. Erik Vangen (spilleder) har ansvar for å avbryte og varsle ved behov.');
 
   const utsList = document.getElementById('uts-list');
   utsList.innerHTML = '';
@@ -1654,7 +1654,7 @@ function fillDemo() {
 
   const rolList = document.getElementById('rol-list');
   rolList.innerHTML = '';
-  [['Spilleder / Evaluator', 'Kari Bakken', 'Leder øvelsesforløpet, introduserer skriftlige injeksjoner og koordinerer rollespillerne. Observerer, noterer og leder evalueringen etter øvelsen.'],
+  [['Spilleder / Evaluator', 'Erik Vangen', 'Ekstern spilleder. Leder øvelsesforløpet, introduserer skriftlige injeksjoner og koordinerer rollespillerne. Observerer, noterer og leder evalueringen etter øvelsen.'],
    ['Rollespiller A', 'Per Haugen', 'Spiller NRK-journalist (09:30) og jernbaneoperatøren (10:20) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
    ['Rollespiller B', 'Mari Strand', 'Spiller innsatsleder brannvesen (09:05) og rektor Fjordheim ungdomsskole (09:20) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
    ['Rollespiller C', 'Lars Erik Dahl', 'Spiller Statsforvalterens beredskapsrådgiver (10:00) og ordfører Bergheim kommune (11:05) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
@@ -1673,7 +1673,7 @@ function fillDemo() {
   deltList.innerHTML = '';
   [['Per Johansen',   'Ordfører',                         'Grunnleggende'],
    ['Anne Sørensen',  'Kommunedirektør',                   'Viderekommet'],
-   ['Kari Bakken',    'Beredskapskoordinator / Spilleder', 'Ekspert'],
+   ['Kari Bakken',    'Beredskapskoordinator',             'Ekspert'],
    ['Lars Moen',      'Kommunikasjonssjef',                'Grunnleggende'],
    ['Tor Hansen',     'Teknisk sjef',                      'Grunnleggende'],
    ['Eva Nordheim',   'Kommunalsjef beredskap',            'Grunnleggende'],
@@ -1724,12 +1724,12 @@ function fillDemo() {
     inps[2].value = fokus;
   });
 
-  set('s5_ext', 'Statsforvalteren i Vestland deltar som observatør ved Ingrid Vik. Fire eksterne rollespillere (Per Haugen, Mari Strand, Lars Erik Dahl og Silje Nygård) injiserer via telefon fra møterom 2B og spiller til sammen syv ulike aktører. Brann- og redningsetaten, politiet og jernbaneoperatøren er representert via rollespillerne, men deltar ikke med ekte personell.');
+  set('s5_ext', 'Erik Vangen er ekstern spilleder og leder gjennomføringen. Statsforvalteren i Vestland deltar som observatør ved Ingrid Vik. Fire rollespillere (Per Haugen, Mari Strand, Lars Erik Dahl og Silje Nygård) injiserer via telefon fra møterom 2B og spiller til sammen åtte ulike aktører. Brann- og redningsetaten, politiet og jernbaneoperatøren er representert via rollespillerne, men deltar ikke med ekte personell.');
 
   // ── PLAN 6 ──
   document.getElementById('s6_debrief').checked = true;
   document.getElementById('s6_obs').checked = true;
-  set('s6_hvem',     'Kari Bakken (intern) + Ingrid Vik, Statsforvalteren (ekstern observatør)');
+  set('s6_hvem',     'Erik Vangen (ekstern spilleder/evaluator) + Ingrid Vik, Statsforvalteren (ekstern observatør)');
   set('s6_tidspunkt', 'Hot wash umiddelbart etter øvelsen (30 min). Skriftlig evalueringsrapport innen 5 virkedager.');
   set('s6_overf',    'Evalueringsrapport sendes kommunedirektøren og politisk ledelse innen 20. mai 2026. Funn implementeres i revidert beredskapsplan innen 31. august 2026. Rapporten sendes Statsforvalteren som del av årsrapportering. Ny øvelse (fullskalaøvelse) vurderes gjennomført tidlig 2028 for å verifisere forbedringer under mer realistiske betingelser.');
 
