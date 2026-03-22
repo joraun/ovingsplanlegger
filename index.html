@@ -127,6 +127,11 @@
     .add-krit { font-size:.73rem; padding:4px 10px; background:none; border:1.5px dashed var(--blue-lt); border-radius:5px; color:var(--blue-mid); cursor:pointer; font-weight:600; transition:all .15s; }
     .add-krit:hover { background:#e8f0fb; border-style:solid; }
 
+    /* ── Tidslinje for injeksjoner ── */
+    #inj-list { border-left:2px solid var(--blue-lt); margin-left:10px; padding-left:18px; }
+    #inj-list .di { position:relative; }
+    #inj-list .di::before { content:''; position:absolute; left:-24px; top:16px; width:10px; height:10px; border-radius:50%; background:var(--blue-mid); border:2px solid var(--white); box-shadow:0 0 0 2px var(--blue-lt); }
+
     /* ── Evalueringsmatrise ── */
     .eval-matrix-wrap { display:flex; flex-direction:column; gap:10px; }
     .eval-maal { background:var(--bg); border:1px solid var(--border); border-radius:var(--r); padding:12px 14px; }
@@ -231,7 +236,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.32</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.33</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1890,7 +1895,14 @@ function pdfInit(palette, headerLabel, orgFn) {
 // ═══════════════════════════════════════════
 //  TBA-ONLY PDF
 // ═══════════════════════════════════════════
+function _checkPDF(fields) {
+  const missing = fields.filter(([id, label]) => !v(id)).map(([,label]) => label);
+  if (!missing.length) return true;
+  return confirm('Følgende felt er ikke fylt ut:\n\n• ' + missing.join('\n• ') + '\n\nVil du generere PDF-en likevel?');
+}
+
 function generateTBAPDF() {
+  if (!_checkPDF([['t1_org', 'Organisasjonsnavn (T1)']])) return;
   const G = {
     dk:   [27,  94,  56],
     md:   [46,  125, 82],
@@ -2005,6 +2017,7 @@ function generateTBAPDF() {
 //  FULL ØVINGSPLAN PDF  (TBA-style design, blue)
 // ═══════════════════════════════════════════
 function generatePDF() {
+  if (!_checkPDF([['s1_navn', 'Navn på øvelsen (S1)'], ['s1_dato', 'Dato (S1)']])) return;
   const B = {
     dk:   [26,  58,  92],
     md:   [42,  82,  152],
@@ -2221,6 +2234,7 @@ function generatePDF() {
 //  EVALUERINGSRAPPORT PDF  (purple/indigo)
 // ═══════════════════════════════════════════
 function generateEvalPDF() {
+  if (!_checkPDF([['s1_navn', 'Navn på øvelsen (S1)'], ['s1_dato', 'Dato (S1)']])) return;
   const E = {
     dk:   [55,  30,  100],
     md:   [90,  60,  170],
