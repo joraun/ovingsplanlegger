@@ -231,7 +231,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.30</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.31</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -255,7 +255,7 @@
       <span class="ph-num">1</span><span>Treningsbehovsanalyse</span>
     </button>
     <div class="ph-arr">▶</div>
-    <button class="ph-tab" id="phTab1">
+    <button class="ph-tab" id="phTab1" onclick="goTo(5)" title="Gå direkte til øvingsplanlegging">
       <span class="ph-num">2</span><span>Øvingsplanlegging</span>
     </button>
   </div>
@@ -318,7 +318,10 @@
       </div>
     </div>
   </div>
-  <div class="nav"><span></span><button class="btn btn-tba" onclick="nextPage()">Neste: Oppgaveanalyse →</button></div>
+  <div class="nav">
+    <button class="btn btn-sec" onclick="goTo(5)" title="Hopp over TBA og start øvingsplanlegging direkte">Hopp til planlegging →</button>
+    <button class="btn btn-tba" onclick="nextPage()">Neste: Oppgaveanalyse →</button>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════
