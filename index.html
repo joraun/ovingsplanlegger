@@ -231,7 +231,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.31</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.32</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1985,6 +1985,15 @@ function generateTBAPDF() {
   twoCol('Treningsnivå', tba_mg(), 'Anbefalt øvelsestype', tba_type());
   $.y += 2;
   fpCard('Prioriterte treningsbehov og anbefalinger', v('t4_behov'), true);
+
+  const progR = dynRows('prog-list');
+  if (progR.length) {
+    $.y += 4;
+    subLabel('Øvingsprogram / Langsiktig progresjon');
+    const pC = [{l:'Trinn',w:22},{l:'Øvelsestype',w:52},{l:'Dato / periode',w:38},{l:'Fokusområde',w:62}];
+    tblHdr(pC); progR.forEach((r,i) => tblRow(pC,r,i));
+    $.y += 4;
+  }
 
   addPageFooters('Treningsbehovsanalyse  ·  ' + dateStr);
   const fname = ('TBA_' + orgName).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
