@@ -255,7 +255,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.1</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.2</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1352,7 +1352,7 @@ function addDelt() {
     const val = rolleSel.value;
     if (!val) return;
     const oppTA = rolleSel.closest('.di').querySelector('textarea');
-    if (oppTA && !oppTA.value.trim()) {
+    if (oppTA) {
       const desc = _getKatalogBesk(val);
       if (desc) { oppTA.value = desc; _autoResize(oppTA); }
     }
