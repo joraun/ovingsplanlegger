@@ -232,7 +232,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.35</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.36</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -794,7 +794,7 @@ function goTo(i) {
   document.getElementById('page-' + PAGES[idx]).classList.add('active');
   if (PAGES[idx] === 'tba-3')     { buildT4Summary(); autoSuggest(); }
   if (PAGES[idx] === 'transition') { buildSummary(); buildTransitionOptions(); }
-  if (PAGES[idx] === 'plan-3')    { _refreshInjMaalDropdowns(); _refreshSpillstabDatalist(); }
+  if (PAGES[idx] === 'plan-3')    { _refreshInjMaalDropdowns(); _refreshSpillstabDatalist(); _resizeInjTextareas(); }
   if (PAGES[idx] === 'plan-5')    buildEvalMatrix();
   renderNav();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1206,7 +1206,11 @@ function addInj() {
   maalSel.appendChild(noneOp);
   const ansvInp = inp('Ansvarlig', 1);
   ansvInp.setAttribute('list', 'spillstab-datalist');
-  mkDyn('inj-list', [inp('Tidspunkt', '0 0 auto'), inp('Beskrivelse', 2), ansvInp, maalSel]);
+  const beskTA = document.createElement('textarea');
+  beskTA.placeholder = 'Beskrivelse'; beskTA.rows = 1;
+  beskTA.style.cssText = 'flex:2;min-width:180px;resize:none;overflow:hidden;';
+  beskTA.addEventListener('input', () => _autoResize(beskTA));
+  mkDyn('inj-list', [inp('Tidspunkt', '0 0 auto'), beskTA, ansvInp, maalSel]);
   _refreshInjMaalDropdowns();
   _refreshSpillstabDatalist();
 }
@@ -1419,6 +1423,7 @@ function _loadFromLocalStorage() {
     _applyData(data);
     if (data._savedAt) _updateSaveIndicator(data._savedAt);
     if (typeof data.page === 'number') goTo(data.page);
+    requestAnimationFrame(_resizeInjTextareas);
     return true;
   } catch(e) { return false; }
 }
@@ -1618,7 +1623,9 @@ function fillDemo() {
     addInj();
     const row = injList.querySelector('.di:last-child');
     const inps = row.querySelectorAll('input');
-    inps[0].value = tid; inps[1].value = besk; inps[2].value = ans;
+    inps[0].value = tid;
+    row.querySelector('textarea').value = besk;
+    inps[1].value = ans;
     if (maalIdx !== null) row.querySelector('.inj-maal-sel').value = maals[maalIdx].maal;
   });
 
@@ -1721,6 +1728,7 @@ function fillDemo() {
 
   renderNav();
   _saveToLocalStorage();
+  requestAnimationFrame(_resizeInjTextareas);
   showToast('Demoscenario lastet inn — Fjordheim kommune 🏔️');
 }
 
