@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.24</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.25</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -1184,7 +1184,10 @@ function addInj() {
   maalSel.appendChild(noneOp);
   const ansvInp = inp('Ansvarlig', 1);
   ansvInp.setAttribute('list', 'spillstab-datalist');
-  mkDyn('inj-list', [inp('Tidspunkt', '0 0 auto'), inp('Beskrivelse', 2), ansvInp, maalSel]);
+  const beskTA = document.createElement('textarea');
+  beskTA.placeholder = 'Beskrivelse'; beskTA.rows = 3;
+  beskTA.style.cssText = 'flex:2;min-width:180px;resize:vertical;';
+  mkDyn('inj-list', [inp('Tidspunkt', '0 0 auto'), beskTA, ansvInp, maalSel]);
   _refreshInjMaalDropdowns();
   _refreshSpillstabDatalist();
 }
@@ -1549,7 +1552,9 @@ function fillDemo() {
     addInj();
     const row = injList.querySelector('.di:last-child');
     const inps = row.querySelectorAll('input');
-    inps[0].value = tid; inps[1].value = besk; inps[2].value = ans;
+    inps[0].value = tid;
+    row.querySelector('textarea').value = besk;
+    inps[1].value = ans;
     if (maalIdx !== null) row.querySelector('.inj-maal-sel').value = maals[maalIdx].maal;
   });
 
