@@ -179,6 +179,10 @@
     .sum-card p { font-size:.83rem; color:var(--text); line-height:1.55; }
     .sum-card p.mt { color:var(--muted); font-style:italic; }
     .trans-btns { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+    #trans-prog { text-align:left; margin-bottom:18px; }
+    #trans-prog p { font-size:.88rem; font-weight:600; color:var(--blue); margin-bottom:10px; }
+    .prog-trinn-btn { display:block; width:100%; text-align:left; padding:12px 16px; margin-bottom:8px; background:var(--bg); border:2px solid var(--blue-lt); border-radius:var(--r); cursor:pointer; font-family:inherit; font-size:.87rem; color:var(--text); transition:all .15s; }
+    .prog-trinn-btn:hover { background:#e8f0fb; border-color:var(--blue-mid); }
 
     /* ── Nav buttons ── */
     .nav { display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px; flex-wrap:wrap; }
@@ -224,10 +228,12 @@
 
 <header>
   <div class="hdr-inner">
-    <div class="hdr-logo">🛡️</div>
-    <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.28</span></h1>
-      <p>Planleggingsverktøy for beredskapsøvelser</p>
+    <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
+      <div class="hdr-logo">🛡️</div>
+      <div class="hdr-text">
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.29</span></h1>
+        <p>Planleggingsverktøy for beredskapsøvelser</p>
+      </div>
     </div>
     <div class="hdr-right">
       <span id="save-indicator" class="save-ind"></span>
@@ -448,6 +454,13 @@
           <p class="hint">Oppsummer de viktigste funnene fra T1–T3. Dette er grunnlaget for læringsmålene og bakgrunnen i øvingsplanen.</p>
           <textarea id="t4_behov" rows="5" placeholder="Basert på analysen bør øvelsen prioritere å trene på..."></textarea>
         </div>
+        <hr class="d" />
+        <div>
+          <label class="t">Øvingsprogram / Langsiktig progresjon <span style="font-weight:400;color:var(--muted);font-size:.78rem;">(valgfritt)</span></label>
+          <p class="hint" style="margin-bottom:9px;">Dersom analysen peker mot et behov for gradvis kompetansebygging («krype–gå–løpe»), kan du skissere hele programmet her. På neste skjerm velger du hvilken av øvelsene du vil planlegge nå.</p>
+          <div class="dl" id="prog-list"></div>
+          <button class="add t" onclick="addProg()">+ Legg til trinn</button>
+        </div>
       </div>
     </div>
   </div>
@@ -466,9 +479,10 @@
     <h2>Treningsbehovsanalysen er fullført</h2>
     <p>Her er en oppsummering av de viktigste funnene. Relevante felt i øvingsplanleggingen er forhåndsutfylt fra analysen — du kan alltid justere dem.</p>
     <div class="sum-grid" id="sumGrid"></div>
+    <div id="trans-prog"></div>
     <div class="trans-btns">
       <button class="btn btn-pdf-tba" onclick="generateTBAPDF()">📄 Last ned TBA som PDF</button>
-      <button class="btn btn-pln btn-lg" onclick="startPlanning()">📋 Start øvingsplanlegging →</button>
+      <button class="btn btn-pln btn-lg" id="trans-start-btn" onclick="startPlanning()">📋 Start øvingsplanlegging →</button>
     </div>
   </div>
   <div class="nav">
@@ -775,7 +789,7 @@ function goTo(i) {
   idx = i;
   document.getElementById('page-' + PAGES[idx]).classList.add('active');
   if (PAGES[idx] === 'tba-3')     { buildT4Summary(); autoSuggest(); }
-  if (PAGES[idx] === 'transition') buildSummary();
+  if (PAGES[idx] === 'transition') { buildSummary(); buildTransitionOptions(); }
   if (PAGES[idx] === 'plan-3')    { _refreshInjMaalDropdowns(); _refreshSpillstabDatalist(); _resizeInjTextareas(); }
   if (PAGES[idx] === 'plan-5')    buildEvalMatrix();
   renderNav();
@@ -1200,6 +1214,51 @@ function addUts()  { mkDyn('uts-list',  [inp('Utstyr / Beskrivelse', 2), inp('An
 function addRol()  { mkDyn('rol-list',  [inp('Rolle', 1), inp('Navn', 1), ta('Beskrivelse')]); }
 function addDelt() { mkDyn('delt-list', [inp('Navn', 2), inp('Rolle', 1), sel(['—','Grunnleggende','Viderekommet','Ekspert'])]); }
 function addKont() { mkDyn('kont-list', [inp('Rolle / Organisasjon', 1), inp('Telefon', 1), sel(['Spillstab', 'Scenario-aktør', 'Nødnummer'])]); }
+function addProg() {
+  const n = document.querySelectorAll('#prog-list .di').length + 1;
+  const trinnInp = inp('Trinn', '0 0 auto'); trinnInp.value = 'Trinn ' + n;
+  const typeOpts = ['— Velg type —','Seminar / Workshop','Diskusjonsøvelse','Spilløvelse / ledelsesspill','Ferdighetstrening / drill','Funksjonsøvelse','Fullskalaøvelse','Annet'];
+  const datoInp = inp('Dato / periode', '0 0 auto');
+  mkDyn('prog-list', [trinnInp, sel(typeOpts), datoInp, inp('Fokusområde', 2)]);
+}
+
+function buildTransitionOptions() {
+  const progDiv = document.getElementById('trans-prog');
+  const startBtn = document.getElementById('trans-start-btn');
+  if (!progDiv) return;
+  const rows = [...document.querySelectorAll('#prog-list .di')].filter(r => {
+    const s = r.querySelector('select'); return s && s.value && !s.value.startsWith('—');
+  });
+  if (rows.length === 0) { progDiv.innerHTML = ''; startBtn.style.display = ''; return; }
+  startBtn.style.display = 'none';
+  progDiv.innerHTML = '<p>Velg hvilken øvelse du vil planlegge nå:</p>' +
+    rows.map((row, i) => {
+      const inps = row.querySelectorAll('input');
+      const trinn = inps[0]?.value.trim() || ('Trinn ' + (i + 1));
+      const type  = row.querySelector('select')?.value || '';
+      const dato  = inps[1]?.value.trim() || '';
+      const fokus = inps[2]?.value.trim() || '';
+      return `<button class="prog-trinn-btn" onclick="startPlanningFromTrinn(${i})">
+        <strong>${trinn}</strong>${type ? ' — ' + type : ''}${dato ? ' · ' + dato : ''}
+        ${fokus ? '<br><span style="font-size:.8rem;opacity:.7">' + fokus + '</span>' : ''}
+      </button>`;
+    }).join('') +
+    '<button class="btn btn-sec" style="margin-top:4px;font-size:.82rem;" onclick="startPlanning()">Start planlegging uten forhåndsvalg</button>';
+}
+
+function startPlanningFromTrinn(i) {
+  const rows = [...document.querySelectorAll('#prog-list .di')].filter(r => {
+    const s = r.querySelector('select'); return s && s.value && !s.value.startsWith('—');
+  });
+  const row = rows[i];
+  if (!row) { startPlanning(); return; }
+  const inps = row.querySelectorAll('input');
+  const type = row.querySelector('select')?.value || '';
+  const dato = inps[1]?.value.trim() || '';
+  if (type) set('s1_type', type);
+  if (dato && /^\d{4}-\d{2}-\d{2}$/.test(dato)) set('s1_dato', dato);
+  startPlanning();
+}
 
 // Seed initial rows
 ['T2Opp','Maal','Inj','Uts','Rol','Delt','Kont'].forEach(k => window['add'+k]());
@@ -1237,7 +1296,7 @@ function _serializeEvalMatrix() {
 }
 
 function _collectData() {
-  const dynListIds = ['t2-opp-list','inj-list','uts-list','rol-list','delt-list','kont-list'];
+  const dynListIds = ['t2-opp-list','inj-list','uts-list','rol-list','delt-list','kont-list','prog-list'];
   const dynContainers = dynListIds.map(id => document.getElementById(id));
   const maalContainer = document.getElementById('maal-list');
   const evalContainer = document.getElementById('eval-matrix');
@@ -1263,7 +1322,8 @@ function _collectData() {
       'uts-list':    _serializeDynList('uts-list'),
       'rol-list':    _serializeDynList('rol-list'),
       'delt-list':   _serializeDynList('delt-list'),
-      'kont-list':   _serializeDynList('kont-list')
+      'kont-list':   _serializeDynList('kont-list'),
+      'prog-list':   _serializeDynList('prog-list')
     },
     evalMatrix: _serializeEvalMatrix()
   };
@@ -1327,6 +1387,7 @@ function _applyData(data) {
   if (L['rol-list'])    _restoreDynList('rol-list', L['rol-list'], addRol);
   if (L['delt-list'])   _restoreDynList('delt-list', L['delt-list'], addDelt);
   if (L['kont-list'])   _restoreDynList('kont-list', L['kont-list'], addKont);
+  if (L['prog-list'])   _restoreDynList('prog-list', L['prog-list'], addProg);
 
   // Evalueringsmatrise — lagres til bruk når matrisen bygges
   window._evalMatrixState = data.evalMatrix || {};
@@ -1487,7 +1548,7 @@ function fillDemo() {
   document.getElementById('t4_org').checked = true;
   set('t4_type', 'Spilløvelse');
   updateTypeDesc();
-  set('t4_behov', 'Øvelsen bør prioritere: (1) Rask og korrekt etablering av kriseledelsen — mål under 30 min, (2) Avklaring av roller og beslutningsmyndighet under press, (3) Korrekt bruk av CIM og situasjonsrapportering til Statsforvalteren, (4) Koordinert og proaktiv ekstern kommunikasjon mot media og publikum.\n\nSpilløvelse er valgt da tidligere diskusjonsøvelse og reell hendelse (2024) har gitt grunnleggende rolleforståelse. Nå trenes beslutninger under tidspress og i møte med realistiske innspill fra eksterne aktører via telefon.');
+  set('t4_behov', 'Øvelsen bør prioritere: (1) Rask og korrekt etablering av kriseledelsen — mål under 30 min, (2) Avklaring av roller og beslutningsmyndighet under press, (3) Korrekt bruk av CIM og situasjonsrapportering til Statsforvalteren, (4) Koordinert og proaktiv ekstern kommunikasjon mot media og publikum.\n\nØvingsprogrammet følger «krype–gå–løpe»-prinsippet over tre trinn. Grunnleggende rolleforståelse er etablert gjennom diskusjonsøvelse (2022) og reell hendelse (2024). Trinn 1 er en spilløvelse som trener beslutninger under tidspress. Trinn 2 viderefører med fokus på samvirke med eksterne aktører. Trinn 3 er en fullskalaøvelse som validerer all oppnådd kompetanse under realistiske betingelser.');
 
   // ── PLAN 1 ──
   set('s1_navn',   'Øvelse Fjordheim 2026');
@@ -1635,6 +1696,21 @@ function fillDemo() {
     const inps = row.querySelectorAll('input');
     inps[0].value = navn; inps[1].value = tlf;
     row.querySelector('select').value = type;
+  });
+
+  const progList = document.getElementById('prog-list');
+  progList.innerHTML = '';
+  [['Trinn 1', 'Spilløvelse / ledelsesspill', '2026-05-14', 'Kjemikaliehendelse ved jernbane — etablering og ekstern kommunikasjon'],
+   ['Trinn 2', 'Spilløvelse / ledelsesspill', 'Vår 2027',   'Samvirke med nødetater og Statsforvalteren under vedvarende hendelse'],
+   ['Trinn 3', 'Fullskalaøvelse',             'Vår 2028',   'Helhetlig krisehåndtering med politi, helse, brann og nabokommune']
+  ].forEach(([trinn, type, dato, fokus]) => {
+    addProg();
+    const row = progList.querySelector('.di:last-child');
+    const inps = row.querySelectorAll('input');
+    inps[0].value = trinn;
+    row.querySelector('select').value = type;
+    inps[1].value = dato;
+    inps[2].value = fokus;
   });
 
   set('s5_ext', 'Statsforvalteren i Vestland deltar som observatør ved Ingrid Vik. Fire eksterne rollespillere (Per Haugen, Mari Strand, Lars Erik Dahl og Silje Nygård) injiserer via telefon fra møterom 2B og spiller til sammen syv ulike aktører. Brann- og redningsetaten, politiet og jernbaneoperatøren er representert via rollespillerne, men deltar ikke med ekte personell.');
