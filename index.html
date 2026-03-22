@@ -234,7 +234,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.2.3</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.2.4</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -799,6 +799,7 @@ function goTo(i) {
   if (PAGES[idx] === 'tba-3')     { buildT4Summary(); autoSuggest(); }
   if (PAGES[idx] === 'transition') { buildSummary(); buildTransitionOptions(); }
   if (PAGES[idx] === 'plan-3')    { _refreshInjMaalDropdowns(); _refreshSpillstabDatalist(); _resizeInjTextareas(); }
+  if (PAGES[idx] === 'plan-4')    { document.querySelectorAll('#delt-list .di textarea').forEach(_autoResize); }
   if (PAGES[idx] === 'plan-5')    buildEvalMatrix();
   renderNav();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1223,7 +1224,24 @@ function addInj() {
 }
 function addUts()  { mkDyn('uts-list',  [inp('Utstyr / Beskrivelse', 2), inp('Antall', 1)]); }
 function addRol()  { mkDyn('rol-list',  [inp('Rolle', 1), inp('Navn', 1), ta('Beskrivelse')]); }
-function addDelt() { mkDyn('delt-list', [inp('Navn', 2), inp('Rolle', 1), sel(['—','Grunnleggende','Viderekommet','Ekspert'])]); }
+const ROLLE_BESKRIVELSER = {
+  'ordfører':              'Leder kriseledelsen politisk. Tar overordnede beslutninger, er kommunens ansikt utad og godkjenner offentlig kommunikasjon. Representerer kommunen mot statsforvalter og departement.',
+  'kommunedirektør':       'Administrativ leder under hendelsen. Koordinerer alle tjenestesjefer og sørger for ressursallokering. Rapporterer løpende til ordfører og er ansvarlig for at beredskapsplanen følges.',
+  'beredskapskoordinator': 'Faglig støtte til kriseledelsen. Koordinerer loggføring i CIM, holder situasjonsbildet oppdatert og er primærkontakt mot Statsforvalteren.',
+  'kommunikasjonssjef':    'Ansvarlig for all ekstern kommunikasjon. Koordinerer pressehåndtering, utarbeider pressemeldinger og oppdaterer informasjonskanaler. Briefer talsperson.',
+  'teknisk sjef':          'Ansvarlig for teknisk infrastruktur under hendelsen. Koordinerer tiltak knyttet til bygg, vei, vann og avløp. Kontaktpunkt for tekniske samvirkepartnere.',
+  'kommunalsjef':          'Leder sitt fagområde under hendelsen. Rapporterer status til kommunedirektør og iverksetter nødvendige tiltak innenfor eget ansvarsområde.',
+  'vara':                  'Stedfortreder. Følger med på situasjonsbildet og er klar til å overta ved frafall. Bistår i koordinering og støtter der det er behov.',
+  'rådmann':               'Administrativ leder under hendelsen. Koordinerer tjenestesjefer, sørger for ressursallokering og rapporterer løpende til ordfører.',
+};
+function addDelt() {
+  const oppTA = document.createElement('textarea');
+  oppTA.placeholder = 'Oppgaver og ansvar under hendelsen (hentes fra beredskapsplan) — fylles ut automatisk for kjente roller…';
+  oppTA.rows = 2;
+  oppTA.style.cssText = 'flex:1 1 100%;min-width:0;resize:none;overflow:hidden;font-size:.85rem;margin-top:4px;';
+  oppTA.addEventListener('input', () => _autoResize(oppTA));
+  mkDyn('delt-list', [inp('Navn', 2), inp('Rolle', 1), sel(['—','Grunnleggende','Viderekommet','Ekspert']), oppTA]);
+}
 function addKont() { mkDyn('kont-list', [inp('Rolle / Organisasjon', 1), inp('Telefon', 1), sel(['Spillstab', 'Scenario-aktør', 'Nødnummer'])]); }
 function addProg() {
   const n = document.querySelectorAll('#prog-list .di').length + 1;
@@ -1430,7 +1448,7 @@ function _loadFromLocalStorage() {
     _applyData(data);
     if (data._savedAt) _updateSaveIndicator(data._savedAt);
     if (typeof data.page === 'number') goTo(data.page);
-    requestAnimationFrame(_resizeInjTextareas);
+    requestAnimationFrame(() => { _resizeInjTextareas(); document.querySelectorAll('#delt-list .di textarea').forEach(_autoResize); });
     return true;
   } catch(e) { return false; }
 }
@@ -1515,6 +1533,20 @@ document.addEventListener('change', _scheduleSave);
 // ── Oppdater spillstab-datalist når rol-list endres ──
 document.addEventListener('input', e => {
   if (e.target.closest('#rol-list')) _refreshSpillstabDatalist();
+});
+
+// ── Auto-fyll oppgavebeskrivelse ved rollenavn i deltakerlisten ──
+document.addEventListener('input', e => {
+  const row = e.target.closest('#delt-list .di');
+  if (!row) return;
+  const inps = row.querySelectorAll('input');
+  if (e.target !== inps[1]) return; // Kun Rolle-feltet
+  const rolleKey = inps[1].value.trim().toLowerCase();
+  const oppTA = row.querySelector('textarea');
+  if (!oppTA || oppTA.value.trim()) return; // Ikke overskriv eksisterende tekst
+  for (const [key, desc] of Object.entries(ROLLE_BESKRIVELSER)) {
+    if (rolleKey.includes(key)) { oppTA.value = desc; _autoResize(oppTA); _scheduleSave(); break; }
+  }
 });
 
 // ── Last inn lagret data ved oppstart ──
@@ -1671,21 +1703,23 @@ function fillDemo() {
   // ── PLAN 5 ──
   const deltList = document.getElementById('delt-list');
   deltList.innerHTML = '';
-  [['Per Johansen',   'Ordfører',                         'Grunnleggende'],
-   ['Anne Sørensen',  'Kommunedirektør',                   'Viderekommet'],
-   ['Kari Bakken',    'Beredskapskoordinator',             'Ekspert'],
-   ['Lars Moen',      'Kommunikasjonssjef',                'Grunnleggende'],
-   ['Tor Hansen',     'Teknisk sjef',                      'Grunnleggende'],
-   ['Eva Nordheim',   'Kommunalsjef beredskap',            'Grunnleggende'],
-   ['Mari Dalen',     'Vara — ordfører',                   'Grunnleggende'],
-   ['Jon Fjeld',      'Vara — kommunedirektør',             'Grunnleggende'],
-   ['Ingrid Vik',     'Observatør (Statsforvalteren)',      'Ekspert']
-  ].forEach(([navn, rolle, nivaa]) => {
+  [['Per Johansen',  'Ordfører',                  'Grunnleggende', 'Leder kriseledelsen politisk. Tar overordnede beslutninger og er kommunens ansikt utad. Godkjenner offentlig kommunikasjon og representerer kommunen mot Statsforvalteren.'],
+   ['Anne Sørensen', 'Kommunedirektør',            'Viderekommet',  'Administrativ leder under hendelsen. Koordinerer alle tjenestesjefer og sørger for ressursallokering. Rapporterer løpende til ordfører og er ansvarlig for at beredskapsplanen følges.'],
+   ['Kari Bakken',   'Beredskapskoordinator',      'Ekspert',       'Faglig støtte til kriseledelsen. Koordinerer loggføring i CIM, holder situasjonsbildet oppdatert og er kommunens primærkontakt mot Statsforvalteren.'],
+   ['Lars Moen',     'Kommunikasjonssjef',          'Grunnleggende', 'Ansvarlig for all ekstern kommunikasjon. Koordinerer pressehåndtering, utarbeider pressemeldinger og oppdaterer kommunens informasjonskanaler. Briefer og støtter talsperson.'],
+   ['Tor Hansen',    'Teknisk sjef',                'Grunnleggende', 'Ansvarlig for teknisk infrastruktur under hendelsen. Koordinerer tiltak knyttet til bygg, vei, vann og avløp. Kontaktpunkt for tekniske samvirkepartnere.'],
+   ['Eva Nordheim',  'Kommunalsjef beredskap',      'Grunnleggende', 'Leder beredskapsarbeidet innen sitt fagområde. Rapporterer status til kommunedirektør og iverksetter nødvendige tiltak innenfor eget ansvarsområde.'],
+   ['Mari Dalen',    'Vara — ordfører',             'Grunnleggende', 'Stedfortreder for ordfører. Følger med på situasjonsbildet og overtar ordførerens oppgaver ved frafall. Bistår i politisk koordinering.'],
+   ['Jon Fjeld',     'Vara — kommunedirektør',      'Grunnleggende', 'Stedfortreder for kommunedirektøren. Følger med på situasjonsbildet og overtar administrativ ledelse ved frafall.'],
+   ['Ingrid Vik',    'Observatør (Statsforvalteren)','Ekspert',      'Observerer øvelsen på vegne av Statsforvalteren. Deltar ikke aktivt i krisehåndteringen under øvelsen. Bidrar med faglig tilbakemelding i debrief og evaluering.']
+  ].forEach(([navn, rolle, nivaa, oppgaver]) => {
     addDelt();
     const row = deltList.querySelector('.di:last-child');
     const inps = row.querySelectorAll('input');
     inps[0].value = navn; inps[1].value = rolle;
     row.querySelector('select').value = nivaa;
+    const oppTA = row.querySelector('textarea');
+    if (oppTA) { oppTA.value = oppgaver; _autoResize(oppTA); }
   });
 
   const kontList = document.getElementById('kont-list');
@@ -1735,7 +1769,7 @@ function fillDemo() {
 
   renderNav();
   _saveToLocalStorage();
-  requestAnimationFrame(_resizeInjTextareas);
+  requestAnimationFrame(() => { _resizeInjTextareas(); document.querySelectorAll('#delt-list .di textarea').forEach(_autoResize); });
   showToast('Demoscenario lastet inn — Fjordheim kommune 🏔️');
 }
 
@@ -2709,11 +2743,12 @@ function generateRollekortPDF() {
     else spillstab.push({ rolle, navn, besk });
   });
   document.querySelectorAll('#delt-list .di').forEach(r => {
-    const inps   = r.querySelectorAll('input');
-    const navn   = inps[0]?.value.trim() || '';
-    const rolle  = inps[1]?.value.trim() || '';
-    const erfSel = r.querySelector('select')?.value || '';
-    if (navn) deltakere.push({ navn, rolle, erfSel });
+    const inps    = r.querySelectorAll('input');
+    const navn    = inps[0]?.value.trim() || '';
+    const rolle   = inps[1]?.value.trim() || '';
+    const erfSel  = r.querySelector('select')?.value || '';
+    const oppgaver = r.querySelector('textarea')?.value.trim() || '';
+    if (navn) deltakere.push({ navn, rolle, erfSel, oppgaver });
   });
 
   const total = spilledere.length + spillstab.length + deltakere.length;
@@ -2903,11 +2938,19 @@ function generateRollekortPDF() {
 
     let y = cardY + hH + 19;
 
+    if (person.oppgaver) {
+      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
+      doc.text('DIN ROLLE:', CM+7, y); y += 5;
+      doc.setFontSize(8); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      doc.splitTextToSize(person.oppgaver, IW-12).slice(0,3).forEach(l => { doc.text(l, CM+7, y); y += 4.2; });
+      y += 2;
+    }
+
     if (startpunkt) {
       doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
       doc.text('SITUASJON VED OPPSTART:', CM+7, y); y += 5;
       doc.setFontSize(8.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
-      doc.splitTextToSize(startpunkt, IW-12).slice(0,3).forEach(l => { doc.text(l, CM+7, y); y += 4.5; });
+      doc.splitTextToSize(startpunkt, IW-12).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 4.5; });
       y += 3;
     }
 
