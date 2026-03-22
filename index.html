@@ -255,7 +255,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.4</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.5</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1827,14 +1827,14 @@ function fillDemo() {
   });
 
   // ── PLAN 4 ──
-  set('s4_scenario',   'Torsdag 14. mai kl. 08:45 mottar kommunens vakttelefon melding fra jernbaneoperatøren om at et godstog har sporet av ved Fjordheim stasjon. Toget transporterte kjemikalier, og det er meldt om røykutvikling fra ett av vognene. Ca. 200 meter fra sporet ligger Fjordheim ungdomsskole med 350 elever og 40 ansatte. Brannvesenet er varslet og rykker ut. Politiet sperrer av et område på 150 meter rundt avsporingen.');
+  set('s4_scenario',   'Torsdag 14. mai kl. 08:45 mottar kommunens vakttelefon melding fra jernbaneoperatøren om at et godstog har sporet av ved Fjordheim stasjon. Toget transporterte kjemikalier, og det er meldt om røykutvikling fra en av vognene. Brannvesenet er varslet og rykker ut. Politiet etablerer en initial sperresone på 300 meter rundt avsporingen. Ca. 200 meter fra sporet ligger Fjordheim ungdomsskole med 350 elever og 40 ansatte — innenfor sperresonen.');
   set('s4_startpunkt', 'Torsdag 14. mai kl. 09:00 innkalles du til kommunens kriseledelse. Et godstog har sporet av ved Fjordheim stasjon med røykutvikling fra kjemikalievogner. Fjordheim ungdomsskole ligger 200 meter fra avsporingen.');
 
   const injList = document.getElementById('inj-list');
   injList.innerHTML = '';
   // [tidspunkt, beskrivelse, ansvarlig, maalIndex (0-based, null = ikke koblet)]
-  [['09:05', 'TELEFON — Innsatsleder brannvesen: «Vogn 3 lekker aktivt. Vi bekrefter klorhydrogen. Anbefaler umiddelbar evakuering av Fjordheim ungdomsskole — 150 meter fra sporet.»', 'Mari Strand', 3],
-   ['09:20', 'TELEFON — Rektor Fjordheim ungdomsskole: «Hva gjør vi? Elevene er urolige og foreldre ringer allerede. Skal vi evakuere på egenhånd eller vente på ordre?»', 'Mari Strand', 4],
+  [['09:05', 'TELEFON — Innsatsleder brannvesen: «Vogn 3 har aktiv lekkasje — HAZMAT bekrefter klorhydrogen. Politiet har utvidet sperresonen og iverksatt evakuering av Fjordheim ungdomsskole. Vi trenger at kommunen rigger et evakueringsmottak og koordinerer informasjon til foreldre.»', 'Mari Strand', 3],
+   ['09:20', 'TELEFON — Rektor Fjordheim ungdomsskole: «Vi er i gang med evakuering — politiet beordret oss for 10 minutter siden. 350 elever og 40 ansatte er nå samlet ved Fjordheim idrettshall. Foreldre strømmer inn og vi klarer ikke å håndtere dem alene. Kan kommunen koordinere mottaket og sende ut en offisiell melding?»', 'Mari Strand', 4],
    ['09:30', 'TELEFON — NRK Vestland: «Jeg er journalist og står 100 meter fra sperringen. Kan ordføreren stille til direkteintervju nå? Vi sender om 10 minutter.»', 'Per Haugen', 2],
    ['09:45', 'MELDING — Kommunens IKT-avdeling varsler om at interntelefonsystemet i rådhuset er nede. Stabsmedlemmer kan kun nås på mobiltelefon.', 'Erik Vangen', 1],
    ['10:00', 'TELEFON — Statsforvalterens beredskapsrådgiver: «Vi trenger situasjonsrapport innen 30 minutter. Har kommunen behov for bistand fra Statsforvalteren?»', 'Lars Erik Dahl', 1],
