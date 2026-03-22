@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.26</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.27</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -688,7 +688,7 @@
         <hr class="d" />
         <div>
           <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;">Kontaktliste for øvingsdagen</label>
-          <p class="hint" style="margin-bottom:9px;">Deltakernes kontaktliste for øvingsdagen — én rad per rolle eller organisasjon, ikke per person. «Rolle / Organisasjon» er det deltakerne ser (f.eks. «Innsatsleder brannvesen»), telefonnummeret er rollespillerens mobilnummer. <strong>Scenario-aktør</strong> — rolle spilt av rollespiller via telefon. <strong>Nødnummer</strong> — ved reell hendelse under øvelsen.</p>
+          <p class="hint" style="margin-bottom:9px;">Deltakernes kontaktliste for øvingsdagen — én rad per rolle eller organisasjon. Deltakerne skal selv vurdere hvem de trenger å kontakte; beskriv derfor ikke hva rollen skal brukes til. Telefonnummeret er rollespillerens mobilnummer, ikke organisasjonens. <strong>Nødnummer</strong> — ved reell hendelse under øvelsen.</p>
           <div class="dl" id="kont-list"></div>
           <button class="add" onclick="addKont()">+ Legg til kontakt</button>
         </div>
@@ -1158,6 +1158,10 @@ function sortInjByTime() {
 }
 
 // Planning lists
+function _autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+function _resizeInjTextareas() {
+  document.querySelectorAll('#inj-list .di textarea').forEach(_autoResize);
+}
 function _refreshSpillstabDatalist() {
   const dl = document.getElementById('spillstab-datalist');
   if (!dl) return;
@@ -1185,8 +1189,9 @@ function addInj() {
   const ansvInp = inp('Ansvarlig', 1);
   ansvInp.setAttribute('list', 'spillstab-datalist');
   const beskTA = document.createElement('textarea');
-  beskTA.placeholder = 'Beskrivelse'; beskTA.rows = 3;
-  beskTA.style.cssText = 'flex:2;min-width:180px;resize:vertical;';
+  beskTA.placeholder = 'Beskrivelse'; beskTA.rows = 2;
+  beskTA.style.cssText = 'flex:2;min-width:180px;resize:none;overflow:hidden;';
+  beskTA.addEventListener('input', () => _autoResize(beskTA));
   mkDyn('inj-list', [inp('Tidspunkt', '0 0 auto'), beskTA, ansvInp, maalSel]);
   _refreshInjMaalDropdowns();
   _refreshSpillstabDatalist();
@@ -1194,7 +1199,7 @@ function addInj() {
 function addUts()  { mkDyn('uts-list',  [inp('Utstyr / Beskrivelse', 2), inp('Antall', 1)]); }
 function addRol()  { mkDyn('rol-list',  [inp('Rolle', 1), inp('Navn', 1), ta('Beskrivelse')]); }
 function addDelt() { mkDyn('delt-list', [inp('Navn', 2), inp('Rolle', 1), sel(['—','Grunnleggende','Viderekommet','Ekspert'])]); }
-function addKont() { mkDyn('kont-list', [inp('Rolle / Organisasjon', 1), inp('Beskrivelse', 1), inp('Telefon', 1), sel(['Spillstab', 'Scenario-aktør', 'Nødnummer'])]); }
+function addKont() { mkDyn('kont-list', [inp('Rolle / Organisasjon', 1), inp('Telefon', 1), sel(['Spillstab', 'Scenario-aktør', 'Nødnummer'])]); }
 
 // Seed initial rows
 ['T2Opp','Maal','Inj','Uts','Rol','Delt','Kont'].forEach(k => window['add'+k]());
@@ -1353,6 +1358,7 @@ function _loadFromLocalStorage() {
     _applyData(data);
     if (data._savedAt) _updateSaveIndicator(data._savedAt);
     if (typeof data.page === 'number') goTo(data.page);
+    requestAnimationFrame(_resizeInjTextareas);
     return true;
   } catch(e) { return false; }
 }
@@ -1613,21 +1619,21 @@ function fillDemo() {
   const kontList = document.getElementById('kont-list');
   kontList.innerHTML = '';
   // [navn, funksjon, telefon, type]
-  [['Innsatsleder brannvesen',              'Koordinering felt — ringer inn med statusoppdateringer',   '903 45 678', 'Scenario-aktør'],
-   ['Rektor Fjordheim ungdomsskole',         'Kontakt ved evakuering og spørsmål om elever/ansatte',     '903 45 678', 'Scenario-aktør'],
-   ['NRK Vestland',                          'Pressehenvendelser — journalist på stedet',                 '902 67 890', 'Scenario-aktør'],
-   ['Jernbaneoperatøren (Fjordnor)',         'Informasjon om farlig gods, fraktseddel og MSDS',          '902 67 890', 'Scenario-aktør'],
-   ['Statsforvalterens beredskapsrådgiver', 'Rapportering og forespørsel om statlig bistand',            '904 56 789', 'Scenario-aktør'],
-   ['Ordfører Bergheim kommune',             'Nabokommune — bistandstilbud og samordning',               '904 56 789', 'Scenario-aktør'],
-   ['Hjemmetjenesteleder',                  'Sårbare pasienter i evakueringssonen',                      '905 67 890', 'Scenario-aktør'],
-   ['Brann og redning',                     'Kun ved reell hendelse under øvelsen',                      '110',        'Nødnummer'],
-   ['Politi',                               'Kun ved reell hendelse under øvelsen',                      '112',        'Nødnummer'],
-   ['Ambulanse',                            'Kun ved reell hendelse under øvelsen',                      '113',        'Nødnummer']
-  ].forEach(([navn, funk, tlf, type]) => {
+  [['Innsatsleder brannvesen',              '903 45 678', 'Scenario-aktør'],
+   ['Rektor Fjordheim ungdomsskole',         '903 45 678', 'Scenario-aktør'],
+   ['NRK Vestland',                          '902 67 890', 'Scenario-aktør'],
+   ['Jernbaneoperatøren (Fjordnor)',         '902 67 890', 'Scenario-aktør'],
+   ['Statsforvalterens beredskapsrådgiver', '904 56 789', 'Scenario-aktør'],
+   ['Ordfører Bergheim kommune',             '904 56 789', 'Scenario-aktør'],
+   ['Hjemmetjenesteleder',                  '905 67 890', 'Scenario-aktør'],
+   ['Brann og redning',                     '110',        'Nødnummer'],
+   ['Politi',                               '112',        'Nødnummer'],
+   ['Ambulanse',                            '113',        'Nødnummer']
+  ].forEach(([navn, tlf, type]) => {
     addKont();
     const row = kontList.querySelector('.di:last-child');
     const inps = row.querySelectorAll('input');
-    inps[0].value = navn; inps[1].value = funk; inps[2].value = tlf;
+    inps[0].value = navn; inps[1].value = tlf;
     row.querySelector('select').value = type;
   });
 
@@ -1642,6 +1648,7 @@ function fillDemo() {
 
   renderNav();
   _saveToLocalStorage();
+  requestAnimationFrame(_resizeInjTextareas);
   showToast('Demoscenario lastet inn — Fjordheim kommune 🏔️');
 }
 
