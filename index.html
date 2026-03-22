@@ -256,7 +256,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.8</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.9</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -2483,8 +2483,8 @@ function generatePDF() {
   secHdr('5', 'Deltakere');
   const dR = dynRows('delt-list');
   if (dR.length) {
-    const dC = [{l:'Navn',w:70},{l:'Rolle',w:74},{l:'Nivå',w:30}];
-    subLabel('Deltakerliste'); tblHdr(dC); dR.forEach((r,i) => tblRow(dC,r,i)); $.y += 4;
+    const dC = [{l:'Navn',w:70},{l:'Rolle',w:74},{l:'Nivå',w:38}];
+    subLabel('Deltakerliste'); tblHdr(dC); dR.forEach((r,i) => tblRow(dC,r.slice(0,3),i)); $.y += 4;
   }
   const kR = dynRows('kont-list');
   if (kR.length) {
