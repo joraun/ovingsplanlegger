@@ -234,7 +234,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.40</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.41</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -2102,6 +2102,7 @@ function generatePDF() {
 
   // ── CONTENT PAGES ──
   doc.addPage(); initContentPage();
+  const tbaFirstPage = doc.getNumberOfPages();
 
   // TBA-sammendrag (grønn)
   secHdr('TBA', 'Treningsbehovsanalyse — Sammendrag', GREEN);
@@ -2116,6 +2117,15 @@ function generatePDF() {
   twoCol('Treningsnivå', tba_mg(), 'Anbefalt øvelsestype', tba_type(), GREEN);
   fpCard('Prioriterte treningsbehov og anbefalinger', v('t4_behov'), true, GREEN);
   $.y += 6;
+
+  // Overmal sidestreken grønn på alle TBA-sider
+  const tbaLastPage = doc.getNumberOfPages();
+  for (let pg = tbaFirstPage; pg <= tbaLastPage; pg++) {
+    doc.setPage(pg);
+    doc.setFillColor(...GREEN.md); doc.rect(0, 0, 6, H, 'F');
+    doc.setFillColor(...GREEN.lt); doc.rect(6, 0, 1.5, H, 'F');
+  }
+  doc.setPage(tbaLastPage);
 
   // Seksjon 1
   secHdr('1', 'Grunnleggende informasjon');
