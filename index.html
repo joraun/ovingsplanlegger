@@ -234,7 +234,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.2.1</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.2.2</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -2670,129 +2670,287 @@ function generateObserverPDF() {
 }
 
 // ═══════════════════════════════════════════
-//  ROLLEKORT PDF  (2 kort per A4-side)
+//  ROLLEKORT PDF
+//  – Spilleder(e)  → helsides dreiebok
+//  – Annen spillstab → halvside blå kort
+//  – Deltakere       → halvside grønne kort
 // ═══════════════════════════════════════════
 function generateRollekortPDF() {
-  // Samle spillstab
-  const persons = [];
-  document.querySelectorAll('#rol-list .di').forEach(r => {
+  // ── Felles data ──
+  const kodeord    = v('s4_kodeord') || '';
+  const startpunkt = v('s4_startpunkt') || '';
+  const hovMaal    = v('s3_hoved') || '';
+  const exName     = (v('s1_navn') || v('t1_org') || 'Øvelse').slice(0, 50);
+  const orgName    = (v('s1_org') || v('t1_org') || '').slice(0, 50);
+  const rawDato    = v('s1_dato');
+  const exDato     = rawDato ? new Date(rawDato).toLocaleDateString('nb-NO', { day:'numeric', month:'long', year:'numeric' }) : '';
+  const exTid      = v('s1_tid') || '';
+  const dateStr    = new Date().toLocaleDateString('nb-NO', { day:'numeric', month:'long', year:'numeric' });
+
+  // ── Injeksjoner ──
+  const injAll = [];
+  document.querySelectorAll('#inj-list .di').forEach(r => {
     const inps = r.querySelectorAll('input');
+    const tid  = inps[0]?.value.trim() || '';
+    const besk = r.querySelector('textarea')?.value.trim() || '';
+    const ans  = inps[1]?.value.trim() || '';
+    if (tid || besk) injAll.push({ tid, besk, ans });
+  });
+
+  // ── Samle personer ──
+  const spilledere = [], spillstab = [], deltakere = [];
+  document.querySelectorAll('#rol-list .di').forEach(r => {
+    const inps  = r.querySelectorAll('input');
     const rolle = inps[0]?.value.trim() || '';
     const navn  = inps[1]?.value.trim() || '';
     const besk  = r.querySelector('textarea')?.value.trim() || '';
-    if (navn) persons.push({ rolle, navn, besk, type: 'spillstab' });
+    if (!navn) return;
+    if (rolle.toLowerCase().includes('spilleder')) spilledere.push({ rolle, navn, besk });
+    else spillstab.push({ rolle, navn, besk });
   });
-  // Samle deltakere
   document.querySelectorAll('#delt-list .di').forEach(r => {
-    const inps = r.querySelectorAll('input');
-    const navn    = inps[0]?.value.trim() || '';
-    const rolle   = inps[1]?.value.trim() || '';
-    const erfSel  = r.querySelector('select')?.value || '';
-    const besk    = (erfSel && erfSel !== '—') ? 'Erfaringsnivå: ' + erfSel : '';
-    if (navn) persons.push({ rolle, navn, besk, type: 'deltaker' });
+    const inps   = r.querySelectorAll('input');
+    const navn   = inps[0]?.value.trim() || '';
+    const rolle  = inps[1]?.value.trim() || '';
+    const erfSel = r.querySelector('select')?.value || '';
+    if (navn) deltakere.push({ navn, rolle, erfSel });
   });
-  if (persons.length === 0) {
-    showToast('Ingen spillstab- eller deltakerliste å generere rollekort fra.');
-    return;
-  }
 
+  const total = spilledere.length + spillstab.length + deltakere.length;
+  if (total === 0) { showToast('Ingen spillstab- eller deltakerliste å generere rollekort fra.'); return; }
+
+  // ── PDF-oppsett ──
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const W = 210, H = 297;
-  const cM  = 12;           // margin fra sidekant
-  const cW  = W - cM * 2;  // kortbredde: 186mm
-  const cH  = 128;          // korthøyde
-  const gap = 9;            // mellomrom mellom kort
-  const y1  = 12;           // topp kort 1
-  const y2  = y1 + cH + gap; // topp kort 2
+  const W = 210, H = 297, CM = 12, IW = W - CM * 2;
+  const cH = 135, gap = 7, y1 = 10, y2 = y1 + cH + gap;
 
-  const exName  = v('s1_navn') || v('t1_org') || 'Øvelse';
-  const orgName = (v('s1_org') || v('t1_org') || '').slice(0, 45);
-  const dateStr = new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+  const BLU = { dk:[26,58,92],  md:[42,82,152],  lt:[180,210,245], xl:[235,242,255], card:[242,246,252], tx:[28,40,54],  mu:[100,118,138] };
+  const GRN = { dk:[27,94,56],  md:[46,125,82],  lt:[200,235,210], xl:[235,248,240], card:[242,250,245], tx:[28,40,54],  mu:[100,118,138] };
 
-  const BLU = { dk:[26,58,92],   md:[42,82,152],  lt:[180,210,245], card:[242,246,252], tx:[28,40,54],  mu:[110,125,140] };
-  const GRN = { dk:[27,94,56],   md:[46,125,82],  lt:[200,235,210], card:[242,250,245], tx:[28,40,54],  mu:[110,125,140] };
-
-  function drawCard(cardY, person) {
-    const { rolle, navn, besk, type } = person;
-    const P   = type === 'spillstab' ? BLU : GRN;
-    const hH  = 32;   // header-høyde
-
-    // Kortbakgrunn
-    doc.setFillColor(...P.card);
-    doc.roundedRect(cM, cardY, cW, cH, 3, 3, 'F');
-
-    // Toppkant-stripe (farget)
-    doc.setFillColor(...P.dk);
-    doc.roundedRect(cM, cardY, cW, hH, 3, 3, 'F');
-    doc.rect(cM, cardY + hH - 4, cW, 4, 'F'); // fjern avrunding nederst på header
-
-    // Kategori-tag øverst til venstre
-    const tag = type === 'spillstab' ? 'SPILLSTAB' : 'DELTAKER';
-    doc.setFontSize(7); doc.setFont(undefined, 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text(tag, cM + 6, cardY + 8);
-
-    // Øvelsenavn øverst til høyre
-    doc.setFontSize(7.5); doc.setFont(undefined, 'normal');
-    doc.setTextColor(255, 255, 255);
-    doc.text(exName.slice(0, 42), cM + cW - 5, cardY + 8, { align: 'right' });
-
-    // Rolle (stor tekst i header)
-    doc.setFontSize(15); doc.setFont(undefined, 'bold');
-    doc.setTextColor(255, 255, 255);
-    const rolleLines = doc.splitTextToSize(rolle, cW - 14);
-    doc.text(rolleLines[0] || '', cM + 6, cardY + 22);
-
-    // Navn (meget stor)
-    doc.setFontSize(24); doc.setFont(undefined, 'bold');
-    doc.setTextColor(...P.dk);
-    const navnLines = doc.splitTextToSize(navn, cW - 12);
-    doc.text(navnLines[0] || '', cM + 6, cardY + hH + 14);
-
-    // Beskrivelse
-    if (besk) {
-      doc.setFontSize(9.5); doc.setFont(undefined, 'normal');
-      doc.setTextColor(...P.tx);
-      const bLines = doc.splitTextToSize(besk, cW - 12);
-      let ty = cardY + hH + 24;
-      bLines.slice(0, 6).forEach(line => { doc.text(line, cM + 6, ty); ty += 5.5; });
-    }
-
-    // Venstrekant-stripe (tykk farget linje)
-    doc.setFillColor(...P.md);
-    doc.rect(cM, cardY, 4, cH, 'F');
-
-    // Bunntekst
-    doc.setDrawColor(...P.lt);
-    doc.line(cM + 6, cardY + cH - 11, cM + cW - 4, cardY + cH - 11);
-    doc.setFontSize(7.5); doc.setFont(undefined, 'normal');
-    doc.setTextColor(...P.mu);
-    doc.text(orgName, cM + 6, cardY + cH - 4);
-    doc.text(dateStr, cM + cW - 4, cardY + cH - 4, { align: 'right' });
-  }
+  let firstPage = true;
+  function np() { if (!firstPage) doc.addPage(); firstPage = false; }
 
   function drawCutLine(lineY) {
-    doc.setDrawColor(180, 180, 180);
-    doc.setLineDashPattern([2, 2], 0);
-    doc.line(cM + 2, lineY, cM + cW - 2, lineY);
-    doc.setLineDashPattern([], 0);
-    doc.setFontSize(7); doc.setTextColor(160, 160, 160);
-    doc.text('klipp', W / 2, lineY - 1, { align: 'center' });
+    doc.setDrawColor(180,180,180); doc.setLineDashPattern([2,2], 0);
+    doc.line(CM+2, lineY, W-CM-2, lineY); doc.setLineDashPattern([], 0);
+    doc.setFontSize(7); doc.setTextColor(160,160,160);
+    doc.text('klipp', W/2, lineY-1, { align:'center' });
   }
 
-  persons.forEach((person, i) => {
-    if (i > 0 && i % 2 === 0) doc.addPage();
-    const isFirst = (i % 2 === 0);
-    drawCard(isFirst ? y1 : y2, person);
-    if (isFirst && i < persons.length - 1) {
-      drawCutLine(y1 + cH + gap / 2);
+  function cardFooter(P, cardY) {
+    doc.setDrawColor(...P.lt);
+    doc.line(CM+6, cardY+cH-10, W-CM-4, cardY+cH-10);
+    doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.mu);
+    doc.text(orgName, CM+6, cardY+cH-4);
+    doc.text(dateStr, W-CM-4, cardY+cH-4, { align:'right' });
+  }
+
+  // ─── DREIEBOK (helsides, spilleder) ───
+  function drawDreiebok(person) {
+    np();
+    const P = BLU, hH = 44;
+    doc.setFillColor(...P.card); doc.rect(0, 0, W, H, 'F');
+    doc.setFillColor(...P.md);   doc.rect(0, 0, 5, H, 'F');
+    doc.setFillColor(...P.dk);   doc.rect(0, 0, W, hH, 'F');
+
+    doc.setFontSize(7.5); doc.setFont(undefined,'bold'); doc.setTextColor(...P.lt);
+    doc.text('SPILLEDER  ·  DREIEBOK', CM+4, 10);
+    doc.setFont(undefined,'normal'); doc.setTextColor(255,255,255);
+    doc.text(exName.slice(0,40), W-CM-4, 10, { align:'right' });
+
+    doc.setFontSize(24); doc.setFont(undefined,'bold'); doc.setTextColor(255,255,255);
+    doc.text(person.navn, CM+4, 27);
+    doc.setFontSize(12); doc.setFont(undefined,'normal'); doc.setTextColor(...P.lt);
+    doc.text(person.rolle, CM+4, 36);
+    const infoStr = [exDato, exTid ? 'kl. '+exTid : ''].filter(Boolean).join('  ·  ');
+    doc.setFontSize(9); doc.setTextColor(255,255,255);
+    doc.text(infoStr, CM+4, hH-5);
+
+    let y = hH + 8;
+
+    if (kodeord) {
+      doc.setFillColor(180,40,40); doc.roundedRect(CM+4, y, IW-4, 10, 2, 2, 'F');
+      doc.setFontSize(8.5); doc.setFont(undefined,'bold'); doc.setTextColor(255,255,255);
+      doc.text('SIKKERHETSKODEORD: ' + kodeord.toUpperCase() + '  —  si dette høyt for å stanse øvelsen umiddelbart', CM+8, y+7);
+      y += 15;
     }
-  });
+
+    if (person.besk) {
+      doc.setFontSize(9); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      doc.splitTextToSize(person.besk, IW-6).slice(0,2).forEach(l => { doc.text(l, CM+4, y); y += 5; });
+      y += 3;
+    }
+
+    // Injeksjonsplan-header
+    doc.setFontSize(10); doc.setFont(undefined,'bold'); doc.setTextColor(...P.dk);
+    doc.text('INJEKSJONSPLAN', CM+4, y); y += 3;
+    doc.setDrawColor(...P.md); doc.line(CM+4, y, W-CM-4, y); y += 6;
+
+    // Tabellkolonner: Tid | Injeksjon | Ansvarlig
+    const tC = [
+      { l:'Tid',       x:CM+4,   w:22  },
+      { l:'Injeksjon', x:CM+28,  w:108 },
+      { l:'Ansvarlig', x:CM+138, w:44  },
+    ];
+    const tRight = W - CM - 4;
+
+    function drawTblHdr(atY) {
+      doc.setFillColor(...P.dk); doc.rect(CM+4, atY, tRight-(CM+4), 8, 'F');
+      tC.forEach(c => { doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(255,255,255); doc.text(c.l, c.x+2, atY+5.5); });
+      return atY + 8;
+    }
+    y = drawTblHdr(y);
+
+    injAll.forEach((inj, i) => {
+      const bLines = doc.splitTextToSize(inj.besk, tC[1].w-4);
+      const aLines = doc.splitTextToSize(inj.ans,  tC[2].w-2);
+      const rowH   = Math.max(bLines.length, 1) * 4.5 + 4;
+
+      if (y + rowH > H - 18) {
+        doc.addPage();
+        doc.setFillColor(...P.card); doc.rect(0, 0, W, H, 'F');
+        doc.setFillColor(...P.md);   doc.rect(0, 0, 5, H, 'F');
+        doc.setFillColor(...P.dk);   doc.rect(0, 0, W, 14, 'F');
+        doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...P.lt);
+        doc.text('DREIEBOK  (forts.)', CM+4, 10);
+        doc.setFont(undefined,'normal'); doc.setTextColor(255,255,255);
+        doc.text(person.navn, W-CM-4, 10, { align:'right' });
+        y = 20; y = drawTblHdr(y);
+      }
+
+      if (i % 2 === 0) doc.setFillColor(255,255,255); else doc.setFillColor(...P.xl);
+      doc.rect(CM+4, y, tRight-(CM+4), rowH, 'F');
+      doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(...P.dk);
+      doc.text(inj.tid, tC[0].x+2, y+5.5);
+      doc.setFontSize(8.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      bLines.forEach((l,li) => doc.text(l, tC[1].x+2, y+5+li*4.5));
+      doc.setTextColor(...P.mu);
+      aLines.slice(0,2).forEach((l,li) => doc.text(l, tC[2].x+2, y+5+li*4.5));
+      doc.setDrawColor(...P.lt); doc.line(CM+4, y+rowH, tRight, y+rowH);
+      y += rowH;
+    });
+
+    // Sidefot
+    doc.setDrawColor(...P.lt); doc.line(CM+4, H-12, W-CM-4, H-12);
+    doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.mu);
+    doc.text(orgName, CM+4, H-6); doc.text(dateStr, W-CM-4, H-6, { align:'right' });
+  }
+
+  // ─── SPILLSTAB-KORT (halvside, blå) ───
+  function drawSpillstabCard(cardY, person) {
+    const P = BLU, hH = 30;
+    doc.setFillColor(...P.card); doc.roundedRect(CM, cardY, IW, cH, 3, 3, 'F');
+    doc.setFillColor(...P.md);   doc.rect(CM, cardY, 4, cH, 'F');
+    doc.setFillColor(...P.dk);   doc.roundedRect(CM, cardY, IW, hH, 3, 3, 'F');
+    doc.rect(CM, cardY+hH-4, IW, 4, 'F');
+
+    doc.setFontSize(7); doc.setFont(undefined,'bold'); doc.setTextColor(...P.lt);
+    doc.text('SPILLSTAB', CM+7, cardY+8);
+    doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(255,255,255);
+    doc.text(exName.slice(0,38), CM+IW-3, cardY+8, { align:'right' });
+    doc.setFontSize(13); doc.setFont(undefined,'bold'); doc.setTextColor(255,255,255);
+    doc.text(person.rolle.slice(0,35), CM+7, cardY+20);
+    doc.setFontSize(20); doc.setFont(undefined,'bold'); doc.setTextColor(...P.dk);
+    doc.text(person.navn, CM+7, cardY+hH+12);
+
+    let y = cardY + hH + 19;
+
+    if (person.besk) {
+      doc.setFontSize(9); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      doc.splitTextToSize(person.besk, IW-12).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 4.8; });
+      y += 3;
+    }
+
+    const myInj = injAll.filter(inj => inj.ans && inj.ans.toLowerCase().includes(person.navn.split(' ')[0].toLowerCase()));
+    if (myInj.length > 0) {
+      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
+      doc.text('DINE INJEKSJONER:', CM+7, y); y += 5;
+      doc.setFontSize(8.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      myInj.slice(0,5).forEach(inj => {
+        const txt = (inj.tid ? inj.tid+'  ' : '') + inj.besk;
+        doc.splitTextToSize(txt, IW-14).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 4.5; });
+        y += 1;
+      });
+      if (myInj.length > 5) { doc.setFontSize(7.5); doc.setTextColor(...P.mu); doc.text('+ '+(myInj.length-5)+' flere — se dreiebok', CM+7, y); y += 5; }
+    }
+
+    if (kodeord) {
+      const ky = Math.max(y+2, cardY+cH-20);
+      doc.setFontSize(8.5); doc.setFont(undefined,'bold'); doc.setTextColor(180,40,40);
+      doc.text('Kodeord: ' + kodeord, CM+7, ky);
+    }
+    cardFooter(P, cardY);
+  }
+
+  // ─── DELTAKER-KORT (halvside, grønn) ───
+  function drawDeltakerCard(cardY, person) {
+    const P = GRN, hH = 30;
+    doc.setFillColor(...P.card); doc.roundedRect(CM, cardY, IW, cH, 3, 3, 'F');
+    doc.setFillColor(...P.md);   doc.rect(CM, cardY, 4, cH, 'F');
+    doc.setFillColor(...P.dk);   doc.roundedRect(CM, cardY, IW, hH, 3, 3, 'F');
+    doc.rect(CM, cardY+hH-4, IW, 4, 'F');
+
+    doc.setFontSize(7); doc.setFont(undefined,'bold'); doc.setTextColor(...P.lt);
+    doc.text('DELTAKER', CM+7, cardY+8);
+    doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(255,255,255);
+    const dtStr = [exDato, exTid ? 'kl. '+exTid : ''].filter(Boolean).join(' ');
+    doc.text((exName.slice(0,26) + (dtStr ? '  ·  '+dtStr : '')).slice(0,52), CM+IW-3, cardY+8, { align:'right' });
+    doc.setFontSize(13); doc.setFont(undefined,'bold'); doc.setTextColor(255,255,255);
+    doc.text(person.rolle.slice(0,35), CM+7, cardY+20);
+    doc.setFontSize(20); doc.setFont(undefined,'bold'); doc.setTextColor(...P.dk);
+    doc.text(person.navn, CM+7, cardY+hH+12);
+
+    let y = cardY + hH + 19;
+
+    if (startpunkt) {
+      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
+      doc.text('SITUASJON VED OPPSTART:', CM+7, y); y += 5;
+      doc.setFontSize(8.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      doc.splitTextToSize(startpunkt, IW-12).slice(0,3).forEach(l => { doc.text(l, CM+7, y); y += 4.5; });
+      y += 3;
+    }
+
+    if (hovMaal) {
+      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
+      doc.text('HOVEDFOKUS I DAG:', CM+7, y); y += 5;
+      doc.setFontSize(8.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      doc.splitTextToSize(hovMaal, IW-12).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 4.5; });
+      y += 3;
+    }
+
+    if (kodeord) {
+      doc.setFontSize(8.5); doc.setFont(undefined,'bold'); doc.setTextColor(180,40,40);
+      doc.text('Kodeord: ' + kodeord, CM+7, y); y += 8;
+    }
+
+    // Notatlinjer
+    const noteBottom = cardY + cH - 13;
+    let lineY = Math.max(y+4, noteBottom-21);
+    doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.mu);
+    doc.text('Notater:', CM+7, lineY-2);
+    doc.setDrawColor(...P.lt);
+    while (lineY <= noteBottom) { doc.line(CM+7, lineY, CM+IW-4, lineY); lineY += 7; }
+
+    cardFooter(P, cardY);
+  }
+
+  // ── Generer sider ──
+  spilledere.forEach(p => drawDreiebok(p));
+
+  for (let i = 0; i < spillstab.length; i += 2) {
+    np(); drawSpillstabCard(y1, spillstab[i]);
+    if (i+1 < spillstab.length) { drawCutLine(y1+cH+gap/2); drawSpillstabCard(y2, spillstab[i+1]); }
+  }
+
+  for (let i = 0; i < deltakere.length; i += 2) {
+    np(); drawDeltakerCard(y1, deltakere[i]);
+    if (i+1 < deltakere.length) { drawCutLine(y1+cH+gap/2); drawDeltakerCard(y2, deltakere[i+1]); }
+  }
 
   const fn = ('Rollekort_' + exName).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
   doc.save(fn + '.pdf');
-  showToast('Rollekort lastet ned — ' + persons.length + ' kort generert!');
+  showToast('Rollekort lastet ned — ' + spilledere.length + ' dreiebok, ' + spillstab.length + ' spillstab-kort, ' + deltakere.length + ' deltaker-kort!');
 }
 </script>
 </body>
