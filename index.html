@@ -234,7 +234,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.39</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.40</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1866,13 +1866,15 @@ function pdfInit(palette, headerLabel, orgFn) {
   function tblRow(cols, data, ri, pal) {
     pal = pal || P;
     doc.setFontSize(10); doc.setFont(undefined, 'normal');
+    const pad = 5;
     let ml = 1;
-    data.forEach((d, ci) => { if (!d) return; const ls = doc.splitTextToSize(String(d), cols[ci].w - 3); if (ls.length > ml) ml = ls.length; });
+    data.forEach((d, ci) => { if (!d) return; const ls = doc.splitTextToSize(String(d), cols[ci].w - pad); if (ls.length > ml) ml = ls.length; });
     const rh = ml * 5.5 + 4; chk(rh);
+    doc.setFontSize(10); doc.setFont(undefined, 'normal');
     if (ri % 2 === 0) { doc.setFillColor(...pal.card); doc.rect(M, $.y - 1, IW, rh, 'F'); }
     doc.setTextColor(...P.tx);
     let x = M + 2;
-    data.forEach((d, ci) => { doc.splitTextToSize(String(d || '—'), cols[ci].w - 3).forEach((l, li) => doc.text(l, x, $.y + 4 + li * 5.5)); x += cols[ci].w; });
+    data.forEach((d, ci) => { doc.splitTextToSize(String(d || '—'), cols[ci].w - pad).forEach((l, li) => doc.text(l, x, $.y + 4 + li * 5.5)); x += cols[ci].w; });
     doc.setDrawColor(...P.bd); doc.setLineWidth(0.18);
     doc.line(M, $.y + rh - 1, M + IW, $.y + rh - 1); $.y += rh;
   }
@@ -2176,7 +2178,7 @@ function generatePDF() {
   const injR = dynRows('inj-list');
   if (injR.length) {
     const goalTexts = [...document.querySelectorAll('#maal-list .maal-di .maal-text')].map(t => t.value.trim());
-    const iC = [{l:'Tidspunkt',w:28},{l:'Beskrivelse',w:75},{l:'Ansvarlig',w:27},{l:'Delmål',w:44}];
+    const iC = [{l:'Tidspunkt',w:24},{l:'Beskrivelse',w:72},{l:'Ansvarlig',w:34},{l:'Delmål',w:44}];
     const injData = injR
       .sort((a, b) => { const nA = _injTimeVal(a[0]||''), nB = _injTimeVal(b[0]||''); return nA !== nB ? nA - nB : (a[0]||'').localeCompare(b[0]||'', 'nb'); })
       .map(r => {
