@@ -232,7 +232,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.36</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.37</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1210,7 +1210,10 @@ function addInj() {
   beskTA.placeholder = 'Beskrivelse'; beskTA.rows = 1;
   beskTA.style.cssText = 'flex:2;min-width:180px;resize:none;overflow:hidden;';
   beskTA.addEventListener('input', () => _autoResize(beskTA));
-  mkDyn('inj-list', [inp('Tidspunkt', '0 0 auto'), beskTA, ansvInp, maalSel]);
+  const tidInp = document.createElement('input');
+  tidInp.type = 'text'; tidInp.placeholder = 'Tidspunkt';
+  tidInp.style.cssText = 'flex:0 0 85px;width:85px;min-width:0;';
+  mkDyn('inj-list', [tidInp, beskTA, ansvInp, maalSel]);
   _refreshInjMaalDropdowns();
   _refreshSpillstabDatalist();
 }
