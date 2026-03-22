@@ -208,6 +208,7 @@
 
     /* ── Notice strip ── */
     .notice { background:#e8f5e9; border:1px solid #a5d6a7; border-radius:var(--r); padding:11px 16px; font-size:.84rem; color:var(--ok); font-weight:600; margin-top:4px; }
+    .notice-warn { background:#fff8e1; border:1px solid #ffe082; border-radius:var(--r); padding:11px 16px; font-size:.84rem; color:#7a5c00; font-weight:600; margin-top:4px; }
 
     /* ── Toast ── */
     #toast { position:fixed; bottom:22px; right:22px; background:var(--ok); color:#fff; padding:11px 18px; border-radius:var(--r); box-shadow:var(--sh-lg); font-size:.87rem; font-weight:600; opacity:0; pointer-events:none; transition:opacity .3s; z-index:999; }
@@ -255,7 +256,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.7</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.8</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -792,7 +793,7 @@
       </div>
     </div>
   </div>
-  <div class="notice">✅ Alle seksjoner er fylt ut — klar for å generere PDF-rapport.</div>
+  <div id="eval-notice"></div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
     <button class="btn btn-pdf" onclick="generatePDF()">📄 Øvingsplan PDF</button>
@@ -837,7 +838,7 @@ function goTo(i) {
   if (PAGES[idx] === 'transition') { buildSummary(); buildTransitionOptions(); }
   if (PAGES[idx] === 'plan-3')    { _refreshInjMaalDropdowns(); _refreshSpillstabDatalist(); _resizeInjTextareas(); }
   if (PAGES[idx] === 'plan-4')    { document.querySelectorAll('#delt-list .di textarea').forEach(_autoResize); }
-  if (PAGES[idx] === 'plan-5')    buildEvalMatrix();
+  if (PAGES[idx] === 'plan-5')    { buildEvalMatrix(); _updateEvalNotice(); }
   renderNav();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1061,6 +1062,28 @@ function buildEvalMatrix() {
 
   if (!hasContent) {
     container.innerHTML = '<p class="eval-empty">Ingen delmål er lagt inn ennå. Gå til «Læringsmål» og legg til delmål med kriterier.</p>';
+  }
+  _updateEvalNotice();
+}
+
+function _updateEvalNotice() {
+  const el = document.getElementById('eval-notice');
+  if (!el) return;
+  const metodeChecked = ['s6_debrief','s6_obs','s6_spm','s6_annet'].some(id => document.getElementById(id)?.checked);
+  const hvem     = document.getElementById('s6_hvem')?.value.trim();
+  const tidspkt  = document.getElementById('s6_tidspunkt')?.value.trim();
+  const overf    = document.getElementById('s6_overf')?.value.trim();
+  const missing = [];
+  if (!metodeChecked) missing.push('evalueringsmetode');
+  if (!hvem)          missing.push('hvem evaluerer');
+  if (!tidspkt)       missing.push('evalueringstidspunkt');
+  if (!overf)         missing.push('ansvarsfordeling for oppfølging');
+  if (missing.length === 0) {
+    el.className = 'notice';
+    el.textContent = '✅ Alle seksjoner er fylt ut — klar for å generere PDF-rapport.';
+  } else {
+    el.className = 'notice-warn';
+    el.textContent = '⚠️ Mangler: ' + missing.join(', ') + '.';
   }
 }
 
@@ -1665,6 +1688,16 @@ document.addEventListener('change', _scheduleSave);
 // ── Oppdater spillstab-datalist når rol-list endres ──
 document.addEventListener('input', e => {
   if (e.target.closest('#rol-list')) _refreshSpillstabDatalist();
+});
+
+// ── Oppdater evalueringsnotat ved endringer i S6-felt ──
+document.addEventListener('input', e => {
+  const s6Fields = ['s6_hvem','s6_tidspunkt','s6_overf'];
+  if (s6Fields.includes(e.target.id)) _updateEvalNotice();
+});
+document.addEventListener('change', e => {
+  const s6Checks = ['s6_debrief','s6_obs','s6_spm','s6_annet'];
+  if (s6Checks.includes(e.target.id)) _updateEvalNotice();
 });
 
 
