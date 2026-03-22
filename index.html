@@ -232,7 +232,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.37</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.38</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1686,7 +1686,7 @@ function fillDemo() {
 
   const kontList = document.getElementById('kont-list');
   kontList.innerHTML = '';
-  // [navn, funksjon, telefon, type]
+  // [rolle, telefon, type]
   [['Innsatsleder brannvesen',              '903 45 678', 'Scenario-aktør'],
    ['Rektor Fjordheim ungdomsskole',         '903 45 678', 'Scenario-aktør'],
    ['NRK Vestland',                          '902 67 890', 'Scenario-aktør'],
@@ -2210,7 +2210,7 @@ function generatePDF() {
   }
   const kR = dynRows('kont-list');
   if (kR.length) {
-    const kC = [{l:'Navn',w:48},{l:'Funksjon',w:55},{l:'Telefon',w:30},{l:'Type',w:41}];
+    const kC = [{l:'Rolle / Organisasjon',w:93},{l:'Telefon',w:35},{l:'Type',w:46}];
     subLabel('Kontaktliste for øvingsdagen'); tblHdr(kC); kR.forEach((r,i) => tblRow(kC,r,i)); $.y += 4;
   }
   fpCard('Eksterne aktører og samvirkeorganisasjoner', v('s5_ext'));
