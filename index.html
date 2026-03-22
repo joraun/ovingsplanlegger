@@ -255,7 +255,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.2</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.3</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1828,7 +1828,7 @@ function fillDemo() {
 
   // ── PLAN 4 ──
   set('s4_scenario',   'Torsdag 14. mai kl. 08:45 mottar kommunens vakttelefon melding fra jernbaneoperatøren om at et godstog har sporet av ved Fjordheim stasjon. Toget transporterte kjemikalier, og det er meldt om røykutvikling fra ett av vognene. Ca. 200 meter fra sporet ligger Fjordheim ungdomsskole med 350 elever og 40 ansatte. Brannvesenet er varslet og rykker ut. Politiet sperrer av et område på 150 meter rundt avsporingen.');
-  set('s4_startpunkt', 'Kl. 09:00 ringer beredskapskoordinatoren (spilleder) kommunedirektøren og informerer om hendelsen. Kommunedirektøren må ta stilling til om kriseledelsen skal innkalles og kriseledelserommet etableres. Ingen øvrige i staben er foreløpig informert.');
+  set('s4_startpunkt', 'Torsdag 14. mai kl. 09:00 innkalles du til kommunens kriseledelse. Et godstog har sporet av ved Fjordheim stasjon med røykutvikling fra kjemikalievogner. Fjordheim ungdomsskole, 200 meter fra sporet, er under evakuering. Kriseledelsen samles umiddelbart.');
 
   const injList = document.getElementById('inj-list');
   injList.innerHTML = '';
@@ -3128,31 +3128,31 @@ function generateRollekortPDF() {
     let y = cardY + hH + 19;
 
     if (person.oppgaver) {
-      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
-      doc.text('DIN ROLLE:', CM+7, y); y += 5;
-      doc.setFontSize(8); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
-      doc.splitTextToSize(person.oppgaver, IW-12).slice(0,3).forEach(l => { doc.text(l, CM+7, y); y += 4.2; });
+      doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
+      doc.text('DIN ROLLE:', CM+7, y); y += 5.5;
+      doc.setFontSize(9.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      doc.splitTextToSize(person.oppgaver, IW-12).slice(0,3).forEach(l => { doc.text(l, CM+7, y); y += 5; });
       y += 2;
     }
 
     if (startpunkt) {
-      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
-      doc.text('SITUASJON VED OPPSTART:', CM+7, y); y += 5;
-      doc.setFontSize(8.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
-      doc.splitTextToSize(startpunkt, IW-12).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 4.5; });
+      doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
+      doc.text('SITUASJON VED OPPSTART:', CM+7, y); y += 5.5;
+      doc.setFontSize(9.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      doc.splitTextToSize(startpunkt, IW-12).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 5; });
       y += 3;
     }
 
     if (hovMaal) {
-      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
-      doc.text('HOVEDFOKUS I DAG:', CM+7, y); y += 5;
-      doc.setFontSize(8.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
-      doc.splitTextToSize(hovMaal, IW-12).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 4.5; });
+      doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
+      doc.text('HOVEDFOKUS I DAG:', CM+7, y); y += 5.5;
+      doc.setFontSize(9.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
+      doc.splitTextToSize(hovMaal, IW-12).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 5; });
       y += 3;
     }
 
     if (kodeord) {
-      doc.setFontSize(8.5); doc.setFont(undefined,'bold'); doc.setTextColor(180,40,40);
+      doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(180,40,40);
       doc.text('Kodeord: ' + kodeord, CM+7, y); y += 8;
     }
 
