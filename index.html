@@ -234,7 +234,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.42</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.2.1</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -723,6 +723,7 @@
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
     <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
+    <button class="btn btn-pdf-plan" onclick="generateRollekortPDF()" title="Generer utskriftsklar PDF med rollekort for spillstab og deltakere">🃏 Rollekort PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Evaluering →</button>
   </div>
 </div>
@@ -2666,6 +2667,132 @@ function generateObserverPDF() {
   const fname = ('Observatorskjema_' + exName).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
   doc.save(fname + '.pdf');
   showToast('Observatørskjema lastet ned!');
+}
+
+// ═══════════════════════════════════════════
+//  ROLLEKORT PDF  (2 kort per A4-side)
+// ═══════════════════════════════════════════
+function generateRollekortPDF() {
+  // Samle spillstab
+  const persons = [];
+  document.querySelectorAll('#rol-list .di').forEach(r => {
+    const inps = r.querySelectorAll('input');
+    const rolle = inps[0]?.value.trim() || '';
+    const navn  = inps[1]?.value.trim() || '';
+    const besk  = r.querySelector('textarea')?.value.trim() || '';
+    if (navn) persons.push({ rolle, navn, besk, type: 'spillstab' });
+  });
+  // Samle deltakere
+  document.querySelectorAll('#delt-list .di').forEach(r => {
+    const inps = r.querySelectorAll('input');
+    const navn    = inps[0]?.value.trim() || '';
+    const rolle   = inps[1]?.value.trim() || '';
+    const erfSel  = r.querySelector('select')?.value || '';
+    const besk    = (erfSel && erfSel !== '—') ? 'Erfaringsnivå: ' + erfSel : '';
+    if (navn) persons.push({ rolle, navn, besk, type: 'deltaker' });
+  });
+  if (persons.length === 0) {
+    showToast('Ingen spillstab- eller deltakerliste å generere rollekort fra.');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, H = 297;
+  const cM  = 12;           // margin fra sidekant
+  const cW  = W - cM * 2;  // kortbredde: 186mm
+  const cH  = 128;          // korthøyde
+  const gap = 9;            // mellomrom mellom kort
+  const y1  = 12;           // topp kort 1
+  const y2  = y1 + cH + gap; // topp kort 2
+
+  const exName  = v('s1_navn') || v('t1_org') || 'Øvelse';
+  const orgName = (v('s1_org') || v('t1_org') || '').slice(0, 45);
+  const dateStr = new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const BLU = { dk:[26,58,92],   md:[42,82,152],  lt:[180,210,245], card:[242,246,252], tx:[28,40,54],  mu:[110,125,140] };
+  const GRN = { dk:[27,94,56],   md:[46,125,82],  lt:[200,235,210], card:[242,250,245], tx:[28,40,54],  mu:[110,125,140] };
+
+  function drawCard(cardY, person) {
+    const { rolle, navn, besk, type } = person;
+    const P   = type === 'spillstab' ? BLU : GRN;
+    const hH  = 32;   // header-høyde
+
+    // Kortbakgrunn
+    doc.setFillColor(...P.card);
+    doc.roundedRect(cM, cardY, cW, cH, 3, 3, 'F');
+
+    // Toppkant-stripe (farget)
+    doc.setFillColor(...P.dk);
+    doc.roundedRect(cM, cardY, cW, hH, 3, 3, 'F');
+    doc.rect(cM, cardY + hH - 4, cW, 4, 'F'); // fjern avrunding nederst på header
+
+    // Kategori-tag øverst til venstre
+    const tag = type === 'spillstab' ? 'SPILLSTAB' : 'DELTAKER';
+    doc.setFontSize(7); doc.setFont(undefined, 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(tag, cM + 6, cardY + 8);
+
+    // Øvelsenavn øverst til høyre
+    doc.setFontSize(7.5); doc.setFont(undefined, 'normal');
+    doc.setTextColor(255, 255, 255);
+    doc.text(exName.slice(0, 42), cM + cW - 5, cardY + 8, { align: 'right' });
+
+    // Rolle (stor tekst i header)
+    doc.setFontSize(15); doc.setFont(undefined, 'bold');
+    doc.setTextColor(255, 255, 255);
+    const rolleLines = doc.splitTextToSize(rolle, cW - 14);
+    doc.text(rolleLines[0] || '', cM + 6, cardY + 22);
+
+    // Navn (meget stor)
+    doc.setFontSize(24); doc.setFont(undefined, 'bold');
+    doc.setTextColor(...P.dk);
+    const navnLines = doc.splitTextToSize(navn, cW - 12);
+    doc.text(navnLines[0] || '', cM + 6, cardY + hH + 14);
+
+    // Beskrivelse
+    if (besk) {
+      doc.setFontSize(9.5); doc.setFont(undefined, 'normal');
+      doc.setTextColor(...P.tx);
+      const bLines = doc.splitTextToSize(besk, cW - 12);
+      let ty = cardY + hH + 24;
+      bLines.slice(0, 6).forEach(line => { doc.text(line, cM + 6, ty); ty += 5.5; });
+    }
+
+    // Venstrekant-stripe (tykk farget linje)
+    doc.setFillColor(...P.md);
+    doc.rect(cM, cardY, 4, cH, 'F');
+
+    // Bunntekst
+    doc.setDrawColor(...P.lt);
+    doc.line(cM + 6, cardY + cH - 11, cM + cW - 4, cardY + cH - 11);
+    doc.setFontSize(7.5); doc.setFont(undefined, 'normal');
+    doc.setTextColor(...P.mu);
+    doc.text(orgName, cM + 6, cardY + cH - 4);
+    doc.text(dateStr, cM + cW - 4, cardY + cH - 4, { align: 'right' });
+  }
+
+  function drawCutLine(lineY) {
+    doc.setDrawColor(180, 180, 180);
+    doc.setLineDashPattern([2, 2], 0);
+    doc.line(cM + 2, lineY, cM + cW - 2, lineY);
+    doc.setLineDashPattern([], 0);
+    doc.setFontSize(7); doc.setTextColor(160, 160, 160);
+    doc.text('klipp', W / 2, lineY - 1, { align: 'center' });
+  }
+
+  persons.forEach((person, i) => {
+    if (i > 0 && i % 2 === 0) doc.addPage();
+    const isFirst = (i % 2 === 0);
+    drawCard(isFirst ? y1 : y2, person);
+    if (isFirst && i < persons.length - 1) {
+      drawCutLine(y1 + cH + gap / 2);
+    }
+  });
+
+  const fn = ('Rollekort_' + exName).replace(/[^a-zA-Z0-9æøåÆØÅ_\- ]/g, '').replace(/ /g, '_');
+  doc.save(fn + '.pdf');
+  showToast('Rollekort lastet ned — ' + persons.length + ' kort generert!');
 }
 </script>
 </body>
