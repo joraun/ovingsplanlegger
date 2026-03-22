@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.25</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.26</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -688,7 +688,7 @@
         <hr class="d" />
         <div>
           <label style="font-size:.82rem;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;">Kontaktliste for øvingsdagen</label>
-          <p class="hint" style="margin-bottom:9px;">Kun personer som trenger å bli oppringt under øvelsen. <strong>Scenario-aktør</strong> — rollespiller som injiserer via telefon fra et annet rom (bruk mobilnummeret, ikke organisasjonens). <strong>Nødnummer</strong> — ved reell hendelse under øvelsen. Spilleder og observatører er fysisk til stede og trenger ikke stå her.</p>
+          <p class="hint" style="margin-bottom:9px;">Deltakernes kontaktliste for øvingsdagen — én rad per rolle eller organisasjon, ikke per person. «Rolle / Organisasjon» er det deltakerne ser (f.eks. «Innsatsleder brannvesen»), telefonnummeret er rollespillerens mobilnummer. <strong>Scenario-aktør</strong> — rolle spilt av rollespiller via telefon. <strong>Nødnummer</strong> — ved reell hendelse under øvelsen.</p>
           <div class="dl" id="kont-list"></div>
           <button class="add" onclick="addKont()">+ Legg til kontakt</button>
         </div>
@@ -1194,7 +1194,7 @@ function addInj() {
 function addUts()  { mkDyn('uts-list',  [inp('Utstyr / Beskrivelse', 2), inp('Antall', 1)]); }
 function addRol()  { mkDyn('rol-list',  [inp('Rolle', 1), inp('Navn', 1), ta('Beskrivelse')]); }
 function addDelt() { mkDyn('delt-list', [inp('Navn', 2), inp('Rolle', 1), sel(['—','Grunnleggende','Viderekommet','Ekspert'])]); }
-function addKont() { mkDyn('kont-list', [inp('Navn', 1), inp('Funksjon', 1), inp('Telefon', 1), sel(['Spillstab', 'Scenario-aktør', 'Nødnummer'])]); }
+function addKont() { mkDyn('kont-list', [inp('Rolle / Organisasjon', 1), inp('Beskrivelse', 1), inp('Telefon', 1), sel(['Spillstab', 'Scenario-aktør', 'Nødnummer'])]); }
 
 // Seed initial rows
 ['T2Opp','Maal','Inj','Uts','Rol','Delt','Kont'].forEach(k => window['add'+k]());
@@ -1542,11 +1542,11 @@ function fillDemo() {
    ['09:20', 'TELEFON — Rektor Fjordheim ungdomsskole: «Hva gjør vi? Elevene er urolige og foreldre ringer allerede. Skal vi evakuere på egenhånd eller vente på ordre?»', 'Mari Strand', 4],
    ['09:30', 'TELEFON — NRK Vestland: «Jeg er journalist og står 100 meter fra sperringen. Kan ordføreren stille til direkteintervju nå? Vi sender om 10 minutter.»', 'Per Haugen', 2],
    ['09:45', 'MELDING — Kommunens IKT-avdeling varsler om at interntelefonsystemet i rådhuset er nede. Stabsmedlemmer kan kun nås på mobiltelefon.', 'Kari Bakken', 1],
-   ['10:00', 'TELEFON — Statsforvalterens beredskapsrådgiver: «Vi trenger situasjonsrapport innen 30 minutter. Har kommunen behov for bistand fra Statsforvalteren?»', 'Mari Strand', 1],
+   ['10:00', 'TELEFON — Statsforvalterens beredskapsrådgiver: «Vi trenger situasjonsrapport innen 30 minutter. Har kommunen behov for bistand fra Statsforvalteren?»', 'Lars Erik Dahl', 1],
    ['10:20', 'TELEFON — Jernbaneoperatøren: «Vi har hentet frem fraktseddelen — totalt 4,2 tonn klorhydrogen i vogn 3. Sender MSDS-ark på e-post nå. Dere bør koordinere med Miljødirektoratet.»', 'Per Haugen', 3],
    ['10:35', 'SOSIALE MEDIER — Spilleder viser skjermbilde på projektor: Forelder på Facebook: «Min datter er på skolen!! Ingen informasjon fra kommunen — dette er skandaløst!!» — 340 delinger på 20 minutter.', 'Kari Bakken', 2],
-   ['10:50', 'TELEFON — Hjemmetjenesteleder: «To av våre pasienter bor innenfor evakueringssonen. En av dem er helt avhengig av oksygenkonsentrator uten batteri. Vi trenger beslutning nå.»', 'Mari Strand', 4],
-   ['11:05', 'TELEFON — Ordfører i Bergheim kommune: «Vi hørte dere har en kjemikaliehendelse. Vi har ledig nødstrømaggregat og kan stille med to kommunale biler. Trenger dere bistand?»', 'Per Haugen', 3],
+   ['10:50', 'TELEFON — Hjemmetjenesteleder: «To av våre pasienter bor innenfor evakueringssonen. En av dem er helt avhengig av oksygenkonsentrator uten batteri. Vi trenger beslutning nå.»', 'Silje Nygård', 4],
+   ['11:05', 'TELEFON — Ordfører i Bergheim kommune: «Vi hørte dere har en kjemikaliehendelse. Vi har ledig nødstrømaggregat og kan stille med to kommunale biler. Trenger dere bistand?»', 'Lars Erik Dahl', 3],
    ['11:20', 'MELDING — NRK sender nå direkteoverføring fra stedet. Programleder stiller spørsmål ved kommunens håndtering av evakueringen. Produsenten ber om offisiell uttalelse innen 15 minutter.', 'Kari Bakken', 2]
   ].forEach(([tid, besk, ans, maalIdx]) => {
     addInj();
@@ -1561,7 +1561,7 @@ function fillDemo() {
   set('s4_markor', 'Ingen markører eller sminke — spilløvelsen foregår i kriseledelserommet uten feltaktivitet. Rollespillerne befinner seg i tilstøtende rom og injiserer utelukkende via telefon.');
   set('s4_sikkerhetsleder', 'Kari Bakken (spilleder)');
   set('s4_kodeord', 'NO PLAY');
-  set('s4_hms', 'Spilløvelsen foregår innendørs i kriseledelserommet — ingen fysisk risiko eller feltoperasjoner. Kodeordet «NO PLAY» stanser øvelsen umiddelbart ved en reell hendelse; alle deltakere informeres om dette ved oppstart. Rollespillerne (Per Haugen og Mari Strand) befinner seg i møterom 2B og skal ikke avbrytes under gjennomføringen. Spilleder har ansvar for å avbryte og varsle ved behov.');
+  set('s4_hms', 'Spilløvelsen foregår innendørs i kriseledelserommet — ingen fysisk risiko eller feltoperasjoner. Kodeordet «NO PLAY» stanser øvelsen umiddelbart ved en reell hendelse; alle deltakere informeres om dette ved oppstart. Rollespillerne (Per Haugen, Mari Strand, Lars Erik Dahl og Silje Nygård) befinner seg i møterom 2B og skal ikke avbrytes under gjennomføringen. Spilleder har ansvar for å avbryte og varsle ved behov.');
 
   const utsList = document.getElementById('uts-list');
   utsList.innerHTML = '';
@@ -1577,8 +1577,10 @@ function fillDemo() {
   const rolList = document.getElementById('rol-list');
   rolList.innerHTML = '';
   [['Spilleder / Evaluator', 'Kari Bakken', 'Leder øvelsesforløpet, introduserer skriftlige injeksjoner og koordinerer rollespillerne. Observerer, noterer og leder evalueringen etter øvelsen.'],
-   ['Rollespiller A', 'Per Haugen', 'Spiller NRK-journalist (09:30), jernbaneoperatøren (10:20) og ordfører Bergheim (11:05) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
-   ['Rollespiller B', 'Mari Strand', 'Spiller innsatsleder brannvesen (09:05), rektor (09:20), Statsforvalterens beredskapsrådgiver (10:00) og hjemmetjenesteleder (10:50) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
+   ['Rollespiller A', 'Per Haugen', 'Spiller NRK-journalist (09:30) og jernbaneoperatøren (10:20) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
+   ['Rollespiller B', 'Mari Strand', 'Spiller innsatsleder brannvesen (09:05) og rektor Fjordheim ungdomsskole (09:20) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
+   ['Rollespiller C', 'Lars Erik Dahl', 'Spiller Statsforvalterens beredskapsrådgiver (10:00) og ordfører Bergheim kommune (11:05) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
+   ['Rollespiller D', 'Silje Nygård', 'Spiller hjemmetjenesteleder (10:50) via telefon fra møterom 2B. Briefes av spilleder kl. 08:30.'],
    ['Observatør', 'Ingrid Vik (Statsforvalteren)', 'Observerer øvelsen på vegne av Statsforvalteren. Bidrar ikke aktivt i krisehåndteringen, men gir faglig tilbakemelding i debrief og evaluering.']
   ].forEach(([rolle, navn, besk]) => {
     addRol();
@@ -1611,11 +1613,16 @@ function fillDemo() {
   const kontList = document.getElementById('kont-list');
   kontList.innerHTML = '';
   // [navn, funksjon, telefon, type]
-  [['Per Haugen',    'Rollespiller A: NRK-journalist, jernbaneoperatøren, ordfører Bergheim', '902 67 890', 'Scenario-aktør'],
-   ['Mari Strand',   'Rollespiller B: Innsatsleder brann, rektor, Statsforvalteren, hjemmetjenesten', '903 45 678', 'Scenario-aktør'],
-   ['Brann og redning', 'Reell hendelse under øvelsen',  '110', 'Nødnummer'],
-   ['Politi',           'Reell hendelse under øvelsen',  '112', 'Nødnummer'],
-   ['Ambulanse',        'Reell hendelse under øvelsen',  '113', 'Nødnummer']
+  [['Innsatsleder brannvesen',              'Koordinering felt — ringer inn med statusoppdateringer',   '903 45 678', 'Scenario-aktør'],
+   ['Rektor Fjordheim ungdomsskole',         'Kontakt ved evakuering og spørsmål om elever/ansatte',     '903 45 678', 'Scenario-aktør'],
+   ['NRK Vestland',                          'Pressehenvendelser — journalist på stedet',                 '902 67 890', 'Scenario-aktør'],
+   ['Jernbaneoperatøren (Fjordnor)',         'Informasjon om farlig gods, fraktseddel og MSDS',          '902 67 890', 'Scenario-aktør'],
+   ['Statsforvalterens beredskapsrådgiver', 'Rapportering og forespørsel om statlig bistand',            '904 56 789', 'Scenario-aktør'],
+   ['Ordfører Bergheim kommune',             'Nabokommune — bistandstilbud og samordning',               '904 56 789', 'Scenario-aktør'],
+   ['Hjemmetjenesteleder',                  'Sårbare pasienter i evakueringssonen',                      '905 67 890', 'Scenario-aktør'],
+   ['Brann og redning',                     'Kun ved reell hendelse under øvelsen',                      '110',        'Nødnummer'],
+   ['Politi',                               'Kun ved reell hendelse under øvelsen',                      '112',        'Nødnummer'],
+   ['Ambulanse',                            'Kun ved reell hendelse under øvelsen',                      '113',        'Nødnummer']
   ].forEach(([navn, funk, tlf, type]) => {
     addKont();
     const row = kontList.querySelector('.di:last-child');
@@ -1624,7 +1631,7 @@ function fillDemo() {
     row.querySelector('select').value = type;
   });
 
-  set('s5_ext', 'Statsforvalteren i Vestland deltar som observatør ved Ingrid Vik. Per Haugen og Mari Strand er eksterne rollespillere som injiserer via telefon fra møterom 2B — de spiller til sammen syv ulike aktører gjennom øvelsen. Brann- og redningsetaten, politiet og jernbaneoperatøren er representert i scenariet via rollespillerne, men deltar ikke med ekte personell.');
+  set('s5_ext', 'Statsforvalteren i Vestland deltar som observatør ved Ingrid Vik. Fire eksterne rollespillere (Per Haugen, Mari Strand, Lars Erik Dahl og Silje Nygård) injiserer via telefon fra møterom 2B og spiller til sammen syv ulike aktører. Brann- og redningsetaten, politiet og jernbaneoperatøren er representert via rollespillerne, men deltar ikke med ekte personell.');
 
   // ── PLAN 6 ──
   document.getElementById('s6_debrief').checked = true;
