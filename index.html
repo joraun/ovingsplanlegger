@@ -226,7 +226,7 @@
   <div class="hdr-inner">
     <div class="hdr-logo">🛡️</div>
     <div class="hdr-text">
-      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.27</span></h1>
+      <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.28</span></h1>
       <p>Planleggingsverktøy for beredskapsøvelser</p>
     </div>
     <div class="hdr-right">
@@ -776,7 +776,7 @@ function goTo(i) {
   document.getElementById('page-' + PAGES[idx]).classList.add('active');
   if (PAGES[idx] === 'tba-3')     { buildT4Summary(); autoSuggest(); }
   if (PAGES[idx] === 'transition') buildSummary();
-  if (PAGES[idx] === 'plan-3')    _refreshInjMaalDropdowns();
+  if (PAGES[idx] === 'plan-3')    { _refreshInjMaalDropdowns(); _refreshSpillstabDatalist(); _resizeInjTextareas(); }
   if (PAGES[idx] === 'plan-5')    buildEvalMatrix();
   renderNav();
   window.scrollTo({ top: 0, behavior: 'smooth' });
