@@ -1857,6 +1857,7 @@ function pdfInit(palette, headerLabel, orgFn) {
 
   function tblHdr(cols, pal) {
     pal = pal || P;
+    tblRow._lastCols = cols;
     chk(10);
     doc.setFillColor(...pal.md); doc.rect(M, $.y - 1, IW, 8, 'F');
     doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(...P.wh);
@@ -1866,11 +1867,14 @@ function pdfInit(palette, headerLabel, orgFn) {
   function tblRow(cols, data, ri, pal) {
     pal = pal || P;
     doc.setFontSize(10); doc.setFont(undefined, 'normal');
-    const pad = 5;
+    const pad = 7;
     let ml = 1;
     data.forEach((d, ci) => { if (!d) return; const ls = doc.splitTextToSize(String(d), cols[ci].w - pad); if (ls.length > ml) ml = ls.length; });
-    const rh = ml * 5.5 + 4; chk(rh);
+    const rh = ml * 5.5 + 4;
+    const pgBefore = doc.getNumberOfPages();
+    chk(rh);
     doc.setFontSize(10); doc.setFont(undefined, 'normal');
+    if (doc.getNumberOfPages() > pgBefore && tblRow._lastCols) { tblHdr(tblRow._lastCols, pal); }
     if (ri % 2 === 0) { doc.setFillColor(...pal.card); doc.rect(M, $.y - 1, IW, rh, 'F'); }
     doc.setTextColor(...P.tx);
     let x = M + 2;
@@ -2178,7 +2182,7 @@ function generatePDF() {
   const injR = dynRows('inj-list');
   if (injR.length) {
     const goalTexts = [...document.querySelectorAll('#maal-list .maal-di .maal-text')].map(t => t.value.trim());
-    const iC = [{l:'Tidspunkt',w:24},{l:'Beskrivelse',w:72},{l:'Ansvarlig',w:34},{l:'Delmål',w:44}];
+    const iC = [{l:'Tidspunkt',w:22},{l:'Beskrivelse',w:78},{l:'Ansvarlig',w:36},{l:'Delmål',w:38}];
     const injData = injR
       .sort((a, b) => { const nA = _injTimeVal(a[0]||''), nB = _injTimeVal(b[0]||''); return nA !== nB ? nA - nB : (a[0]||'').localeCompare(b[0]||'', 'nb'); })
       .map(r => {
