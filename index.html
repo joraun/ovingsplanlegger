@@ -234,7 +234,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.2.4</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.2.5</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1225,7 +1225,7 @@ function addInj() {
 function addUts()  { mkDyn('uts-list',  [inp('Utstyr / Beskrivelse', 2), inp('Antall', 1)]); }
 function addRol()  { mkDyn('rol-list',  [inp('Rolle', 1), inp('Navn', 1), ta('Beskrivelse')]); }
 const ROLLE_BESKRIVELSER = {
-  'ordfører':              'Leder kriseledelsen politisk. Tar overordnede beslutninger, er kommunens ansikt utad og godkjenner offentlig kommunikasjon. Representerer kommunen mot statsforvalter og departement.',
+  'ordfører':              'Leder kriseledelsen politisk. Tar overordnede beslutninger og er kommunens ansikt utad. Godkjenner offentlig kommunikasjon og er talsperson overfor media og befolkning.',
   'kommunedirektør':       'Administrativ leder under hendelsen. Koordinerer alle tjenestesjefer og sørger for ressursallokering. Rapporterer løpende til ordfører og er ansvarlig for at beredskapsplanen følges.',
   'beredskapskoordinator': 'Faglig støtte til kriseledelsen. Koordinerer loggføring i CIM, holder situasjonsbildet oppdatert og er primærkontakt mot Statsforvalteren.',
   'kommunikasjonssjef':    'Ansvarlig for all ekstern kommunikasjon. Koordinerer pressehåndtering, utarbeider pressemeldinger og oppdaterer informasjonskanaler. Briefer talsperson.',
@@ -1703,7 +1703,7 @@ function fillDemo() {
   // ── PLAN 5 ──
   const deltList = document.getElementById('delt-list');
   deltList.innerHTML = '';
-  [['Per Johansen',  'Ordfører',                  'Grunnleggende', 'Leder kriseledelsen politisk. Tar overordnede beslutninger og er kommunens ansikt utad. Godkjenner offentlig kommunikasjon og representerer kommunen mot Statsforvalteren.'],
+  [['Per Johansen',  'Ordfører',                  'Grunnleggende', 'Leder kriseledelsen politisk. Tar overordnede beslutninger og er kommunens ansikt utad. Godkjenner offentlig kommunikasjon og er talsperson overfor media og befolkning.'],
    ['Anne Sørensen', 'Kommunedirektør',            'Viderekommet',  'Administrativ leder under hendelsen. Koordinerer alle tjenestesjefer og sørger for ressursallokering. Rapporterer løpende til ordfører og er ansvarlig for at beredskapsplanen følges.'],
    ['Kari Bakken',   'Beredskapskoordinator',      'Ekspert',       'Faglig støtte til kriseledelsen. Koordinerer loggføring i CIM, holder situasjonsbildet oppdatert og er kommunens primærkontakt mot Statsforvalteren.'],
    ['Lars Moen',     'Kommunikasjonssjef',          'Grunnleggende', 'Ansvarlig for all ekstern kommunikasjon. Koordinerer pressehåndtering, utarbeider pressemeldinger og oppdaterer kommunens informasjonskanaler. Briefer og støtter talsperson.'],
