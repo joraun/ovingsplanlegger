@@ -234,7 +234,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.41</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.0.42</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -2126,6 +2126,7 @@ function generatePDF() {
     doc.setFillColor(...GREEN.lt); doc.rect(6, 0, 1.5, H, 'F');
   }
   doc.setPage(tbaLastPage);
+  doc.addPage(); initContentPage();
 
   // Seksjon 1
   secHdr('1', 'Grunnleggende informasjon');
