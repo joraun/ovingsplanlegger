@@ -256,20 +256,20 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.10</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.11</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
     <div class="hdr-right">
       <span id="save-indicator" class="save-ind"></span>
-      <button class="hdr-btn" onclick="exportJSON()" title="Last ned all data som JSON-fil">💾 Eksporter</button>
-      <label class="hdr-btn" title="Last inn data fra JSON-fil" style="cursor:pointer">
+      <button class="hdr-btn" onclick="exportJSON()" title="Last ned all data som JSON-fil" aria-label="Eksporter data som JSON-fil">💾 Eksporter</button>
+      <label class="hdr-btn" title="Last inn data fra JSON-fil" style="cursor:pointer" aria-label="Importer data fra JSON-fil">
         📂 Importer
         <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(event)">
       </label>
-      <button class="hdr-btn" onclick="openKatalog()" title="Administrer rollekatalog for deltakerlisten">📇 Rollekatalog</button>
-      <button class="hdr-btn hdr-btn-red" onclick="resetAll()" title="Slett all data og start på nytt">🗑️ Nullstill</button>
-      <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario">🧪 Demo</button>
+      <button class="hdr-btn" onclick="openKatalog()" title="Administrer rollekatalog for deltakerlisten" aria-label="Åpne rollekatalog">📇 Rollekatalog</button>
+      <button class="hdr-btn hdr-btn-red" onclick="resetAll()" title="Slett all data og start på nytt" aria-label="Nullstill all data">🗑️ Nullstill</button>
+      <button class="demo-btn" onclick="fillDemo()" title="Fyll inn fiktivt testscenario" aria-label="Fyll inn demo-scenario">🧪 Demo</button>
     </div>
   </div>
   <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
@@ -510,8 +510,8 @@
     <div class="sum-grid" id="sumGrid"></div>
     <div id="trans-prog"></div>
     <div class="trans-btns">
-      <button class="btn btn-pdf-tba" onclick="generateTBAPDF()">📄 Last ned TBA som PDF</button>
-      <button class="btn btn-pln btn-lg" id="trans-start-btn" onclick="startPlanning()">📋 Start øvingsplanlegging →</button>
+      <button class="btn btn-pdf-tba" onclick="generateTBAPDF()" aria-label="Last ned treningsbehovsanalyse som PDF">📄 Last ned TBA som PDF</button>
+      <button class="btn btn-pln btn-lg" id="trans-start-btn" onclick="startPlanning()" aria-label="Start øvingsplanlegging">📋 Start øvingsplanlegging →</button>
     </div>
   </div>
   <div class="nav">
@@ -556,7 +556,7 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
-    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()" aria-label="Last ned øvingsplan som PDF">📄 Øvingsplan PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Bakgrunn →</button>
   </div>
 </div>
@@ -591,7 +591,7 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
-    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()" aria-label="Last ned øvingsplan som PDF">📄 Øvingsplan PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Læringsmål →</button>
   </div>
 </div>
@@ -634,7 +634,7 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
-    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()" aria-label="Last ned øvingsplan som PDF">📄 Øvingsplan PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Scenario →</button>
   </div>
 </div>
@@ -672,7 +672,7 @@
           <div class="dl" id="inj-list"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="add" onclick="addInj()">+ Legg til injeksjon</button>
-            <button class="add" onclick="sortInjByTime()" title="Sorterer radene kronologisk etter tidspunkt-feltet">⏱️ Sorter etter tid</button>
+            <button class="add" onclick="sortInjByTime()" title="Sorterer radene kronologisk etter tidspunkt-feltet" aria-label="Sorter injeksjoner etter tid">⏱️ Sorter etter tid</button>
           </div>
         </div>
         <hr class="d" />
@@ -710,7 +710,7 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
-    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()" aria-label="Last ned øvingsplan som PDF">📄 Øvingsplan PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Deltakere →</button>
   </div>
 </div>
@@ -745,8 +745,8 @@
   </div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
-    <button class="btn btn-pdf-plan" onclick="generatePDF()">📄 Øvingsplan PDF</button>
-    <button class="btn btn-pdf-plan" onclick="generateRollekortPDF()" title="Generer utskriftsklar PDF med rollekort for spillstab og deltakere">🃏 Rollekort PDF</button>
+    <button class="btn btn-pdf-plan" onclick="generatePDF()" aria-label="Last ned øvingsplan som PDF">📄 Øvingsplan PDF</button>
+    <button class="btn btn-pdf-plan" onclick="generateRollekortPDF()" title="Generer utskriftsklar PDF med rollekort for spillstab og deltakere" aria-label="Last ned rollekort som PDF">🃏 Rollekort PDF</button>
     <button class="btn btn-pln" onclick="nextPage()">Neste: Evaluering →</button>
   </div>
 </div>
@@ -796,9 +796,9 @@
   <div id="eval-notice"></div>
   <div class="nav">
     <button class="btn btn-sec" onclick="prevPage()">← Tilbake</button>
-    <button class="btn btn-pdf" onclick="generatePDF()">📄 Øvingsplan PDF</button>
-    <button class="btn btn-pdf-eval" onclick="generateEvalPDF()">📋 Evalueringsrapport PDF</button>
-    <button class="btn btn-pdf-obs" onclick="generateObserverPDF()">📋 Observatørskjema PDF</button>
+    <button class="btn btn-pdf" onclick="generatePDF()" aria-label="Last ned øvingsplan som PDF">📄 Øvingsplan PDF</button>
+    <button class="btn btn-pdf-eval" onclick="generateEvalPDF()" aria-label="Last ned evalueringsrapport som PDF">📋 Evalueringsrapport PDF</button>
+    <button class="btn btn-pdf-obs" onclick="generateObserverPDF()" aria-label="Last ned observatørskjema som PDF">📋 Observatørskjema PDF</button>
   </div>
 </div>
 
@@ -808,7 +808,7 @@
   <div class="rk-modal">
     <div class="rk-mhdr">
       <div><h2>📇 Rollekatalog</h2><p>Forhåndsdefinerte roller og beskrivelser for deltakerlisten</p></div>
-      <button class="rk-xbtn" onclick="closeKatalog()">✕</button>
+      <button class="rk-xbtn" onclick="closeKatalog()" aria-label="Lukk rollekatalog">✕</button>
     </div>
     <div id="rk-tabs" class="rk-tabs"></div>
     <div id="rk-body" class="rk-body"></div>
@@ -903,7 +903,7 @@ function buildT4Summary() {
     ['Kompetansenivå',   v('t3_nivaa')],
   ];
   document.getElementById('t4-findings-grid').innerHTML = items.map(([lbl, val]) =>
-    `<div class="fi-row"><span class="fi-lbl">${lbl}</span><span class="fi-val${val ? '' : ' mt'}">${val || '— ikke utfylt —'}</span></div>`
+    `<div class="fi-row"><span class="fi-lbl">${esc(lbl)}</span><span class="fi-val${val ? '' : ' mt'}">${esc(val) || '— ikke utfylt —'}</span></div>`
   ).join('');
 }
 
@@ -946,7 +946,7 @@ function buildSummary() {
   const trunc = (s, n) => s && s.length > n ? s.slice(0, n) + '…' : s;
   const card = (h, val, cls) => {
     const show = val?.trim() || null;
-    return `<div class="sum-card${cls ? ' '+cls : ''}"><h4>${h}</h4><p class="${show?'':'mt'}">${show || '— ikke utfylt —'}</p></div>`;
+    return `<div class="sum-card${cls ? ' '+cls : ''}"><h4>${esc(h)}</h4><p class="${show?'':'mt'}">${esc(show) || '— ikke utfylt —'}</p></div>`;
   };
   document.getElementById('sumGrid').innerHTML = `
     <div class="sum-meta">
@@ -1102,8 +1102,15 @@ function dynRows(listId) {
   });
   return rows;
 }
+function esc(s) {
+  if (!s) return s;
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
@@ -1122,6 +1129,7 @@ function getEvalMetoder(short = false) {
 function rmBtn() {
   const b = document.createElement('button');
   b.className = 'rb'; b.innerHTML = '✕'; b.title = 'Fjern';
+  b.setAttribute('aria-label', 'Fjern rad');
   b.onclick = () => b.closest('.di, .maal-di, .krit-sub-row').remove();
   return b;
 }
@@ -1183,6 +1191,7 @@ function addMaal() {
   // Remove button for whole goal
   const rb = document.createElement('button');
   rb.className = 'rb'; rb.innerHTML = '✕'; rb.title = 'Fjern delmål';
+  rb.setAttribute('aria-label', 'Fjern delmål');
   rb.onclick = () => di.remove();
 
   di.appendChild(body); di.appendChild(rb);
@@ -1199,6 +1208,7 @@ function addKritItem(listEl) {
   input.placeholder = 'F.eks. Tiltak iverksatt innen 5 min, ABCDE gjennomført korrekt...';
   const rb = document.createElement('button');
   rb.className = 'rb'; rb.innerHTML = '✕'; rb.title = 'Fjern kriterium';
+  rb.setAttribute('aria-label', 'Fjern kriterium');
   rb.onclick = () => row.remove();
   row.appendChild(input); row.appendChild(rb);
   listEl.appendChild(row);
@@ -1224,7 +1234,7 @@ function _refreshInjMaalDropdowns() {
 
 function _injTimeVal(str) {
   const m = str.match(/(\d{1,2})[.:+](\d{2})/);
-  return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : Infinity;
+  return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : Infinity;
 }
 function sortInjByTime() {
   const list = document.getElementById('inj-list');
@@ -1325,7 +1335,7 @@ function _loadKatalog() {
     _katalog = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(ROLLEKATALOG_DEFAULT));
   } catch(e) { _katalog = JSON.parse(JSON.stringify(ROLLEKATALOG_DEFAULT)); }
 }
-function _saveKatalog() { localStorage.setItem(KATALOG_KEY, JSON.stringify(_katalog)); }
+function _saveKatalog() { try { localStorage.setItem(KATALOG_KEY, JSON.stringify(_katalog)); } catch(e) { showToast('⚠️ Lagring av katalog feilet'); } }
 function _getKatalogBesk(rolleNavn) {
   if (!_katalog) return '';
   const key = rolleNavn.toLowerCase();
@@ -1400,7 +1410,7 @@ function addProg() {
 function buildTransitionOptions() {
   const progDiv = document.getElementById('trans-prog');
   const startBtn = document.getElementById('trans-start-btn');
-  if (!progDiv) return;
+  if (!progDiv || !startBtn) return;
   const rows = [...document.querySelectorAll('#prog-list .di')].filter(r => {
     const s = r.querySelector('select'); return s && s.value && !s.value.startsWith('—');
   });
@@ -1414,8 +1424,8 @@ function buildTransitionOptions() {
       const dato  = inps[1]?.value.trim() || '';
       const fokus = inps[2]?.value.trim() || '';
       return `<button class="prog-trinn-btn" onclick="startPlanningFromTrinn(${i})">
-        <strong>${trinn}</strong>${type ? ' — ' + type : ''}${dato ? ' · ' + dato : ''}
-        ${fokus ? '<br><span style="font-size:.8rem;opacity:.7">' + fokus + '</span>' : ''}
+        <strong>${esc(trinn)}</strong>${type ? ' — ' + esc(type) : ''}${dato ? ' · ' + esc(dato) : ''}
+        ${fokus ? '<br><span style="font-size:.8rem;opacity:.7">' + esc(fokus) + '</span>' : ''}
       </button>`;
     }).join('') +
     '<button class="btn btn-sec" style="margin-top:4px;font-size:.82rem;" onclick="startPlanning()">Start planlegging uten forhåndsvalg</button>';
@@ -1592,7 +1602,7 @@ function _saveToLocalStorage() {
     data._savedAt = new Date().toISOString();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     _updateSaveIndicator(data._savedAt);
-  } catch(e) {}
+  } catch(e) { showToast('⚠️ Lagring feilet — privat modus eller fullt lager'); }
 }
 
 function _loadFromLocalStorage() {
@@ -1744,6 +1754,7 @@ function _renderRkBody() {
     requestAnimationFrame(() => _autoResize(bTA));
     const del   = document.createElement('button');
     del.className = 'rk-del'; del.textContent = '✕'; del.title = 'Fjern rolle';
+    del.setAttribute('aria-label', 'Fjern rolle');
     del.onclick = () => { kat.roller.splice(idx, 1); _saveKatalog(); _renderRkBody(); };
     flds.appendChild(rInp); flds.appendChild(bTA);
     row.appendChild(flds); row.appendChild(del);
@@ -2014,6 +2025,7 @@ function fillDemo() {
 // av de tre generate-funksjonene for egne doc-kall ($.y += 6 o.l.)
 // ─────────────────────────────────────────────────────────────────
 function pdfInit(palette, headerLabel, orgFn) {
+  if (!window.jspdf) { alert('PDF-biblioteket (jsPDF) kunne ikke lastes. Sjekk internettforbindelsen og prøv igjen.'); return null; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const W = 210, H = 297, M = 18, IW = W - M * 2;
@@ -2182,9 +2194,10 @@ function generateTBAPDF() {
     mu:   [100, 118, 138],
     bd:   [210, 220, 230],
   };
+  const _p = pdfInit(G, 'TRENINGSBEHOVSANALYSE', () => v('t1_org'));
+  if (!_p) return;
   const { doc, W, H, M, IW, $, initContentPage, chk,
-          fpCard, secHdr, twoCol, bulletList, addPageFooters } =
-    pdfInit(G, 'TRENINGSBEHOVSANALYSE', () => v('t1_org'));
+          fpCard, secHdr, twoCol, bulletList, addPageFooters } = _p;
 
   const orgName = v('t1_org') || 'Organisasjon ikke angitt';
   const dateStr = new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -2304,9 +2317,10 @@ function generatePDF() {
     card: [242, 250, 245],
     hi:   [220, 243, 229],
   };
+  const _p = pdfInit(B, 'ØVINGSPLAN', () => (v('s1_org') || v('t1_org') || '').slice(0, 35));
+  if (!_p) return;
   const { doc, W, H, M, IW, $, initContentPage, chk,
-          fpCard, secHdr, twoCol, subLabel, bulletList, tblHdr, tblRow, addPageFooters } =
-    pdfInit(B, 'ØVINGSPLAN', () => (v('s1_org') || v('t1_org') || '').slice(0, 35));
+          fpCard, secHdr, twoCol, subLabel, bulletList, tblHdr, tblRow, addPageFooters } = _p;
 
   const orgName = v('s1_org') || v('t1_org') || 'Organisasjon ikke angitt';
   const exName  = v('s1_navn') || 'Uten tittel';
@@ -2529,9 +2543,10 @@ function generateEvalPDF() {
     warn: [185, 80,  20],
   };
 
+  const _p = pdfInit(E, 'EVALUERINGSRAPPORT', () => (v('s1_org') || v('t1_org') || '').slice(0, 30));
+  if (!_p) return;
   const { doc, W, H, M, IW, $,
-    initContentPage, chk, fpCard, secHdr, twoCol, addPageFooters }
-    = pdfInit(E, 'EVALUERINGSRAPPORT', () => (v('s1_org') || v('t1_org') || '').slice(0, 30));
+    initContentPage, chk, fpCard, secHdr, twoCol, addPageFooters } = _p;
 
   // ── COVER PAGE ──
   const exName  = v('s1_navn') || 'Uten tittel';
@@ -2732,6 +2747,7 @@ function generateEvalPDF() {
 // ═══════════════════════════════════════════
 function generateObserverPDF() {
   if (!_checkPDF([['s1_navn', 'Navn på øvelsen (S1)']])) return;
+  if (!window.jspdf) { alert('PDF-biblioteket (jsPDF) kunne ikke lastes. Sjekk internettforbindelsen og prøv igjen.'); return; }
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -2978,6 +2994,7 @@ function generateRollekortPDF() {
   if (total === 0) { showToast('Ingen spillstab- eller deltakerliste å generere rollekort fra.'); return; }
 
   // ── PDF-oppsett ──
+  if (!window.jspdf) { alert('PDF-biblioteket (jsPDF) kunne ikke lastes. Sjekk internettforbindelsen og prøv igjen.'); return; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const W = 210, H = 297, CM = 12, IW = W - CM * 2;
