@@ -256,7 +256,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.14</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.15</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -2504,7 +2504,13 @@ function generatePDF() {
   const kR = dynRows('kont-list');
   if (kR.length) {
     const kC = [{l:'Rolle / Organisasjon',w:93},{l:'Telefon',w:35},{l:'Type',w:46}];
-    subLabel('Kontaktliste for øvingsdagen'); tblHdr(kC); kR.forEach((r,i) => tblRow(kC,r,i)); $.y += 4;
+    subLabel('Kontaktliste for øvingsdagen'); tblHdr(kC); kR.forEach((r,i) => tblRow(kC,r,i)); $.y += 2;
+    if (kR.some(r => (r[2] || '').toLowerCase().includes('nødnummer'))) {
+      chk(8);
+      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(180,40,40);
+      doc.text('Nødnumrene ovenfor skal KUN brukes ved reell hendelse \u2014 ikke som del av øvelsen.', M, $.y);
+      $.y += 6;
+    } else { $.y += 2; }
   }
   fpCard('Eksterne aktører og samvirkeorganisasjoner', v('s5_ext'));
   $.y += 6;
