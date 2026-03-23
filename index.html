@@ -256,7 +256,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.13</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.14</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -3045,9 +3045,13 @@ function generateRollekortPDF() {
     let y = hH + 8;
 
     if (kodeord) {
-      doc.setFillColor(180,40,40); doc.roundedRect(CM+4, y, IW-4, 10, 2, 2, 'F');
-      doc.setFontSize(8.5); doc.setFont(undefined,'bold'); doc.setTextColor(255,255,255);
-      doc.text('SIKKERHETSKODEORD: ' + kodeord.toUpperCase() + '  —  si dette høyt for å stanse øvelsen umiddelbart', CM+8, y+7);
+      const kodeTxt = 'SIKKERHET: Ved reell hendelse \u2014 rop \u00AB' + kodeord.toUpperCase() + '\u00BB og varsle \u00F8vingsleder';
+      doc.setFontSize(8.5); doc.setFont(undefined,'bold');
+      const kodeTxtW = doc.getTextWidth(kodeTxt) + 12;
+      const kodeBoxW = Math.min(Math.max(kodeTxtW, 100), IW-4);
+      doc.setFillColor(180,40,40); doc.roundedRect(CM+4, y, kodeBoxW, 9, 2, 2, 'F');
+      doc.setTextColor(255,255,255);
+      doc.text(kodeTxt, CM+4 + kodeBoxW/2, y+6.2, { align:'center' });
       y += 15;
     }
 
