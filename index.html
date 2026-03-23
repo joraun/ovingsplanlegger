@@ -256,7 +256,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.11</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.12</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -3182,38 +3182,36 @@ function generateRollekortPDF() {
       doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
       doc.text('DIN ROLLE:', CM+7, y); y += 5.5;
       doc.setFontSize(9.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
-      doc.splitTextToSize(person.oppgaver, IW-12).slice(0,3).forEach(l => { doc.text(l, CM+7, y); y += 5; });
+      const maxRolleY = cardY + cH - 14;
+      person.oppgaver.split('\n').forEach(line => {
+        if (y >= maxRolleY) return;
+        const wrapped = doc.splitTextToSize(line, IW-12);
+        wrapped.forEach(l => { if (y < maxRolleY) { doc.text(l, CM+7, y); y += 5; } });
+      });
       y += 2;
     }
 
     if (startpunkt) {
+      y += 4;
       doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
       doc.text('SITUASJON VED OPPSTART:', CM+7, y); y += 5.5;
       doc.setFontSize(9.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
       doc.splitTextToSize(startpunkt, IW-12).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 5; });
-      y += 3;
     }
 
     if (hovMaal) {
+      y += 4;
       doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(...P.md);
       doc.text('HOVEDFOKUS I DAG:', CM+7, y); y += 5.5;
       doc.setFontSize(9.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.tx);
       doc.splitTextToSize(hovMaal, IW-12).slice(0,2).forEach(l => { doc.text(l, CM+7, y); y += 5; });
-      y += 3;
     }
 
     if (kodeord) {
+      y += 4;
       doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(180,40,40);
-      doc.text('Kodeord: ' + kodeord, CM+7, y); y += 8;
+      doc.text('Kodeord: ' + kodeord, CM+7, y);
     }
-
-    // Notatlinjer
-    const noteBottom = cardY + cH - 13;
-    let lineY = Math.max(y+4, noteBottom-21);
-    doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(...P.mu);
-    doc.text('Notater:', CM+7, lineY-2);
-    doc.setDrawColor(...P.lt);
-    while (lineY <= noteBottom) { doc.line(CM+7, lineY, CM+IW-4, lineY); lineY += 7; }
 
     cardFooter(P, cardY);
   }
