@@ -256,7 +256,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.12</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.13</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -3153,7 +3153,7 @@ function generateRollekortPDF() {
     if (kodeord) {
       const ky = Math.max(y+2, cardY+cH-20);
       doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(180,40,40);
-      doc.text('Kodeord: ' + kodeord, CM+7, ky);
+      doc.text('SIKKERHET: Ved reell hendelse \u2014 rop \u00AB' + kodeord.toUpperCase() + '\u00BB og varsle \u00F8vingsleder', CM+7, ky);
     }
     cardFooter(P, cardY);
   }
@@ -3210,7 +3210,7 @@ function generateRollekortPDF() {
     if (kodeord) {
       y += 4;
       doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(180,40,40);
-      doc.text('Kodeord: ' + kodeord, CM+7, y);
+      doc.text('SIKKERHET: Ved reell hendelse \u2014 rop \u00AB' + kodeord.toUpperCase() + '\u00BB og varsle spilleder', CM+7, y);
     }
 
     cardFooter(P, cardY);
