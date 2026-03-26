@@ -256,7 +256,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.15</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.16</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -308,18 +308,19 @@
           <p class="hint">Hvorfor gjennomføres denne treningsbehovsanalysen nå? Hva er situasjonen som har utløst den?</p>
           <textarea id="t1_bakgrunn" rows="3" placeholder="F.eks. ny hendelse avdekket svakheter, pålegg fra overordnet, planlagt kompetanseheving..."></textarea>
         </div>
-        <div class="f">
+        <div class="f span2">
           <label class="t">Øvings- og treningskultur</label>
-          <select id="t1_kultur">
-            <option value="">— Velg nivå —</option>
-            <option>Lav — lite systematikk, ad-hoc</option>
-            <option>Middels — noe struktur, varierende</option>
-            <option>Høy — systematisk og forankret</option>
-          </select>
-        </div>
-        <div class="f">
-          <label class="t">Utdyp kulturen</label>
-          <textarea id="t1_kultur_note" rows="3" placeholder="Beskriv øvingskulturen nærmere..."></textarea>
+          <p class="hint">Kryss av for påstandene som stemmer for din organisasjon. Vær ærlig — dette er et internt arbeidsverktøy.</p>
+          <div class="cg" style="flex-direction:column;gap:7px;margin-top:6px;">
+            <label class="cl"><input type="checkbox" id="t1_kult_1" /> Ledelsen setter faktisk av tid og ressurser til øving.</label>
+            <label class="cl"><input type="checkbox" id="t1_kult_2" /> Vi øver regelmessig, ikke bare når det passer.</label>
+            <label class="cl"><input type="checkbox" id="t1_kult_3" /> Det er trygt å feile på øving.</label>
+            <label class="cl"><input type="checkbox" id="t1_kult_4" /> Vi har klare læringsmål for hver øvelse.</label>
+            <label class="cl"><input type="checkbox" id="t1_kult_5" /> Vi tør å øve på det vi er dårlige på.</label>
+            <label class="cl"><input type="checkbox" id="t1_kult_6" /> Vi øver faktisk med de aktørene vi ville samarbeidet med i en reell hendelse.</label>
+            <label class="cl"><input type="checkbox" id="t1_kult_7" /> Evalueringer fører faktisk til forbedringer.</label>
+          </div>
+          <p id="t1_kult_score_lbl" style="margin-top:9px;font-size:.8rem;color:var(--muted);font-style:italic;min-height:1.2em;"></p>
         </div>
         <div class="f">
           <label class="t">Tilgjengelige ressurser</label>
@@ -895,7 +896,7 @@ function buildT4Summary() {
     : '';
   const items = [
     ['Organisasjon',     v('t1_org')],
-    ['Øvingskultur',     v('t1_kultur')],
+    ['Øvingskultur',     kulturSummary()],
     ['Begrensninger',    tr(v('t1_begrensninger'), 90)],
     ['Krit. oppgaver',   oppText],
     ['Kompetansegap',    tr(v('t2_gap'), 110)],
@@ -951,7 +952,7 @@ function buildSummary() {
   document.getElementById('sumGrid').innerHTML = `
     <div class="sum-meta">
       ${card('Organisasjon',         trunc(v('t1_org'),   80))}
-      ${card('Øvingskultur',         trunc(v('t1_kultur'),60))}
+      ${card('Øvingskultur',         kulturSummary())}
       ${card('Kompetansenivå',       v('t3_nivaa'))}
       ${card('Treningsnivå',         tba_mg())}
       ${card('Anbefalt øvelsestype', tba_type())}
@@ -988,6 +989,42 @@ function tba_mg() {
     .join(', ');
 }
 function tba_type() { return v('t4_type'); }
+
+// ── Øvingskultur-påstander ──
+const _KULT_ITEMS = [
+  'Ledelsen setter faktisk av tid og ressurser til øving',
+  'Vi øver regelmessig, ikke bare når det passer',
+  'Det er trygt å feile på øving',
+  'Vi har klare læringsmål for hver øvelse',
+  'Vi tør å øve på det vi er dårlige på',
+  'Vi øver faktisk med de aktørene vi ville samarbeidet med i en reell hendelse',
+  'Evalueringer fører faktisk til forbedringer',
+];
+function kulturScore() {
+  return _KULT_ITEMS.map((_, i) => document.getElementById('t1_kult_' + (i + 1))?.checked).filter(Boolean).length;
+}
+function kulturLabel(n) {
+  if (n <= 2) return 'Lav';
+  if (n <= 4) return 'Middels';
+  return 'Høy';
+}
+function kulturSummary() {
+  const n = kulturScore();
+  if (n === 0) return '';
+  return n + ' av 7 — ' + kulturLabel(n) + ' øvingskultur';
+}
+function kulturDetails() {
+  return _KULT_ITEMS.map((txt, i) => {
+    const checked = document.getElementById('t1_kult_' + (i + 1))?.checked;
+    return (checked ? '✓ ' : '✗ ') + txt;
+  }).join('\n');
+}
+function _updateKulturScore() {
+  const lbl = document.getElementById('t1_kult_score_lbl');
+  if (!lbl) return;
+  const n = kulturScore();
+  lbl.textContent = n === 0 ? '' : n + ' av 7 — ' + kulturLabel(n) + ' øvingskultur';
+}
 
 // ═══════════════════════════════════════════
 //  EVALUERINGSMATRISE (auto fra læringsmål)
@@ -1613,7 +1650,7 @@ function _loadFromLocalStorage() {
     _applyData(data);
     if (data._savedAt) _updateSaveIndicator(data._savedAt);
     if (typeof data.page === 'number') goTo(data.page);
-    requestAnimationFrame(() => { _resizeInjTextareas(); document.querySelectorAll('#delt-list .di textarea').forEach(_autoResize); });
+    requestAnimationFrame(() => { _resizeInjTextareas(); document.querySelectorAll('#delt-list .di textarea').forEach(_autoResize); _updateKulturScore(); });
     return true;
   } catch(e) { return false; }
 }
@@ -1694,6 +1731,7 @@ function resetAll() {
 // ── Auto-lagring ──
 document.addEventListener('input',  _scheduleSave);
 document.addEventListener('change', _scheduleSave);
+document.addEventListener('change', e => { if (e.target.id?.startsWith('t1_kult_')) _updateKulturScore(); });
 
 // ── Oppdater spillstab-datalist når rol-list endres ──
 document.addEventListener('input', e => {
@@ -1788,8 +1826,9 @@ function fillDemo() {
   // ── TBA T1 ──
   set('t1_org',           'Fjordheim kommune — Kommunal kriseledelse');
   set('t1_bakgrunn',      'Kommunen har ikke gjennomført øvelse av kriseledelsen siden desember 2022. En strømhendelse i oktober 2024 rammet kommunen i over 18 timer og avdekket svakheter i varslingsrutiner og etablering av krisestaben. Ny beredskapskoordinator ønsker å kartlegge treningsbehovet systematisk før ny øvelse planlegges.');
-  set('t1_kultur',        'Middels — noe struktur, varierende');
-  set('t1_kultur_note',   'Administrativt nivå har noe erfaring, men deltakelsen er varierende. Ny ordfører og tre nye kommunalsjefer etter valget i 2023 har ingen øvelseserfaring fra politisk ledelse.');
+  // Øvingskultur-påstander for demo (3/7 → Middels)
+  [3, 5, 7].forEach(n => { const el = document.getElementById('t1_kult_' + n); if (el) el.checked = true; });
+  _updateKulturScore();
   set('t1_ressurser',     'Ca. 8 timer per halvår tilgjengelig for øving. Budsjett 15 000 kr per øvelse. Beredskapskoordinator + én ekstern instruktør.');
   set('t1_materiell',     'Kriseledelserommet i rådhuset (kapasitet 14 pers.), bærbare PC-er med CIM-tilgang, sambandsradioer (4 stk), projektor.');
   set('t1_begrensninger', 'Høy politisk turnover etter kommunevalget 2023 — ny ordfører og tre nye kommunalsjefer. Varamedlemmer lite involvert i beredskapsarbeid. Begrenset tilgjengelig tid fra politisk ledelse.');
@@ -2248,7 +2287,7 @@ function generateTBAPDF() {
   secHdr('T1', 'Organisasjonsanalyse');
   fpCard('Organisasjon', orgName);
   fpCard('Bakgrunn og formål', v('t1_bakgrunn'));
-  fpCard('Øvings- og treningskultur', [v('t1_kultur'), v('t1_kultur_note')].filter(Boolean).join(' — '));
+  fpCard('Øvings- og treningskultur', kulturDetails());
   twoCol('Ressurser', v('t1_ressurser'), 'Materiell og fasiliteter', v('t1_materiell'));
   fpCard('Begrensninger og utfordringer', v('t1_begrensninger'));
   fpCard('Krav og hjemmel', v('t1_krav'));
@@ -2380,7 +2419,7 @@ function generatePDF() {
   // TBA-sammendrag (grønn)
   secHdr('TBA', 'Treningsbehovsanalyse — Sammendrag', GREEN);
   fpCard('Organisasjon', v('t1_org') || orgName, false, GREEN);
-  twoCol('Øvingskultur', v('t1_kultur'), 'Ressurser', v('t1_ressurser'), GREEN);
+  twoCol('Øvingskultur', kulturSummary(), 'Ressurser', v('t1_ressurser'), GREEN);
   fpCard('Begrensninger', v('t1_begrensninger'), false, GREEN);
   fpCard('Krav og hjemmel', v('t1_krav'), false, GREEN);
   const oppR = dynRows('t2-opp-list');
