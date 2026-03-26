@@ -256,7 +256,7 @@
     <div onclick="goTo(0)" title="Tilbake til start" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
       <div class="hdr-logo">🛡️</div>
       <div class="hdr-text">
-        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.16</span></h1>
+        <h1>Øvingsplanlegger <span class="ver-badge">v. 1.3.17</span></h1>
         <p>Planleggingsverktøy for beredskapsøvelser</p>
       </div>
     </div>
@@ -1016,7 +1016,7 @@ function kulturSummary() {
 function kulturDetails() {
   return _KULT_ITEMS.map((txt, i) => {
     const checked = document.getElementById('t1_kult_' + (i + 1))?.checked;
-    return (checked ? '✓ ' : '✗ ') + txt;
+    return (checked ? '[+] ' : '[ ] ') + txt;
   }).join('\n');
 }
 function _updateKulturScore() {
